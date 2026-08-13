@@ -2,6 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Scissors } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -58,10 +59,15 @@ function LoginForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>PangkasKAKA Admin</CardTitle>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-sky-50 via-white to-blue-100 px-4">
+      <div className="pointer-events-none absolute -top-24 -left-24 size-72 rounded-full bg-primary/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 -right-24 size-72 rounded-full bg-primary/15 blur-3xl" />
+      <Card className="relative w-full max-w-sm border-border/60 shadow-xl shadow-primary/5">
+        <CardHeader className="items-center text-center">
+          <div className="mb-2 flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+            <Scissors className="size-6" />
+          </div>
+          <CardTitle className="text-xl">PangkasKAKA Admin</CardTitle>
           <CardDescription>Sign in with your admin account.</CardDescription>
         </CardHeader>
         <CardContent>
