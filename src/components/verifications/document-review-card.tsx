@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Spinner } from "@/components/ui/spinner";
 import { useReviewDocument } from "@/lib/queries/shops";
 import { ApiError } from "@/lib/api";
 import type { DocKey, DocStatus, ShopDocument } from "@/types/admin";
@@ -36,14 +37,17 @@ export function DocumentReviewCard({
   doc: ShopDocument;
 }) {
   const [note, setNote] = useState(doc.note ?? "");
+  const [pendingStatus, setPendingStatus] = useState<DocStatus | null>(null);
   const reviewDocument = useReviewDocument(shopId);
 
   function handleReview(status: DocStatus) {
+    setPendingStatus(status);
     reviewDocument.mutate(
       { docKey, status, note: note || undefined },
       {
         onSuccess: () => toast.success(`${label}: ditandai ${STATUS_LABEL[status].toLowerCase()}`),
         onError: (err) => toast.error(err instanceof ApiError ? err.message : "Gagal menyimpan review dokumen"),
+        onSettled: () => setPendingStatus(null),
       }
     );
   }
@@ -81,7 +85,9 @@ export function DocumentReviewCard({
             variant="default"
             disabled={reviewDocument.isPending}
             onClick={() => handleReview("valid")}
+            className="gap-1.5"
           >
+            {pendingStatus === "valid" && <Spinner color="success" size="xs" label="Menyimpan..." />}
             Valid
           </Button>
           <Button
@@ -89,7 +95,9 @@ export function DocumentReviewCard({
             variant="secondary"
             disabled={reviewDocument.isPending}
             onClick={() => handleReview("needs_revision")}
+            className="gap-1.5"
           >
+            {pendingStatus === "needs_revision" && <Spinner color="warning" size="xs" label="Menyimpan..." />}
             Perlu revisi
           </Button>
           <Button
@@ -97,7 +105,9 @@ export function DocumentReviewCard({
             variant="destructive"
             disabled={reviewDocument.isPending}
             onClick={() => handleReview("invalid")}
+            className="gap-1.5"
           >
+            {pendingStatus === "invalid" && <Spinner color="danger" size="xs" label="Menyimpan..." />}
             Tidak valid
           </Button>
         </div>

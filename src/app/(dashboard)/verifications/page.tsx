@@ -6,7 +6,7 @@ import { usePendingShops } from "@/lib/queries/shops";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Table,
   TableBody,
@@ -54,19 +54,13 @@ export default function VerificationsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading &&
-                Array.from({ length: 3 }).map((_, i) => (
-                  <TableRow key={i}>
-                    <TableCell colSpan={7}>
-                      <Skeleton className="h-6 w-full" />
-                    </TableCell>
-                  </TableRow>
-                ))}
-
               {isLoading && (
                 <TableRow>
-                  <TableCell colSpan={7} className="py-2 text-center text-xs text-muted-foreground">
-                    Memuat antrian verifikasi dari server, mohon tunggu...
+                  <TableCell colSpan={7} className="py-10">
+                    <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                      <Spinner color="dark" size="xs" label="Memuat antrian verifikasi..." />
+                      Memuat antrian verifikasi dari server, mohon tunggu...
+                    </div>
                   </TableCell>
                 </TableRow>
               )}

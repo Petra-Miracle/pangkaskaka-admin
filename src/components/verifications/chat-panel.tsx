@@ -6,7 +6,7 @@ import { Send, Lock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import { useChatThread, useCloseChatThread, useSendChatMessage } from "@/lib/queries/chat";
 import { ApiError } from "@/lib/api";
 
@@ -39,15 +39,30 @@ export function ChatPanel({ shopId }: { shopId: string }) {
         <div className="flex items-center justify-between">
           <CardTitle className="text-base">Chat verifikasi</CardTitle>
           {!closed && (
-            <Button size="sm" variant="outline" disabled={closeThread.isPending} onClick={handleClose}>
-              <Lock className="size-3.5" />
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={closeThread.isPending}
+              onClick={handleClose}
+              className="gap-1.5"
+            >
+              {closeThread.isPending ? (
+                <Spinner color="pink" size="xs" label="Menutup chat..." />
+              ) : (
+                <Lock className="size-3.5" />
+              )}
               Tutup chat
             </Button>
           )}
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        {isLoading && <Skeleton className="h-40 w-full" />}
+        {isLoading && (
+          <div className="flex h-40 items-center justify-center gap-2 text-sm text-muted-foreground">
+            <Spinner color="dark" size="sm" label="Memuat percakapan..." />
+            Memuat percakapan...
+          </div>
+        )}
         {isError && <p className="text-sm text-destructive">Gagal memuat percakapan.</p>}
 
         {data && (
@@ -85,7 +100,11 @@ export function ChatPanel({ shopId }: { shopId: string }) {
               onClick={handleSend}
               className="self-end"
             >
-              <Send className="size-4" />
+              {sendMessage.isPending ? (
+                <Spinner color="brand" size="xs" label="Mengirim..." />
+              ) : (
+                <Send className="size-4" />
+              )}
             </Button>
           </div>
         )}

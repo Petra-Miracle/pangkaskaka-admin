@@ -2,7 +2,7 @@
 
 import { Store, ShieldAlert, Users, Wallet } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import { useDashboardStats } from "@/lib/queries/dashboard";
 import type { DashboardStats } from "@/types/admin";
 
@@ -47,7 +47,7 @@ export default function DashboardHomePage() {
             </CardHeader>
             <CardContent>
               {isLoading ? (
-                <Skeleton className="h-9 w-16" />
+                <Spinner color="brand" size="sm" label="Memuat data..." />
               ) : (
                 <div className="text-4xl leading-none font-bold tracking-tight text-primary">
                   {stats ? (format ? format(stats[key]) : stats[key].toLocaleString("id-ID")) : "—"}

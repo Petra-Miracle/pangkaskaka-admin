@@ -44,6 +44,16 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  /* Flowbite spinner color tokens (github.com/themesberg/flowbite) */
+  --color-brand: var(--spinner-brand);
+  --color-dark: var(--spinner-dark);
+  --color-neutral-tertiary: var(--spinner-neutral-tertiary);
+  --color-neutral-quaternary: var(--spinner-neutral-quaternary);
+  --color-success: var(--spinner-success);
+  --color-danger: var(--spinner-danger);
+  --color-warning: var(--spinner-warning);
+  --color-pink: var(--spinner-pink);
+  --color-purple: var(--spinner-purple);
 }
 
 :root {
@@ -79,6 +89,15 @@
   --sidebar-accent-foreground: oklch(0.35 0.11 258);
   --sidebar-border: oklch(0.85 0.014 250 / 45%);
   --sidebar-ring: oklch(0.47 0.19 258);
+  --spinner-brand: var(--color-blue-700);
+  --spinner-dark: var(--color-gray-800);
+  --spinner-neutral-tertiary: var(--color-gray-100);
+  --spinner-neutral-quaternary: var(--color-gray-200);
+  --spinner-success: var(--color-emerald-700);
+  --spinner-danger: var(--color-rose-700);
+  --spinner-warning: var(--color-orange-500);
+  --spinner-pink: var(--color-pink-600);
+  --spinner-purple: var(--color-purple-500);
 }
 
 .dark {
@@ -113,6 +132,15 @@
   --sidebar-accent-foreground: oklch(0.96 0.01 235);
   --sidebar-border: oklch(1 0 0 / 12%);
   --sidebar-ring: oklch(0.588 0.158 242);
+  --spinner-brand: var(--color-blue-600);
+  --spinner-dark: var(--color-gray-300);
+  --spinner-neutral-tertiary: var(--color-gray-600);
+  --spinner-neutral-quaternary: var(--color-gray-500);
+  --spinner-success: var(--color-emerald-500);
+  --spinner-danger: var(--color-rose-500);
+  --spinner-warning: var(--color-orange-400);
+  --spinner-pink: var(--color-pink-500);
+  --spinner-purple: var(--color-purple-500);
 }
 
 @layer base {

@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Select,
   SelectContent,
@@ -95,14 +95,16 @@ export default function UsersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading &&
-                Array.from({ length: 4 }).map((_, i) => (
-                  <TableRow key={i}>
-                    <TableCell colSpan={5}>
-                      <Skeleton className="h-6 w-full" />
-                    </TableCell>
-                  </TableRow>
-                ))}
+              {isLoading && (
+                <TableRow>
+                  <TableCell colSpan={5} className="py-10">
+                    <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                      <Spinner color="purple" size="xs" label="Memuat daftar user..." />
+                      Memuat daftar user...
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
 
               {!isLoading && filtered.length === 0 && (
                 <TableRow>

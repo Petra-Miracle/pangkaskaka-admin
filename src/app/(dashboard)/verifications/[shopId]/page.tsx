@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ArrowLeft, CheckCircle2, Loader2, XCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,7 +18,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import { DocumentReviewCard } from "@/components/verifications/document-review-card";
 import { ChatPanel } from "@/components/verifications/chat-panel";
 import { usePendingShops, useShop, useVerifyShop } from "@/lib/queries/shops";
@@ -67,19 +67,24 @@ export default function VerificationDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="size-4 animate-spin" />
-          Memuat detail toko dari server, mohon tunggu (bisa beberapa detik saat server baru bangun)...
+      <Card className="relative block max-w-full p-6">
+        <div className="opacity-20">
+          <h5 className="mb-2 text-xl font-semibold tracking-tight text-foreground">
+            Memuat detail toko...
+          </h5>
+          <p className="mb-6 text-sm text-muted-foreground">
+            Bisa beberapa detik saat server baru bangun dari idle.
+          </p>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="h-64 rounded-2xl bg-muted-foreground/30" />
+            ))}
+          </div>
         </div>
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-32 w-full" />
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-64 w-full" />
-          ))}
+        <div role="status" className="absolute top-2/4 left-1/2 -translate-x-1/2 -translate-y-1/2">
+          <Spinner color="brand" size="lg" label="Memuat detail toko..." />
         </div>
-      </div>
+      </Card>
     );
   }
 
@@ -163,7 +168,11 @@ export default function VerificationDetailPage() {
         </CardHeader>
         <CardContent className="flex flex-wrap gap-3">
           <Button disabled={verifyShop.isPending} onClick={handleApprove} className="gap-2">
-            <CheckCircle2 className="size-4" />
+            {verifyShop.isPending ? (
+              <Spinner color="success" size="xs" label="Menyetujui..." />
+            ) : (
+              <CheckCircle2 className="size-4" />
+            )}
             Setujui toko
           </Button>
 
@@ -195,7 +204,9 @@ export default function VerificationDetailPage() {
                   variant="destructive"
                   disabled={!rejectNote.trim() || verifyShop.isPending}
                   onClick={handleReject}
+                  className="gap-2"
                 >
+                  {verifyShop.isPending && <Spinner color="danger" size="xs" label="Menolak..." />}
                   Tolak toko
                 </Button>
               </DialogFooter>
