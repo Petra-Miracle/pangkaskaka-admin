@@ -69,14 +69,25 @@ function LoginForm() {
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    if (!blockedUntil) return;
-    const id = setInterval(() => setNow(Date.now()), 500);
-    return () => clearInterval(id);
-  }, [blockedUntil]);
+    // One-time hydration from localStorage (an existing lock survives a
+    // page reload) — not a value React needs to keep synchronized every
+    // render, so a plain effect-on-mount is the right tool here.
+    const attempts = readAttempts();
+    if (attempts.lockedUntil && attempts.lockedUntil > Date.now()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setBlockedUntil(attempts.lockedUntil);
+    }
+  }, []);
 
   useEffect(() => {
-    if (blockedUntil && now >= blockedUntil) setBlockedUntil(null);
-  }, [blockedUntil, now]);
+    if (!blockedUntil) return;
+    const id = setInterval(() => {
+      const current = Date.now();
+      setNow(current);
+      if (current >= blockedUntil) clearInterval(id);
+    }, 500);
+    return () => clearInterval(id);
+  }, [blockedUntil]);
 
   const remainingSeconds = blockedUntil ? Math.max(0, Math.ceil((blockedUntil - now) / 1000)) : 0;
   const isLocked = blockedUntil !== null && remainingSeconds > 0;
