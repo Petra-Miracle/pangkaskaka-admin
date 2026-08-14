@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 import { usePendingShops } from "@/lib/queries/shops";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -48,21 +50,30 @@ export default function VerificationsPage() {
                 <TableHead>Diajukan</TableHead>
                 <TableHead>Dokumen</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead className="text-right">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading &&
                 Array.from({ length: 3 }).map((_, i) => (
                   <TableRow key={i}>
-                    <TableCell colSpan={6}>
+                    <TableCell colSpan={7}>
                       <Skeleton className="h-6 w-full" />
                     </TableCell>
                   </TableRow>
                 ))}
 
+              {isLoading && (
+                <TableRow>
+                  <TableCell colSpan={7} className="py-2 text-center text-xs text-muted-foreground">
+                    Memuat antrian verifikasi dari server, mohon tunggu...
+                  </TableCell>
+                </TableRow>
+              )}
+
               {!isLoading && shops?.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
+                  <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
                     Tidak ada toko yang menunggu verifikasi.
                   </TableCell>
                 </TableRow>
@@ -96,6 +107,19 @@ export default function VerificationsPage() {
                     <Badge variant={shop.verification_status === "pending" ? "outline" : "default"}>
                       {shop.verification_status}
                     </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      size="sm"
+                      variant="default"
+                      nativeButton={false}
+                      render={
+                        <Link href={`/verifications/${shop.id}`} className="gap-1">
+                          Review &amp; Verifikasi
+                          <ChevronRight className="size-3.5" />
+                        </Link>
+                      }
+                    />
                   </TableCell>
                 </TableRow>
               ))}

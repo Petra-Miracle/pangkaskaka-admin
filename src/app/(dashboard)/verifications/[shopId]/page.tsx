@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Loader2, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -68,6 +68,10 @@ export default function VerificationDetailPage() {
   if (isLoading) {
     return (
       <div className="space-y-6">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="size-4 animate-spin" />
+          Memuat detail toko dari server, mohon tunggu (bisa beberapa detik saat server baru bangun)...
+        </div>
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-32 w-full" />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
