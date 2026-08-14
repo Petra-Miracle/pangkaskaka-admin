@@ -3,11 +3,19 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { LogOut, Scissors } from "lucide-react";
+import { ChevronsUpDown, LayoutDashboard, LogOut, Scissors } from "lucide-react";
 import { NAV_ITEMS } from "@/lib/nav-items";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { clearSession, getUser, type AdminUser } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
@@ -74,22 +82,47 @@ export function Sidebar() {
       </nav>
       <div className="border-t border-sidebar-border p-4">
         {user && (
-          <div className="mb-3 flex items-center gap-2.5">
-            <Avatar className="size-8 border border-primary/10">
-              <AvatarFallback className="bg-primary/10 text-xs font-bold text-primary">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-            <div className="min-w-0 text-sm">
-              <p className="truncate font-semibold">{user.name}</p>
-              <p className="truncate text-xs text-muted-foreground">{user.email}</p>
-            </div>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <button className="flex w-full items-center gap-2.5 rounded-xl p-1.5 text-left transition-colors hover:bg-sidebar-accent/50">
+                  <Avatar className="size-8 border border-primary/10">
+                    <AvatarFallback className="bg-primary/10 text-xs font-bold text-primary">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1 text-sm">
+                    <p className="truncate font-semibold">{user.name}</p>
+                    <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+                  </div>
+                  <ChevronsUpDown className="size-3.5 shrink-0 text-muted-foreground" />
+                </button>
+              }
+            />
+            <DropdownMenuContent side="top" align="start" className="w-56">
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="px-2 py-1.5 font-normal">
+                  <p className="truncate text-sm font-semibold text-heading">{user.name}</p>
+                  <p className="truncate text-xs text-body">{user.email}</p>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  render={
+                    <Link href="/">
+                      <LayoutDashboard className="size-4" />
+                      Dashboard
+                    </Link>
+                  }
+                />
+                <DropdownMenuSeparator />
+                <DropdownMenuItem variant="destructive" onClick={handleLogout}>
+                  <LogOut className="size-4" />
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
-        <Button variant="outline" size="sm" className="group w-full gap-2" onClick={handleLogout}>
-          <LogOut className="size-3.5 transition-transform group-hover:-translate-x-0.5" />
-          Log out
-        </Button>
       </div>
     </aside>
   );
