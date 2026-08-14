@@ -3,6 +3,7 @@
 import { Store, ShieldAlert, Users, Wallet } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
+import { StatisticsSection } from "@/components/dashboard/statistics";
 import { useDashboardStats } from "@/lib/queries/dashboard";
 import type { DashboardStats } from "@/types/admin";
 
@@ -57,6 +58,8 @@ export default function DashboardHomePage() {
           </Card>
         ))}
       </div>
+
+      <StatisticsSection />
     </div>
   );
 }

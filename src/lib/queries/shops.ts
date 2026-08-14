@@ -10,6 +10,27 @@ export function usePendingShops() {
   });
 }
 
+// There is no admin "all shops" endpoint yet (AGENT_BRIEF.md, section 4), so
+// the full directory is assembled from the two lists that do exist: public
+// /shops only returns approved+verified shops, /admin/pending-shops only
+// returns shops still awaiting review. Merged + deduped by id for safety.
+export function useAllShops() {
+  return useQuery({
+    queryKey: ["shops", "all"],
+    queryFn: async () => {
+      const [publicShops, pendingShops] = await Promise.all([
+        apiFetch<{ shops: Shop[] }>("/shops").then((data) => data.shops),
+        apiFetch<{ shops: Shop[] }>("/admin/pending-shops").then((data) => data.shops),
+      ]);
+      const byId = new Map<string, Shop>();
+      for (const shop of [...publicShops, ...pendingShops]) {
+        byId.set(shop.id, shop);
+      }
+      return Array.from(byId.values());
+    },
+  });
+}
+
 export function useShop(shopId: string) {
   return useQuery({
     queryKey: ["shop", shopId],

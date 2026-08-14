@@ -5,6 +5,36 @@ export type DashboardStats = {
   revenue_today: number;
 };
 
+export type AnalyticsDistribution = {
+  name: string;
+  count: number;
+  pct: number;
+};
+
+export type AnalyticsWarningShop = {
+  id?: string;
+  shop_id?: string;
+  name?: string;
+  [key: string]: unknown;
+};
+
+export type AdminAnalytics = {
+  kpi: {
+    total_shops: number;
+    new_shops_month: number;
+    pending: number;
+    total_customers: number;
+    customer_growth_pct: number;
+    revenue_today: number;
+    revenue_growth_pct: number;
+  };
+  health: {
+    avg_rating: number;
+    warning_shops: AnalyticsWarningShop[];
+  };
+  distribution: AnalyticsDistribution[];
+};
+
 export type DocKey = "ktp" | "nib" | "npwp" | "surat_usaha" | "toko";
 export type DocStatus = "pending" | "valid" | "invalid" | "needs_revision";
 
