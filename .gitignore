@@ -39,6 +39,9 @@ yarn-error.log*
 # local credentials, never commit
 /SuperAdmin Account/
 
+# local dev server log
+dev.log
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
