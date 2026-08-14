@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
 import { useChatThread, useCloseChatThread, useSendChatMessage } from "@/lib/queries/chat";
-import { ApiError } from "@/lib/api";
+import { getSafeErrorMessage } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 export function ChatPanel({ shopId }: { shopId: string }) {
@@ -23,14 +23,14 @@ export function ChatPanel({ shopId }: { shopId: string }) {
     if (!draft.trim()) return;
     sendMessage.mutate(draft.trim(), {
       onSuccess: () => setDraft(""),
-      onError: (err) => toast.error(err instanceof ApiError ? err.message : "Gagal mengirim pesan"),
+      onError: (err) => toast.error(getSafeErrorMessage(err, "Gagal mengirim pesan")),
     });
   }
 
   function handleClose() {
     closeThread.mutate(undefined, {
       onSuccess: () => toast.success("Chat verifikasi ditutup"),
-      onError: (err) => toast.error(err instanceof ApiError ? err.message : "Gagal menutup chat"),
+      onError: (err) => toast.error(getSafeErrorMessage(err, "Gagal menutup chat")),
     });
   }
 

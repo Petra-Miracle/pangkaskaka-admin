@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageHeader } from "@/components/nav/page-header";
-import { Spinner } from "@/components/ui/spinner";
 import {
   Table,
   TableBody,
@@ -16,6 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatRelativeTime } from "@/lib/utils";
 import { DOC_LABELS, type DocKey } from "@/types/admin";
 
 function reviewedCount(docs: Record<DocKey, { status: string }> | undefined) {
@@ -27,12 +27,41 @@ function StatusBadge({ status }: { status: string }) {
   if (status === "pending") {
     return (
       <Badge variant="outline" className="gap-1.5 border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400">
-        <span className="size-1.5 rounded-full bg-amber-500" />
+        <span className="relative flex size-1.5">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-500 opacity-60" />
+          <span className="relative inline-flex size-1.5 rounded-full bg-amber-500" />
+        </span>
         Menunggu
       </Badge>
     );
   }
   return <Badge variant="secondary">{status}</Badge>;
+}
+
+function SkeletonRows({ rows = 6 }: { rows?: number }) {
+  return (
+    <>
+      {Array.from({ length: rows }).map((_, i) => (
+        <TableRow key={i}>
+          <TableCell>
+            <div className="flex items-center gap-3">
+              <div className="skeleton size-9 shrink-0" />
+              <div className="space-y-1.5">
+                <div className="skeleton h-3 w-32" />
+                <div className="skeleton h-2.5 w-24 opacity-60" />
+              </div>
+            </div>
+          </TableCell>
+          <TableCell><div className="skeleton h-3 w-28" /></TableCell>
+          <TableCell><div className="skeleton h-5 w-16 rounded-full" /></TableCell>
+          <TableCell><div className="skeleton h-3 w-20" /></TableCell>
+          <TableCell><div className="skeleton h-3 w-24" /></TableCell>
+          <TableCell><div className="skeleton h-5 w-20 rounded-full" /></TableCell>
+          <TableCell><div className="skeleton h-7 w-36 rounded-lg" /></TableCell>
+        </TableRow>
+      ))}
+    </>
+  );
 }
 
 export default function VerificationsPage() {
@@ -69,16 +98,7 @@ export default function VerificationsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading && (
-                <TableRow>
-                  <TableCell colSpan={7} className="py-10">
-                    <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                      <Spinner color="brand" size="sm" label="Memuat antrian verifikasi..." />
-                      Memuat antrian verifikasi dari server, mohon tunggu...
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )}
+              {isLoading && <SkeletonRows />}
 
               {!isLoading && shops?.length === 0 && (
                 <TableRow>
@@ -98,13 +118,19 @@ export default function VerificationsPage() {
                 const reviewed = reviewedCount(shop.docs);
                 const progress = totalDocs > 0 ? Math.round((reviewed / totalDocs) * 100) : 0;
                 return (
-                  <TableRow key={shop.id} className="cursor-pointer">
+                  <TableRow
+                    key={shop.id}
+                    className="group cursor-pointer transition-colors hover:bg-primary/[0.03]"
+                  >
                     <TableCell className="font-medium">
-                      <Link href={`/verifications/${shop.id}`} className="flex items-center gap-3 hover:underline">
-                        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-primary/10 bg-gradient-to-br from-primary/10 to-primary/5 text-sm font-bold text-primary">
+                      <Link href={`/verifications/${shop.id}`} className="flex items-center gap-3">
+                        <span className="relative flex size-9 shrink-0 items-center justify-center rounded-xl border border-primary/10 bg-gradient-to-br from-primary/12 to-primary/5 text-sm font-bold text-primary transition-transform group-hover:scale-105">
                           {shop.name?.charAt(0).toUpperCase()}
+                          <span className="absolute -right-0.5 -bottom-0.5 size-2 rounded-full border-2 border-card bg-amber-500" />
                         </span>
-                        <span className="max-w-44 truncate">{shop.name}</span>
+                        <span className="max-w-44 truncate font-semibold group-hover:text-primary">
+                          {shop.name}
+                        </span>
                       </Link>
                     </TableCell>
                     <TableCell>
@@ -118,12 +144,10 @@ export default function VerificationsPage() {
                         {shop.category}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      {new Date(shop.docs_submitted_at).toLocaleDateString("id-ID", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })}
+                    <TableCell className="text-muted-foreground">
+                      <span title={new Date(shop.docs_submitted_at).toLocaleString("id-ID")}>
+                        {formatRelativeTime(shop.docs_submitted_at)}
+                      </span>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
@@ -150,7 +174,7 @@ export default function VerificationsPage() {
                         nativeButton={false}
                         render={
                           <Link href={`/verifications/${shop.id}`} className="gap-1">
-                            Review &amp; Verifikasi
+                            Review
                             <ChevronRight className="size-3.5" />
                           </Link>
                         }

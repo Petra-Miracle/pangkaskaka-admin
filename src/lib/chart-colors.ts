@@ -18,5 +18,6 @@ export function getChartPalette() {
     muted: cssVar("--muted-foreground", "#6b7280"),
     border: cssVar("--border", "#e5e7eb"),
     foreground: cssVar("--foreground", "#111827"),
+    background: cssVar("--background", "#ffffff"),
   };
 }

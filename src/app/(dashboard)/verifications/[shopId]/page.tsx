@@ -22,7 +22,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { DocumentReviewCard } from "@/components/verifications/document-review-card";
 import { ChatPanel } from "@/components/verifications/chat-panel";
 import { usePendingShops, useShop, useVerifyShop } from "@/lib/queries/shops";
-import { ApiError } from "@/lib/api";
+import { getSafeErrorMessage } from "@/lib/api";
 import { DOC_LABELS, type DocKey } from "@/types/admin";
 
 export default function VerificationDetailPage() {
@@ -48,7 +48,7 @@ export default function VerificationDetailPage() {
           toast.success("Toko disetujui");
           router.push("/verifications");
         },
-        onError: (err) => toast.error(err instanceof ApiError ? err.message : "Gagal menyetujui toko"),
+        onError: (err) => toast.error(getSafeErrorMessage(err, "Gagal menyetujui toko")),
       }
     );
   }
@@ -63,31 +63,34 @@ export default function VerificationDetailPage() {
           setRejectOpen(false);
           router.push("/verifications");
         },
-        onError: (err) => toast.error(err instanceof ApiError ? err.message : "Gagal menolak toko"),
+        onError: (err) => toast.error(getSafeErrorMessage(err, "Gagal menolak toko")),
       }
     );
   }
 
   if (isLoading) {
     return (
-      <Card className="relative block max-w-full p-6">
-        <div className="opacity-20">
-          <h5 className="mb-2 text-xl font-semibold tracking-tight text-foreground">
-            Memuat detail toko...
-          </h5>
-          <p className="mb-6 text-sm text-muted-foreground">
-            Bisa beberapa detik saat server baru bangun dari idle.
-          </p>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="h-64 rounded-2xl bg-muted-foreground/30" />
-            ))}
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="skeleton size-9 rounded-lg" />
+          <div className="space-y-2">
+            <div className="skeleton h-6 w-56" />
+            <div className="skeleton h-4 w-80 opacity-60" />
           </div>
         </div>
-        <div role="status" className="absolute top-2/4 left-1/2 -translate-x-1/2 -translate-y-1/2">
-          <Spinner color="brand" size="lg" label="Memuat detail toko..." />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="space-y-3 rounded-2xl border border-border/70 bg-card/60 p-4">
+              <div className="flex items-center justify-between">
+                <div className="skeleton h-4 w-24" />
+                <div className="skeleton h-5 w-20 rounded-full" />
+              </div>
+              <div className="skeleton h-48 w-full rounded-lg" />
+              <div className="skeleton h-14 w-full rounded-lg" />
+            </div>
+          ))}
         </div>
-      </Card>
+      </div>
     );
   }
 

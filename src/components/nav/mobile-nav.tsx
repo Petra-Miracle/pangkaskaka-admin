@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { LayoutDashboard, LogOut, Menu, Scissors, ShieldCheck, Store, Users, MoreHorizontal } from "lucide-react";
+import { LayoutDashboard, LogOut, Menu, Scissors, Search, ShieldCheck, Store, Users, MoreHorizontal } from "lucide-react";
 import { NAV_SECTIONS, NAV_ITEMS } from "@/lib/nav-items";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -64,6 +64,14 @@ export function MobileNav() {
         </Button>
         <h1 className="text-lg font-bold tracking-tight text-foreground">{currentLabel}</h1>
         <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Pencarian cepat"
+            onClick={() => window.dispatchEvent(new Event("pk:open-command"))}
+          >
+            <Search className="size-5" />
+          </Button>
           <ThemeToggle />
           {user && (
             <DropdownMenu>

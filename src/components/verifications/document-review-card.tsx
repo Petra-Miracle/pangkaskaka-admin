@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
 import { useReviewDocument } from "@/lib/queries/shops";
-import { ApiError } from "@/lib/api";
+import { getSafeErrorMessage } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import type { DocKey, DocStatus, ShopDocument } from "@/types/admin";
 
@@ -54,7 +54,7 @@ export function DocumentReviewCard({
       { docKey, status, note: note || undefined },
       {
         onSuccess: () => toast.success(`${label}: ditandai ${STATUS_LABEL[status].toLowerCase()}`),
-        onError: (err) => toast.error(err instanceof ApiError ? err.message : "Gagal menyimpan review dokumen"),
+        onError: (err) => toast.error(getSafeErrorMessage(err, "Gagal menyimpan review dokumen")),
         onSettled: () => setPendingStatus(null),
       }
     );

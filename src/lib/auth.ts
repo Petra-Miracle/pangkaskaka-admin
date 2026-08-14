@@ -1,5 +1,11 @@
 export const AUTH_COOKIE = "pk_admin_token";
 
+// SECURITY_AUDIT.md S1 (strategy B): the token also lives in localStorage
+// (unavoidable without a server-side session, see the doc), so this window
+// only bounds how long the *cookie* mirror — read by proxy.ts's route guard
+// — stays valid before a stolen/leaked value goes stale.
+const SESSION_COOKIE_MAX_AGE_MS = 8 * 60 * 60 * 1000;
+
 export type AdminUser = {
   id: string;
   name: string;
@@ -8,10 +14,11 @@ export type AdminUser = {
   [key: string]: unknown;
 };
 
-function setCookie(name: string, value: string, days: number) {
-  const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString();
-  const secure = typeof window !== "undefined" && window.location.protocol === "https:" ? "; Secure" : "";
-  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax${secure}`;
+function setCookie(name: string, value: string, maxAgeMs: number) {
+  const expires = new Date(Date.now() + maxAgeMs).toUTCString();
+  // SECURITY_AUDIT.md S6: production is always HTTPS (Vercel) — don't make
+  // Secure conditional on the current protocol.
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax; Secure`;
 }
 
 function deleteCookie(name: string) {
@@ -39,7 +46,7 @@ export function setSession(token: string, user: AdminUser) {
   window.localStorage.setItem("pk_admin_user", JSON.stringify(user));
   // Mirrored into a cookie (non-httpOnly, this is a client-side SPA hitting a
   // separate API origin) so proxy.ts can do an optimistic route guard check.
-  setCookie(AUTH_COOKIE, token, 7);
+  setCookie(AUTH_COOKIE, token, SESSION_COOKIE_MAX_AGE_MS);
 }
 
 export function clearSession() {

@@ -56,3 +56,17 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
 
   return data as T;
 }
+
+// SECURITY_AUDIT.md S5: backend `detail`/`message` strings can contain
+// internals not meant for the UI. 401/403 messages are safe/useful to show
+// as-is (they're just "you're not allowed"); everything else is logged for
+// debugging and swapped for a generic message.
+export function getSafeErrorMessage(err: unknown, fallback: string): string {
+  if (err instanceof ApiError) {
+    if (err.status === 401 || err.status === 403) return err.message;
+    console.error(`[API ${err.status}]`, err.message, err.body);
+    return fallback;
+  }
+  if (err instanceof Error) console.error("[API error]", err.message);
+  return fallback;
+}

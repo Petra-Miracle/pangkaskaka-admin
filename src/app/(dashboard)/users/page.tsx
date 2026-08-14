@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/table";
 import { useAllUsers } from "@/lib/queries/users";
 import { ADMIN_USER_ROLES, type AdminUserRole } from "@/types/admin";
-import { cn } from "@/lib/utils";
+import { cn, formatRelativeTime } from "@/lib/utils";
 
 const ROLE_META: Record<AdminUserRole, { label: string; chip: string; dot: string }> = {
   admin: { label: "Admin", chip: "bg-primary/10 text-primary", dot: "bg-primary" },
@@ -47,17 +47,17 @@ function SkeletonRows({ rows = 6 }: { rows?: number }) {
         <TableRow key={i}>
           <TableCell>
             <div className="flex items-center gap-3">
-              <div className="size-9 animate-pulse rounded-full bg-muted" />
+              <div className="skeleton size-9 shrink-0 rounded-full" />
               <div className="space-y-1.5">
-                <div className="h-3 w-28 animate-pulse rounded bg-muted" />
-                <div className="h-2.5 w-40 animate-pulse rounded bg-muted/70" />
+                <div className="skeleton h-3 w-28" />
+                <div className="skeleton h-2.5 w-40 opacity-60" />
               </div>
             </div>
           </TableCell>
-          <TableCell><div className="h-3 w-44 animate-pulse rounded bg-muted" /></TableCell>
-          <TableCell><div className="h-3 w-24 animate-pulse rounded bg-muted" /></TableCell>
-          <TableCell><div className="h-5 w-16 animate-pulse rounded-full bg-muted" /></TableCell>
-          <TableCell><div className="h-3 w-20 animate-pulse rounded bg-muted" /></TableCell>
+          <TableCell><div className="skeleton h-3 w-44" /></TableCell>
+          <TableCell><div className="skeleton h-3 w-24" /></TableCell>
+          <TableCell><div className="skeleton h-5 w-16 rounded-full" /></TableCell>
+          <TableCell><div className="skeleton h-3 w-20" /></TableCell>
         </TableRow>
       ))}
     </>
@@ -177,11 +177,11 @@ export default function UsersPage() {
 
               {!isLoading &&
                 filtered.map((u) => (
-                  <TableRow key={u.id}>
+                  <TableRow key={u.id} className="group transition-colors hover:bg-primary/[0.03]">
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar className="size-9 border border-primary/10">
-                          <AvatarFallback className="bg-gradient-to-br from-primary/12 to-primary/5 text-xs font-bold text-primary">
+                          <AvatarFallback className="bg-gradient-to-br from-primary/12 to-primary/5 text-xs font-bold text-primary transition-transform group-hover:scale-105">
                             {initialsOf(u.name)}
                           </AvatarFallback>
                         </Avatar>
@@ -192,15 +192,14 @@ export default function UsersPage() {
                     <TableCell className="text-muted-foreground">{u.phone || "—"}</TableCell>
                     <TableCell>
                       <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium", ROLE_META[u.role as AdminUserRole]?.chip ?? "bg-muted text-muted-foreground")}>
+                        <span className={cn("size-1.5 rounded-full", ROLE_META[u.role as AdminUserRole]?.dot ?? "bg-muted-foreground")} />
                         {ROLE_META[u.role as AdminUserRole]?.label ?? u.role}
                       </span>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {new Date(u.created_at).toLocaleDateString("id-ID", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })}
+                      <span title={new Date(u.created_at).toLocaleString("id-ID")}>
+                        {formatRelativeTime(u.created_at)}
+                      </span>
                     </TableCell>
                   </TableRow>
                 ))}

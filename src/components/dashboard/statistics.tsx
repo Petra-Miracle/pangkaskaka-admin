@@ -1,10 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTheme } from "next-themes";
 import type { ApexOptions } from "apexcharts";
 import {
   AlertTriangle,
   BarChart3,
+  ChartNoAxesColumnIncreasing,
   MapPin,
   PieChart,
   ShieldCheck,
@@ -76,6 +78,8 @@ function ShopsByFilterChart() {
   const { data: shops, isLoading } = useAllShops();
   const [mode, setMode] = useState<ShopFilterMode>("category");
   const palette = getChartPalette();
+  const { resolvedTheme } = useTheme();
+  const dark = resolvedTheme === "dark";
 
   const grouped = useMemo(() => {
     if (!shops) return [];
@@ -93,7 +97,13 @@ function ShopsByFilterChart() {
   }, [shops, mode]);
 
   const options: ApexOptions = {
-    chart: { type: "bar", height: 260, toolbar: { show: false }, fontFamily: "inherit" },
+    chart: {
+      type: "bar",
+      height: 260,
+      toolbar: { show: false },
+      fontFamily: "inherit",
+      animations: { enabled: true, speed: 700, animateGradually: { enabled: true, delay: 60 } },
+    },
     plotOptions: { bar: { borderRadius: 8, columnWidth: "55%", distributed: true } },
     dataLabels: { enabled: false },
     legend: { show: false },
@@ -107,13 +117,17 @@ function ShopsByFilterChart() {
       palette.warning,
       palette.purple,
     ],
+    fill: {
+      type: "gradient",
+      gradient: { shade: "light", type: "vertical", shadeIntensity: 0.35, opacityFrom: 1, opacityTo: 0.45 },
+    },
     xaxis: {
       categories: grouped.map(([key]) => key),
       labels: { style: { colors: palette.muted } },
     },
     yaxis: { labels: { style: { colors: palette.muted } } },
     grid: { borderColor: palette.border },
-    tooltip: { theme: "light" },
+    tooltip: { theme: dark ? "dark" : "light" },
     series: [{ name: "Jumlah toko", data: grouped.map(([, count]) => count) }],
   };
 
@@ -165,6 +179,8 @@ function ShopsByFilterChart() {
 function UserRolesPieChart() {
   const { data: users, isLoading } = useAllUsers();
   const palette = getChartPalette();
+  const { resolvedTheme } = useTheme();
+  const dark = resolvedTheme === "dark";
 
   const counts = useMemo(() => {
     const map = new Map<string, number>();
@@ -176,11 +192,18 @@ function UserRolesPieChart() {
   const total = counts.reduce((sum, [, count]) => sum + count, 0);
 
   const options: ApexOptions = {
-    chart: { type: "pie", height: 260, fontFamily: "inherit" },
+    chart: {
+      type: "pie",
+      height: 260,
+      fontFamily: "inherit",
+      animations: { enabled: true, speed: 700 },
+    },
     labels: counts.map(([label]) => label),
     colors: [palette.chart2, palette.success, palette.warning, palette.purple],
     legend: { position: "bottom", labels: { colors: palette.muted } },
-    tooltip: { theme: "light" },
+    stroke: { width: 2, colors: [palette.background] },
+    dataLabels: { formatter: (val) => `${Number(val).toFixed(0)}%`, dropShadow: { enabled: false } },
+    tooltip: { theme: dark ? "dark" : "light" },
     series: counts.map(([, count]) => count),
   };
 
@@ -215,23 +238,34 @@ function UserRolesPieChart() {
 function AvgRatingRadialChart() {
   const { data, isLoading } = useAdminAnalytics();
   const palette = getChartPalette();
+  const { resolvedTheme } = useTheme();
+  const dark = resolvedTheme === "dark";
   const rating = data?.health.avg_rating ?? 0;
   const pct = Math.max(0, Math.min(100, Math.round((rating / 5) * 100)));
 
   const options: ApexOptions = {
-    chart: { type: "radialBar", height: 260, fontFamily: "inherit" },
+    chart: {
+      type: "radialBar",
+      height: 260,
+      fontFamily: "inherit",
+      animations: { enabled: true, speed: 700 },
+    },
     series: [pct],
     labels: ["Rating"],
     colors: [palette.chart2],
     plotOptions: {
       radialBar: {
         hollow: { size: "65%" },
+        track: {
+          background: dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)",
+        },
         dataLabels: {
           value: {
             formatter: () => rating.toFixed(1),
-            fontSize: "28px",
+            fontSize: "30px",
             fontWeight: 700,
             offsetY: 8,
+            color: palette.foreground,
           },
           name: { show: false },
         },
@@ -262,27 +296,40 @@ function AvgRatingRadialChart() {
 function GrowthBarChart() {
   const { data, isLoading } = useAdminAnalytics();
   const palette = getChartPalette();
+  const { resolvedTheme } = useTheme();
+  const dark = resolvedTheme === "dark";
   const customerGrowth = data?.kpi.customer_growth_pct ?? 0;
   const revenueGrowth = data?.kpi.revenue_growth_pct ?? 0;
 
   const options: ApexOptions = {
-    chart: { type: "bar", height: 260, toolbar: { show: false }, fontFamily: "inherit" },
+    chart: {
+      type: "bar",
+      height: 260,
+      toolbar: { show: false },
+      fontFamily: "inherit",
+      animations: { enabled: true, speed: 700 },
+    },
     plotOptions: { bar: { horizontal: true, borderRadius: 6, distributed: true, barHeight: "45%" } },
     dataLabels: {
       enabled: true,
       formatter: (val) => `${Number(val).toFixed(1)}%`,
+      style: { colors: [palette.foreground], fontWeight: 600 },
     },
     legend: { show: false },
     colors: [
       customerGrowth >= 0 ? palette.success : palette.danger,
       revenueGrowth >= 0 ? palette.success : palette.danger,
     ],
+    fill: {
+      type: "gradient",
+      gradient: { shade: "light", type: "horizontal", shadeIntensity: 0.3, opacityFrom: 1, opacityTo: 0.55 },
+    },
     xaxis: {
       categories: ["Pertumbuhan pelanggan", "Pertumbuhan pendapatan"],
       labels: { style: { colors: palette.muted } },
     },
     grid: { borderColor: palette.border },
-    tooltip: { theme: "light" },
+    tooltip: { theme: dark ? "dark" : "light" },
     series: [{ name: "Growth %", data: [customerGrowth, revenueGrowth] }],
   };
 
@@ -309,15 +356,26 @@ function GrowthBarChart() {
 function KecamatanDonutChart() {
   const { data, isLoading } = useAdminAnalytics();
   const palette = getChartPalette();
+  const { resolvedTheme } = useTheme();
+  const dark = resolvedTheme === "dark";
   const distribution = data?.distribution ?? [];
 
   const options: ApexOptions = {
-    chart: { type: "donut", height: 260, fontFamily: "inherit" },
+    chart: {
+      type: "donut",
+      height: 260,
+      fontFamily: "inherit",
+      animations: { enabled: true, speed: 700 },
+    },
     labels: distribution.map((d) => d.name),
     colors: [palette.chart1, palette.chart2, palette.chart3, palette.chart4, palette.chart5],
     legend: { position: "bottom", labels: { colors: palette.muted } },
-    dataLabels: { formatter: (val) => `${Number(val).toFixed(0)}%` },
-    tooltip: { theme: "light" },
+    stroke: { width: 2, colors: [palette.background] },
+    dataLabels: {
+      formatter: (val) => `${Number(val).toFixed(0)}%`,
+      dropShadow: { enabled: false },
+    },
+    tooltip: { theme: dark ? "dark" : "light" },
     series: distribution.map((d) => d.count),
   };
 
@@ -364,14 +422,15 @@ function AtRiskShopsList() {
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1">
         {isLoading ? (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Spinner color="dark" size="xs" />
-            Memuat...
+          <div className="space-y-2">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="skeleton h-11 w-full" />
+            ))}
           </div>
         ) : shops.length === 0 ? (
-          <div className="flex items-center gap-2 rounded-xl border border-success/20 bg-success/5 px-4 py-3 text-sm text-success">
+          <div className="flex h-full min-h-32 items-center justify-center gap-2 rounded-xl border border-success/20 bg-success/5 px-4 py-3 text-sm text-success">
             <ShieldCheck className="size-4 shrink-0" />
             Tidak ada toko berisiko saat ini.
           </div>
@@ -380,10 +439,15 @@ function AtRiskShopsList() {
             {shops.map((shop, index) => (
               <li
                 key={shop.id ?? shop.shop_id ?? index}
-                className="flex items-center gap-2 rounded-xl border border-warning/20 bg-warning/5 px-4 py-2.5 text-sm"
+                className="flex items-center gap-3 rounded-xl border border-warning/20 bg-warning/5 px-3.5 py-2.5 text-sm"
               >
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-warning/15 text-xs font-bold text-warning">
+                  {index + 1}
+                </span>
                 <AlertTriangle className="size-4 shrink-0 text-warning" />
-                <span className="font-medium text-heading">{shop.name ?? "Toko tidak diketahui"}</span>
+                <span className="min-w-0 flex-1 truncate font-medium text-heading">
+                  {shop.name ?? "Toko tidak diketahui"}
+                </span>
               </li>
             ))}
           </ul>
@@ -397,9 +461,14 @@ export function StatisticsSection() {
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-xl font-bold tracking-tight text-heading">Statistik</h2>
-        <p className="text-sm text-muted-foreground">
-          Jumlah toko, pengguna, dan pertumbuhan platform — sebagian besar bisa difilter per toko.
+        <h2 className="flex items-center gap-2 text-xl font-bold tracking-tight text-heading">
+          <span className="icon-tile size-9">
+            <ChartNoAxesColumnIncreasing className="size-4.5" />
+          </span>
+          Statistik
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Jumlah toko, pengguna, dan pertumbuhan platform.
         </p>
       </div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
