@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle2, FileCheck2, Gavel, Store, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,6 +36,9 @@ export default function VerificationDetailPage() {
   const verifyShop = useVerifyShop(shopId);
   const [rejectNote, setRejectNote] = useState("");
   const [rejectOpen, setRejectOpen] = useState(false);
+  const reviewedDocCount = shop
+    ? Object.values(shop.docs).filter((d) => d.status !== "pending").length
+    : 0;
 
   function handleApprove() {
     verifyShop.mutate(
@@ -109,7 +112,12 @@ export default function VerificationDetailPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Informasi toko</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <span className="icon-tile size-8">
+              <Store className="size-4" />
+            </span>
+            Informasi toko
+          </CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
           <div>
@@ -146,7 +154,15 @@ export default function VerificationDetailPage() {
       </Card>
 
       <div>
-        <h2 className="mb-3 text-lg font-semibold">Dokumen</h2>
+        <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold">
+          <span className="icon-tile size-8">
+            <FileCheck2 className="size-4" />
+          </span>
+          Dokumen
+          <span className="text-sm font-normal text-muted-foreground">
+            ({reviewedDocCount}/{Object.keys(DOC_LABELS).length} direview)
+          </span>
+        </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {(Object.keys(DOC_LABELS) as DocKey[]).map((docKey) => (
             <DocumentReviewCard
@@ -164,7 +180,12 @@ export default function VerificationDetailPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Keputusan akhir</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <span className="icon-tile size-8">
+              <Gavel className="size-4" />
+            </span>
+            Keputusan akhir
+          </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-3">
           <Button disabled={verifyShop.isPending} onClick={handleApprove} className="gap-2">

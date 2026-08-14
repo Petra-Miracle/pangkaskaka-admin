@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { Send, Lock } from "lucide-react";
+import { Send, Lock, MessageSquare } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
 import { useChatThread, useCloseChatThread, useSendChatMessage } from "@/lib/queries/chat";
 import { ApiError } from "@/lib/api";
+import { cn } from "@/lib/utils";
 
 export function ChatPanel({ shopId }: { shopId: string }) {
   const { data, isLoading, isError } = useChatThread(shopId);
@@ -37,7 +38,12 @@ export function ChatPanel({ shopId }: { shopId: string }) {
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base">Chat verifikasi</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <span className="icon-tile size-8">
+              <MessageSquare className="size-4" />
+            </span>
+            Chat verifikasi
+          </CardTitle>
           {!closed && (
             <Button
               size="sm"
@@ -66,20 +72,36 @@ export function ChatPanel({ shopId }: { shopId: string }) {
         {isError && <p className="text-sm text-destructive">Gagal memuat percakapan.</p>}
 
         {data && (
-          <div className="max-h-80 space-y-2 overflow-y-auto rounded-lg border border-border bg-muted/30 p-3">
+          <div className="max-h-80 space-y-2.5 overflow-y-auto rounded-lg border border-border bg-muted/30 p-3">
             {data.messages.length === 0 && (
               <p className="py-6 text-center text-sm text-muted-foreground">Belum ada pesan.</p>
             )}
-            {data.messages.map((msg, i) => (
-              <div key={msg.id ?? i} className="rounded-md bg-background p-2 text-sm shadow-sm">
-                {(msg.sender_role || msg.sender_name) && (
-                  <p className="text-xs font-medium text-muted-foreground">
-                    {msg.sender_name ?? msg.sender_role}
-                  </p>
-                )}
-                <p>{msg.message ?? msg.text ?? JSON.stringify(msg)}</p>
-              </div>
-            ))}
+            {data.messages.map((msg, i) => {
+              const isAdmin = msg.sender_role === "admin";
+              const text = msg.message ?? msg.text ?? JSON.stringify(msg);
+              return (
+                <div
+                  key={msg.id ?? i}
+                  className={cn("flex", isAdmin ? "justify-end" : "justify-start")}
+                >
+                  <div
+                    className={cn(
+                      "max-w-[80%] rounded-2xl px-3.5 py-2 text-sm shadow-sm",
+                      isAdmin
+                        ? "rounded-br-md bg-primary text-primary-foreground"
+                        : "rounded-bl-md border border-border bg-background"
+                    )}
+                  >
+                    {!isAdmin && (msg.sender_role || msg.sender_name) && (
+                      <p className="mb-0.5 text-[11px] font-semibold text-muted-foreground">
+                        {msg.sender_name ?? msg.sender_role}
+                      </p>
+                    )}
+                    <p className="break-words whitespace-pre-wrap">{text}</p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
 

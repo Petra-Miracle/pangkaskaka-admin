@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
 import { useReviewDocument } from "@/lib/queries/shops";
 import { ApiError } from "@/lib/api";
+import { cn } from "@/lib/utils";
 import type { DocKey, DocStatus, ShopDocument } from "@/types/admin";
 
 const STATUS_VARIANT: Record<DocStatus, "outline" | "default" | "destructive" | "secondary"> = {
@@ -23,6 +24,13 @@ const STATUS_LABEL: Record<DocStatus, string> = {
   valid: "Valid",
   invalid: "Tidak valid",
   needs_revision: "Perlu revisi",
+};
+
+const STATUS_ACCENT: Record<DocStatus, string> = {
+  pending: "border-border",
+  valid: "border-emerald-500/30",
+  invalid: "border-destructive/30",
+  needs_revision: "border-amber-500/30",
 };
 
 export function DocumentReviewCard({
@@ -52,8 +60,10 @@ export function DocumentReviewCard({
     );
   }
 
+  const reviewedAt = doc.reviewed_at ? new Date(doc.reviewed_at).toLocaleString("id-ID") : null;
+
   return (
-    <Card>
+    <Card className={cn("border-t-2 transition-colors", STATUS_ACCENT[doc.status])}>
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-base">{label}</CardTitle>
@@ -111,6 +121,13 @@ export function DocumentReviewCard({
             Tidak valid
           </Button>
         </div>
+
+        {reviewedAt && (
+          <p className="text-xs text-muted-foreground">
+            Direview {reviewedAt}
+            {doc.reviewed_by ? ` oleh ${doc.reviewed_by}` : ""}
+          </p>
+        )}
       </CardContent>
     </Card>
   );
