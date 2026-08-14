@@ -17,7 +17,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { StatisticsSection } from "@/components/dashboard/statistics";
 import { useDashboardStats } from "@/lib/queries/dashboard";
 import { useAdminAnalytics } from "@/lib/queries/analytics";
-import { useAnimatedNumber, useGreeting, useStoredAdminUser } from "@/lib/client-values";
+import { useAnimatedNumber, useGreeting, useStoredAdminUser, useTodayLabel } from "@/lib/client-values";
 import { formatNumber, formatRupiah } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import type { DashboardStats } from "@/types/admin";
@@ -90,19 +90,11 @@ function KpiCard({
   );
 }
 
-function formatToday() {
-  return new Date().toLocaleDateString("id-ID", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-}
-
 export default function DashboardHomePage() {
   const { data: stats, isLoading, isError } = useDashboardStats();
   const { data: analytics } = useAdminAnalytics();
   const greeting = useGreeting();
+  const today = useTodayLabel();
   const user = useStoredAdminUser();
   const adminName = user?.name?.split(" ")[0] ?? null;
 
@@ -119,7 +111,7 @@ export default function DashboardHomePage() {
 
         <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div className="max-w-xl">
-            <p className="text-xs font-semibold tracking-[0.14em] text-white/70 uppercase">{formatToday()}</p>
+            <p className="text-xs font-semibold tracking-[0.14em] text-white/70 uppercase">{today}</p>
             <h1 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">
               {greeting}
               {adminName ? `, ${adminName}` : ""}
