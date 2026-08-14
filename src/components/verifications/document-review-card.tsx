@@ -49,7 +49,7 @@ export function DocumentReviewCard({
   }
 
   return (
-    <Card className="border-border/60">
+    <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-base">{label}</CardTitle>

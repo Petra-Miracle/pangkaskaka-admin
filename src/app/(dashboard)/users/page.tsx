@@ -52,8 +52,8 @@ export default function UsersPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Users</h1>
-        <p className="text-sm text-muted-foreground">
+        <h1 className="mb-1 text-3xl font-bold tracking-tight text-primary md:text-4xl">Users</h1>
+        <p className="text-base text-muted-foreground/90">
           Semua akun terdaftar di platform ({users?.length ?? "…"}) — customer, owner, karyawan, dan admin.
         </p>
       </div>
@@ -82,8 +82,8 @@ export default function UsersPage() {
         </Select>
       </div>
 
-      <Card className="border-border/60">
-        <CardContent className="p-0">
+      <Card>
+        <CardContent className="overflow-x-auto p-0">
           <Table>
             <TableHeader>
               <TableRow>

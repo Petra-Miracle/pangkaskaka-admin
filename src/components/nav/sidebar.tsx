@@ -33,14 +33,14 @@ export function Sidebar() {
     .toUpperCase();
 
   return (
-    <aside className="flex h-screen w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground">
+    <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground backdrop-blur-xl md:flex">
       <div className="flex h-16 items-center gap-2.5 border-b border-sidebar-border px-5">
-        <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
+        <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-sm">
           <Scissors className="size-4.5" />
         </div>
         <div className="leading-tight">
-          <p className="text-sm font-semibold">PangkasKAKA</p>
-          <p className="text-xs text-muted-foreground">SuperAdmin</p>
+          <p className="text-sm font-bold tracking-tight">PangkasKAKA</p>
+          <p className="text-xs font-medium text-muted-foreground">SuperAdmin</p>
         </div>
       </div>
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
@@ -52,13 +52,16 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                "relative flex items-center gap-3 overflow-hidden rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
                 isActive
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
+                  ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
+                  : "text-sidebar-foreground/70 hover:translate-x-1 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
               )}
             >
-              <Icon className="size-4 shrink-0" />
+              {isActive && (
+                <span className="absolute left-0 top-1/2 h-1/2 w-1 -translate-y-1/2 rounded-r-full bg-primary" />
+              )}
+              <Icon className={cn("size-4 shrink-0", isActive && "text-primary")} />
               <span className="flex-1">{item.label}</span>
               {item.blocked && (
                 <Badge variant="outline" className="text-[10px] font-normal">
@@ -72,19 +75,19 @@ export function Sidebar() {
       <div className="border-t border-sidebar-border p-4">
         {user && (
           <div className="mb-3 flex items-center gap-2.5">
-            <Avatar className="size-8">
-              <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
+            <Avatar className="size-8 border border-primary/10">
+              <AvatarFallback className="bg-primary/10 text-xs font-bold text-primary">
                 {initials}
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0 text-sm">
-              <p className="truncate font-medium">{user.name}</p>
+              <p className="truncate font-semibold">{user.name}</p>
               <p className="truncate text-xs text-muted-foreground">{user.email}</p>
             </div>
           </div>
         )}
-        <Button variant="outline" size="sm" className="w-full gap-2" onClick={handleLogout}>
-          <LogOut className="size-3.5" />
+        <Button variant="outline" size="sm" className="group w-full gap-2" onClick={handleLogout}>
+          <LogOut className="size-3.5 transition-transform group-hover:-translate-x-0.5" />
           Log out
         </Button>
       </div>

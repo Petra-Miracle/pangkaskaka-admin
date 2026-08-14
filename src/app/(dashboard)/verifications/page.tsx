@@ -29,8 +29,8 @@ export default function VerificationsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Verifications</h1>
-        <p className="text-sm text-muted-foreground">
+        <h1 className="mb-1 text-3xl font-bold tracking-tight text-primary md:text-4xl">Verifications</h1>
+        <p className="text-base text-muted-foreground/90">
           Semua toko yang menunggu verifikasi ({shops?.length ?? "…"}).
         </p>
       </div>
@@ -39,8 +39,8 @@ export default function VerificationsPage() {
         <p className="text-sm text-destructive">Gagal memuat antrian verifikasi.</p>
       )}
 
-      <Card className="border-border/60">
-        <CardContent className="p-0">
+      <Card>
+        <CardContent className="overflow-x-auto p-0">
           <Table>
             <TableHeader>
               <TableRow>

@@ -1,7 +1,7 @@
 "use client";
 
 import { Store, ShieldAlert, Users, Wallet } from "lucide-react";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDashboardStats } from "@/lib/queries/dashboard";
 import type { DashboardStats } from "@/types/admin";
@@ -23,35 +23,37 @@ export default function DashboardHomePage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">
+      <div className="mb-2 hidden md:mt-1 md:block">
+        <h1 className="mb-1 text-4xl font-bold tracking-tight text-primary lg:text-5xl">Dashboard</h1>
+        <p className="text-base text-muted-foreground/90">
           Ringkasan KPI dari seluruh platform PangkasKAKA.
         </p>
       </div>
+
       {isError && (
         <p className="text-sm text-destructive">
           Gagal memuat data dashboard. Coba muat ulang halaman.
         </p>
       )}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+
+      <div className="relative z-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
         {KPIS.map(({ label, icon: Icon, key, format }) => (
-          <Card key={label} className="border-border/60">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardDescription>{label}</CardDescription>
-                <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <Icon className="size-4" />
-                </div>
+          <Card key={label} interactive className="h-36 justify-between">
+            <CardHeader className="flex-row items-start justify-between">
+              <span className="text-sm font-medium text-muted-foreground">{label}</span>
+              <div className="flex size-10 items-center justify-center rounded-xl border border-primary/20 bg-accent text-primary">
+                <Icon className="size-5" />
               </div>
+            </CardHeader>
+            <CardContent>
               {isLoading ? (
                 <Skeleton className="h-9 w-16" />
               ) : (
-                <CardTitle className="text-3xl">
+                <div className="text-4xl leading-none font-bold tracking-tight text-primary">
                   {stats ? (format ? format(stats[key]) : stats[key].toLocaleString("id-ID")) : "—"}
-                </CardTitle>
+                </div>
               )}
-            </CardHeader>
+            </CardContent>
           </Card>
         ))}
       </div>

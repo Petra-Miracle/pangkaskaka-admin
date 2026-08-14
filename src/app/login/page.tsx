@@ -62,7 +62,7 @@ function LoginForm() {
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-sky-50 via-white to-blue-100 px-4">
       <div className="pointer-events-none absolute -top-24 -left-24 size-72 rounded-full bg-primary/10 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-24 -right-24 size-72 rounded-full bg-primary/15 blur-3xl" />
-      <Card className="relative w-full max-w-sm border-border/60 shadow-xl shadow-primary/5">
+      <Card className="relative w-full max-w-sm shadow-xl shadow-primary/5">
         <CardHeader className="items-center text-center">
           <div className="mb-2 flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
             <Scissors className="size-6" />

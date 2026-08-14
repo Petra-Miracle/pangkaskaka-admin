@@ -34,7 +34,7 @@ export function ChatPanel({ shopId }: { shopId: string }) {
   }
 
   return (
-    <Card className="border-border/60">
+    <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-base">Chat verifikasi</CardTitle>

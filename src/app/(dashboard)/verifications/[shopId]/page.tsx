@@ -94,7 +94,7 @@ export default function VerificationDetailPage() {
           <ArrowLeft className="size-4" />
         </Button>
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{shop.name}</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-primary md:text-3xl">{shop.name}</h1>
           <p className="text-sm text-muted-foreground">{shop.address}</p>
         </div>
         <Badge variant={shop.verification_status === "pending" ? "outline" : "default"} className="ml-auto">
@@ -102,7 +102,7 @@ export default function VerificationDetailPage() {
         </Badge>
       </div>
 
-      <Card className="border-border/60">
+      <Card>
         <CardHeader>
           <CardTitle className="text-base">Informasi toko</CardTitle>
         </CardHeader>
@@ -157,7 +157,7 @@ export default function VerificationDetailPage() {
 
       <ChatPanel shopId={shop.id} />
 
-      <Card className="border-border/60">
+      <Card>
         <CardHeader>
           <CardTitle className="text-base">Keputusan akhir</CardTitle>
         </CardHeader>

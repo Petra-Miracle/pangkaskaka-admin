@@ -13,7 +13,7 @@ export function PlaceholderPage({
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-primary md:text-4xl">{title}</h1>
         {blocked && <Badge variant="outline">Blocked on backend endpoint</Badge>}
       </div>
       <Card>
