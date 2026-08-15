@@ -1,13 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Ban, ExternalLink, Info, Store as StoreIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@heroui/react";
-import { Input } from "@/components/ui/input";
+import { SearchBox } from "@/components/ui/search-box";
 import { PageHeader } from "@/components/nav/page-header";
 import { DataTable, legacyCreateColumnHelper } from "@/components/ui/data-table";
 import type { LegacyColumnDef } from "@tanstack/react-table/legacy";
@@ -181,9 +181,16 @@ export default function ShopsPage() {
   const { data: shops, isLoading, isError } = useAllShops();
   const [search, setSearch] = useState("");
 
+  const [debounced, setDebounced] = useState("");
+  useEffect(() => {
+    const id = setTimeout(() => setDebounced(search), 250);
+    return () => clearTimeout(id);
+  }, [search]);
+  const searching = debounced !== search;
+
   const filtered = useMemo(() => {
     if (!shops) return [];
-    const q = search.trim().toLowerCase();
+    const q = debounced.trim().toLowerCase();
     return shops.filter((s) => {
       return (
         !q ||
@@ -192,7 +199,7 @@ export default function ShopsPage() {
         s.category?.toLowerCase().includes(q)
       );
     });
-  }, [shops, search]);
+  }, [shops, debounced]);
 
   return (
     <div className="space-y-6">
@@ -219,15 +226,13 @@ export default function ShopsPage() {
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative flex-1 sm:max-w-sm">
-          <Input
-            placeholder="Cari nama, alamat, atau kategori..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
-          />
-          <StoreIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-        </div>
+        <SearchBox
+          placeholder="Cari nama, alamat, atau kategori..."
+          value={search}
+          onChange={setSearch}
+          icon={<StoreIcon className="size-4" />}
+          busy={isLoading || searching}
+        />
       </div>
 
       <Card className="glass-card overflow-hidden p-0">

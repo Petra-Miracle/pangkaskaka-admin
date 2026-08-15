@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Users as UsersIcon } from "lucide-react";
 import { Card } from "@heroui/react";
-import { Input } from "@/components/ui/input";
+import { SearchBox } from "@/components/ui/search-box";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { PageHeader } from "@/components/nav/page-header";
 import { DataTable, legacyCreateColumnHelper } from "@/components/ui/data-table";
@@ -85,6 +85,13 @@ export default function UsersPage() {
   const [search, setSearch] = useState("");
   const [role, setRole] = useState<string>("all");
 
+  const [debounced, setDebounced] = useState("");
+  useEffect(() => {
+    const id = setTimeout(() => setDebounced(search), 250);
+    return () => clearTimeout(id);
+  }, [search]);
+  const searching = debounced !== search;
+
   const counts = useMemo(() => {
     const map = new Map<AdminUserRole, number>();
     for (const r of ADMIN_USER_ROLES) map.set(r, 0);
@@ -98,7 +105,7 @@ export default function UsersPage() {
 
   const filtered = useMemo(() => {
     if (!users) return [];
-    const q = search.trim().toLowerCase();
+    const q = debounced.trim().toLowerCase();
     return users.filter((u) => {
       const matchesRole = role === "all" || u.role === role;
       const matchesSearch =
@@ -108,7 +115,7 @@ export default function UsersPage() {
         u.phone?.toLowerCase().includes(q);
       return matchesRole && matchesSearch;
     });
-  }, [users, search, role]);
+  }, [users, debounced, role]);
 
   return (
     <div className="space-y-6">
@@ -147,15 +154,13 @@ export default function UsersPage() {
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative flex-1 sm:max-w-sm">
-          <Input
-            placeholder="Cari nama, email, atau nomor telepon..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
-          />
-          <UsersIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-        </div>
+        <SearchBox
+          placeholder="Cari nama, email, atau nomor telepon..."
+          value={search}
+          onChange={setSearch}
+          icon={<UsersIcon className="size-4" />}
+          busy={isLoading || searching}
+        />
       </div>
 
       <Card className="glass-card overflow-hidden p-0">
