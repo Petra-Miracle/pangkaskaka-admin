@@ -114,72 +114,50 @@ export default function DashboardHomePage() {
 
   return (
     <div className="space-y-6">
-      {/* Hero banner */}
-      <div className="bg-aurora hero-panel relative overflow-hidden rounded-2xl p-5 text-white shadow-lg shadow-primary/20 md:p-6">
+      {/* Greeting banner */}
+      <div className="bg-aurora hero-panel relative overflow-hidden rounded-2xl p-4 text-white shadow-lg shadow-primary/20 md:p-5">
         <div className="bg-grid pointer-events-none absolute inset-0 opacity-20" />
         <div className="bg-noise pointer-events-none absolute inset-0" />
-        <div className="pointer-events-none absolute -top-20 -right-12 size-48 rounded-full bg-white/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 left-1/3 size-56 rounded-full bg-white/5 blur-3xl" />
+        <div className="pointer-events-none absolute -top-20 -right-12 size-40 rounded-full bg-white/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 left-1/3 size-48 rounded-full bg-white/5 blur-3xl" />
 
-        <div className="relative z-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="max-w-xl">
-            <p className="text-[11px] font-semibold tracking-[0.14em] text-white/70 uppercase">{today}</p>
-            <h1 className="mt-1 text-2xl font-bold tracking-tight md:text-[1.65rem]">
+        <div className="relative z-10 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold tracking-[0.14em] text-white/70 uppercase">{today}</p>
+            <h1 className="mt-0.5 truncate text-xl font-bold tracking-tight md:text-2xl">
               {greeting}
               {adminName ? `, ${adminName}` : ""}
             </h1>
-            <p className="mt-1.5 max-w-lg text-[13px] leading-relaxed text-white/75 md:text-sm">
-              Ringkasan KPI seluruh platform PangkasKAKA —{" "}
-              <kbd className="rounded-md border border-white/20 bg-white/10 px-1.5 py-0.5 text-[10px] font-semibold">
-                Ctrl<span className="mx-0.5">+</span>K
-              </kbd>{" "}
-              untuk pencarian cepat.
+            <p className="mt-0.5 truncate text-xs text-white/75">
+              Ringkasan KPI seluruh platform PangkasKAKA.
             </p>
-            <div className="mt-4 flex flex-wrap items-center gap-2.5">
-              <Button
-                variant="outline"
-                nativeButton={false}
-                className="border-white/25 bg-white/10 text-white shadow-none backdrop-blur-md hover:bg-white/20 hover:text-white"
-                render={
-                  <Link href="/verifications" className="gap-1.5">
-                    <ShieldAlert className="size-4" />
-                    Antrian verifikasi
-                    {!isLoading && (s?.pending_verifications ?? 0) > 0 && (
-                      <span className="rounded-full bg-white/25 px-1.5 py-0.5 text-[11px] font-bold">
-                        {s?.pending_verifications}
-                      </span>
-                    )}
-                    <ArrowRight className="size-4" />
-                  </Link>
-                }
-              />
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-medium text-white/85 backdrop-blur-md">
-                <span className="relative flex size-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-                  <span className="relative inline-flex size-1.5 rounded-full bg-emerald-400" />
-                </span>
-                API Production Online
-              </span>
-            </div>
           </div>
 
-          <div className="grid shrink-0 grid-cols-3 gap-2 md:min-w-60">
-            {[
-              { label: "Toko terdaftar", value: s?.total_shops, icon: Store },
-              { label: "Pelanggan", value: s?.total_customers, icon: Users },
-              { label: "Pendapatan hari ini", value: s?.revenue_today, icon: Wallet, money: true },
-            ].map(({ label, value, icon: Icon, money }) => (
-              <div
-                key={label}
-                className="rounded-xl border border-white/15 bg-white/10 p-2.5 backdrop-blur-md transition-transform duration-200 hover:-translate-y-0.5 hover:bg-white/15"
-              >
-                <Icon className="mb-1.5 size-3.5 text-white/70" />
-                <p className="text-base leading-tight font-bold tabular-nums">
-                  {value === undefined ? "…" : money ? formatRupiah(value) : formatNumber(value)}
-                </p>
-                <p className="text-[10px] leading-tight font-medium text-white/60">{label}</p>
-              </div>
-            ))}
+          <div className="flex shrink-0 flex-wrap items-center gap-2.5">
+            <Button
+              variant="outline"
+              nativeButton={false}
+              className="border-white/25 bg-white/10 text-white shadow-none backdrop-blur-md hover:bg-white/20 hover:text-white"
+              render={
+                <Link href="/verifications" className="gap-1.5">
+                  <ShieldAlert className="size-4" />
+                  Antrian verifikasi
+                  {!isLoading && (s?.pending_verifications ?? 0) > 0 && (
+                    <span className="rounded-full bg-white/25 px-1.5 py-0.5 text-[11px] font-bold">
+                      {s?.pending_verifications}
+                    </span>
+                  )}
+                  <ArrowRight className="size-4" />
+                </Link>
+              }
+            />
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-medium text-white/85 backdrop-blur-md">
+              <span className="relative flex size-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+                <span className="relative inline-flex size-1.5 rounded-full bg-emerald-400" />
+              </span>
+              API Production Online
+            </span>
           </div>
         </div>
       </div>
