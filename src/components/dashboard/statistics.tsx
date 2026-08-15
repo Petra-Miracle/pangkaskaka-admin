@@ -104,19 +104,10 @@ function ShopsByFilterChart() {
       fontFamily: "inherit",
       animations: { enabled: true, speed: 700, animateGradually: { enabled: true, delay: 60 } },
     },
-    plotOptions: { bar: { borderRadius: 8, columnWidth: "55%", distributed: true } },
+    plotOptions: { bar: { borderRadius: 8, columnWidth: "55%" } },
     dataLabels: { enabled: false },
     legend: { show: false },
-    colors: [
-      palette.chart1,
-      palette.chart2,
-      palette.chart3,
-      palette.chart4,
-      palette.chart5,
-      palette.success,
-      palette.warning,
-      palette.purple,
-    ],
+    colors: [palette.chart1],
     fill: {
       type: "gradient",
       gradient: { shade: "light", type: "vertical", shadeIntensity: 0.35, opacityFrom: 1, opacityTo: 0.45 },
@@ -199,7 +190,7 @@ function UserRolesPieChart() {
       animations: { enabled: true, speed: 700 },
     },
     labels: counts.map(([label]) => label),
-    colors: [palette.chart2, palette.success, palette.warning, palette.purple],
+    colors: [palette.chart5, palette.chart3, palette.chart1, palette.chart4],
     legend: { position: "bottom", labels: { colors: palette.muted } },
     stroke: { width: 2, colors: [palette.background] },
     dataLabels: { formatter: (val) => `${Number(val).toFixed(0)}%`, dropShadow: { enabled: false } },
@@ -252,7 +243,7 @@ function AvgRatingRadialChart() {
     },
     series: [pct],
     labels: ["Rating"],
-    colors: [palette.chart2],
+    colors: [palette.chart1],
     plotOptions: {
       radialBar: {
         hollow: { size: "65%" },
@@ -309,7 +300,7 @@ function GrowthBarChart() {
       fontFamily: "inherit",
       animations: { enabled: true, speed: 700 },
     },
-    plotOptions: { bar: { horizontal: true, borderRadius: 6, distributed: true, barHeight: "45%" } },
+    plotOptions: { bar: { horizontal: true, borderRadius: 6, barHeight: "45%" } },
     dataLabels: {
       enabled: true,
       formatter: (val) => `${Number(val).toFixed(1)}%`,
@@ -320,10 +311,7 @@ function GrowthBarChart() {
       customerGrowth >= 0 ? palette.success : palette.danger,
       revenueGrowth >= 0 ? palette.success : palette.danger,
     ],
-    fill: {
-      type: "gradient",
-      gradient: { shade: "light", type: "horizontal", shadeIntensity: 0.3, opacityFrom: 1, opacityTo: 0.55 },
-    },
+    fill: { type: "solid" },
     xaxis: {
       categories: ["Pertumbuhan pelanggan", "Pertumbuhan pendapatan"],
       labels: { style: { colors: palette.muted } },
@@ -368,7 +356,7 @@ function KecamatanDonutChart() {
       animations: { enabled: true, speed: 700 },
     },
     labels: distribution.map((d) => d.name),
-    colors: [palette.chart1, palette.chart2, palette.chart3, palette.chart4, palette.chart5],
+    colors: [palette.chart5, palette.chart3, palette.chart2, palette.chart1, palette.chart4],
     legend: { position: "bottom", labels: { colors: palette.muted } },
     stroke: { width: 2, colors: [palette.background] },
     dataLabels: {
