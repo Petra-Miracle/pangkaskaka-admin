@@ -1,6 +1,6 @@
 import { CalendarClock, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@heroui/react";
 import { PageHeader } from "@/components/nav/page-header";
 
 const BOOKINGS_SPEC = `{
@@ -38,15 +38,15 @@ export default function BookingsPage() {
         }
       />
 
-      <Card>
-        <CardHeader>
+      <Card className="glass-card">
+        <Card.Header>
           <div className="flex items-start gap-3">
             <div className="icon-tile size-10">
               <CalendarClock className="size-4.5" />
             </div>
             <div>
-              <CardTitle className="text-base">Belum bisa dibangun</CardTitle>
-              <CardDescription>
+              <Card.Title className="text-base text-foreground">Belum bisa dibangun</Card.Title>
+              <Card.Description className="leading-relaxed text-muted-foreground">
                 Sudah dicek langsung ke API produksi. <code className="font-mono">GET /bookings</code> memang
                 ada dan mengembalikan <code className="font-mono">200</code>, tapi itu endpoint per-user yang
                 sama dipakai mobile app (customer melihat booking-nya sendiri, owner melihat booking tokonya) —
@@ -55,11 +55,11 @@ export default function BookingsPage() {
                 toko; <code className="font-mono">/admin/bookings</code>,{" "}
                 <code className="font-mono">/shops/{"{id}"}/bookings</code>, dan beberapa varian lain semuanya
                 404.
-              </CardDescription>
+              </Card.Description>
             </div>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-5 text-sm">
+        </Card.Header>
+        <Card.Content className="gap-5 text-sm">
           <div className="flex items-start gap-2 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-amber-700 dark:text-amber-400">
             <Clock className="mt-0.5 size-4 shrink-0" />
             Kirim spesifikasi di bawah ke pemilik/pengelola repo backend (di luar proyek ini) — lihat juga
@@ -79,7 +79,7 @@ export default function BookingsPage() {
               {BOOKINGS_SPEC}
             </pre>
           </div>
-        </CardContent>
+        </Card.Content>
       </Card>
     </div>
   );

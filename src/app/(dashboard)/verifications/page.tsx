@@ -5,7 +5,7 @@ import { ChevronRight, Inbox } from "lucide-react";
 import { usePendingShops } from "@/lib/queries/shops";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@heroui/react";
 import { PageHeader } from "@/components/nav/page-header";
 import { DataTable, legacyCreateColumnHelper } from "@/components/ui/data-table";
 import type { LegacyColumnDef } from "@tanstack/react-table/legacy";
@@ -142,8 +142,8 @@ export default function VerificationsPage() {
         </div>
       )}
 
-      <Card className="overflow-hidden">
-        <CardContent className="p-0">
+      <Card className="glass-card overflow-hidden p-0">
+        <Card.Content className="p-0">
           <DataTable
             columns={columns}
             data={shops ?? []}
@@ -159,7 +159,7 @@ export default function VerificationsPage() {
               </div>
             }
           />
-        </CardContent>
+        </Card.Content>
       </Card>
     </div>
   );

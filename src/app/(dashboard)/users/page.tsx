@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Users as UsersIcon } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@heroui/react";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { PageHeader } from "@/components/nav/page-header";
@@ -158,8 +158,8 @@ export default function UsersPage() {
         </div>
       </div>
 
-      <Card className="overflow-hidden">
-        <CardContent className="p-0">
+      <Card className="glass-card overflow-hidden p-0">
+        <Card.Content className="p-0">
           <DataTable
             columns={columns}
             data={filtered}
@@ -175,7 +175,7 @@ export default function UsersPage() {
               </div>
             }
           />
-        </CardContent>
+        </Card.Content>
       </Card>
     </div>
   );

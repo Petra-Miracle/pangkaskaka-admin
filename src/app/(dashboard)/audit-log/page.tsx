@@ -1,6 +1,6 @@
 import { Clock, History } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@heroui/react";
 import { PageHeader } from "@/components/nav/page-header";
 
 const AUDIT_LOG_SPEC = `{
@@ -42,15 +42,15 @@ export default function AuditLogPage() {
         }
       />
 
-      <Card>
-        <CardHeader>
+      <Card className="glass-card">
+        <Card.Header>
           <div className="flex items-start gap-3">
             <div className="icon-tile size-10">
               <History className="size-4.5" />
             </div>
             <div>
-              <CardTitle className="text-base">Belum bisa dibangun — dan lebih besar dari Payments/Bookings</CardTitle>
-              <CardDescription>
+              <Card.Title className="text-base text-foreground">Belum bisa dibangun — dan lebih besar dari Payments/Bookings</Card.Title>
+              <Card.Description className="leading-relaxed text-muted-foreground">
                 Sudah dicek langsung ke API produksi — <code className="font-mono">/admin/audit-log</code>,{" "}
                 <code className="font-mono">/admin/logs</code>, <code className="font-mono">/admin/activity</code>,
                 dan beberapa varian lain semuanya 404. Bedanya dengan Payments/Bookings: di sana datanya sudah
@@ -58,11 +58,11 @@ export default function AuditLogPage() {
                 bentuk apa pun — setiap aksi admin di dashboard ini (approve/reject toko, suspend, review
                 dokumen, ubah kriteria rekrutmen) hari ini tidak meninggalkan jejak siapa yang melakukannya sama
                 sekali. Backend perlu mulai <em>menulis</em> log dulu sebelum ada apa pun untuk dibaca.
-              </CardDescription>
+              </Card.Description>
             </div>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-5 text-sm">
+        </Card.Header>
+        <Card.Content className="gap-5 text-sm">
           <div className="flex items-start gap-2 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-amber-700 dark:text-amber-400">
             <Clock className="mt-0.5 size-4 shrink-0" />
             Kirim spesifikasi di bawah ke pemilik/pengelola repo backend (di luar proyek ini) — lihat juga
@@ -95,7 +95,7 @@ export default function AuditLogPage() {
               {AUDIT_LOG_SPEC}
             </pre>
           </div>
-        </CardContent>
+        </Card.Content>
       </Card>
     </div>
   );

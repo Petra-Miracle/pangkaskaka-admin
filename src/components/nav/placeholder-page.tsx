@@ -1,5 +1,5 @@
 import { Clock, Construction } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@heroui/react";
 import { Badge } from "@/components/ui/badge";
 
 export function PlaceholderPage({
@@ -17,19 +17,19 @@ export function PlaceholderPage({
         <h1 className="text-3xl font-bold tracking-tight text-primary md:text-4xl">{title}</h1>
         {blocked && <Badge variant="outline">Menunggu endpoint backend</Badge>}
       </div>
-      <Card>
-        <CardHeader>
+      <Card className="glass-card">
+        <Card.Header>
           <div className="flex items-start gap-3">
             <div className="icon-tile size-10">
               <Construction className="size-4.5" />
             </div>
             <div>
-              <CardTitle className="text-base">Segera hadir</CardTitle>
-              <CardDescription>{description}</CardDescription>
+              <Card.Title className="text-base text-foreground">Segera hadir</Card.Title>
+              <Card.Description className="leading-relaxed text-muted-foreground">{description}</Card.Description>
             </div>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-3 text-sm text-muted-foreground">
+        </Card.Header>
+        <Card.Content className="gap-3 text-sm text-muted-foreground">
           <p>Halaman ini belum dibangun.</p>
           {blocked && (
             <div className="flex items-center gap-2 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-amber-700 dark:text-amber-400">
@@ -37,7 +37,7 @@ export function PlaceholderPage({
               Fitur ini menunggu endpoint yang belum tersedia di backend — lihat AGENT_BRIEF.md bagian 4.
             </div>
           )}
-        </CardContent>
+        </Card.Content>
       </Card>
     </div>
   );

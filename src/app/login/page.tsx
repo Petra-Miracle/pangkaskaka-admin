@@ -6,7 +6,7 @@ import { Eye, EyeOff, Lock, Mail, Scissors } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@heroui/react";
 import { Spinner } from "@/components/ui/spinner";
 import { setSession, type AdminUser } from "@/lib/auth";
 
@@ -152,7 +152,7 @@ function LoginForm() {
 
       <Card className="glass-card shadow-popover">
         <div className="divider-gradient mx-4" />
-        <CardContent className="pt-5">
+        <Card.Content>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="email">Email</Label>
@@ -219,7 +219,7 @@ function LoginForm() {
               )}
             </Button>
           </form>
-        </CardContent>
+        </Card.Content>
       </Card>
 
       <p className="mt-6 text-center text-[11px] text-muted-foreground">

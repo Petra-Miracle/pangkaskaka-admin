@@ -4,14 +4,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ArrowDown, ArrowUp, ClipboardList, Plus, Save, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card } from "@heroui/react";
 import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/nav/page-header";
 import { Spinner } from "@/components/ui/spinner";
@@ -86,22 +79,22 @@ export default function RecruitmentPage() {
         </div>
       )}
 
-      <Card>
-        <CardHeader>
+      <Card className="glass-card overflow-hidden">
+        <Card.Header>
           <div className="flex items-start gap-3">
             <div className="icon-tile size-10">
               <ClipboardList className="size-4.5" />
             </div>
             <div>
-              <CardTitle className="text-base">Kriteria penilaian karyawan</CardTitle>
-              <CardDescription>
+              <Card.Title className="text-base text-foreground">Kriteria penilaian karyawan</Card.Title>
+              <Card.Description className="leading-relaxed text-muted-foreground">
                 Daftar ini tampil ke pemilik toko saat menilai pelamar karyawan. Urutan bisa diubah,
                 dan perubahan langsung berlaku untuk semua toko begitu disimpan.
-              </CardDescription>
+              </Card.Description>
             </div>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-2.5">
+        </Card.Header>
+        <Card.Content className="gap-2.5">
           {isLoading ? (
             <div className="flex h-32 items-center justify-center">
               <Spinner color="brand" size="sm" label="Memuat kriteria..." />
@@ -171,8 +164,8 @@ export default function RecruitmentPage() {
               Tambah kriteria
             </Button>
           )}
-        </CardContent>
-        <CardFooter className="flex flex-wrap items-center justify-between gap-3">
+        </Card.Content>
+        <Card.Footer className="-mx-4 -mb-4 flex-wrap justify-between gap-3 border-t border-border/60 bg-muted/30 px-4 py-4">
           <p className="text-xs text-muted-foreground">
             {data && `Terakhir diperbarui ${formatRelativeTime(data.updated_at)}`}
           </p>
@@ -194,7 +187,7 @@ export default function RecruitmentPage() {
               Simpan perubahan
             </Button>
           </div>
-        </CardFooter>
+        </Card.Footer>
       </Card>
     </div>
   );

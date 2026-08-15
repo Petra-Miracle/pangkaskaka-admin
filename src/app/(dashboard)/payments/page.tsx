@@ -1,6 +1,6 @@
 import { Clock, CreditCard } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@heroui/react";
 import { PageHeader } from "@/components/nav/page-header";
 
 const PAYMENTS_SPEC = `{
@@ -37,25 +37,25 @@ export default function PaymentsPage() {
         }
       />
 
-      <Card>
-        <CardHeader>
+      <Card className="glass-card">
+        <Card.Header>
           <div className="flex items-start gap-3">
             <div className="icon-tile size-10">
               <CreditCard className="size-4.5" />
             </div>
             <div>
-              <CardTitle className="text-base">Belum bisa dibangun</CardTitle>
-              <CardDescription>
+              <Card.Title className="text-base text-foreground">Belum bisa dibangun</Card.Title>
+              <Card.Description className="leading-relaxed text-muted-foreground">
                 Tidak seperti Shops atau Recruitment yang bisa disiasati dari endpoint yang sudah ada, halaman
                 ini genuinely butuh endpoint baru. Sudah dicek langsung ke API produksi — semua kemungkinan
                 path (<code className="font-mono">/admin/payments</code>, <code className="font-mono">/payments</code>,{" "}
                 <code className="font-mono">/admin/transactions</code>, dan beberapa varian lain) mengembalikan
                 404, jadi tidak ada data untuk ditampilkan sama sekali.
-              </CardDescription>
+              </Card.Description>
             </div>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-5 text-sm">
+        </Card.Header>
+        <Card.Content className="gap-5 text-sm">
           <div className="flex items-start gap-2 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-amber-700 dark:text-amber-400">
             <Clock className="mt-0.5 size-4 shrink-0" />
             Kirim spesifikasi di bawah ke pemilik/pengelola repo backend (di luar proyek ini) — lihat juga
@@ -85,7 +85,7 @@ export default function PaymentsPage() {
               untuk log callback masuk dari Durianpay (bukan transaksinya sendiri).
             </p>
           </div>
-        </CardContent>
+        </Card.Content>
       </Card>
     </div>
   );

@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Ban, ExternalLink, Info, Store as StoreIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@heroui/react";
 import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/nav/page-header";
 import { DataTable, legacyCreateColumnHelper } from "@/components/ui/data-table";
@@ -230,8 +230,8 @@ export default function ShopsPage() {
         </div>
       </div>
 
-      <Card className="overflow-hidden">
-        <CardContent className="p-0">
+      <Card className="glass-card overflow-hidden p-0">
+        <Card.Content className="p-0">
           <DataTable
             columns={columns}
             data={filtered}
@@ -247,7 +247,7 @@ export default function ShopsPage() {
               </div>
             }
           />
-        </CardContent>
+        </Card.Content>
       </Card>
     </div>
   );

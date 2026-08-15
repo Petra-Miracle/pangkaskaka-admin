@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { Send, Lock, MessageSquare } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@heroui/react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
@@ -35,15 +35,15 @@ export function ChatPanel({ shopId }: { shopId: string }) {
   }
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="glass-card">
+      <Card.Header>
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-base">
+          <Card.Title className="flex items-center gap-2 text-base text-foreground">
             <span className="icon-tile size-8">
               <MessageSquare className="size-4" />
             </span>
             Chat verifikasi
-          </CardTitle>
+          </Card.Title>
           {!closed && (
             <Button
               size="sm"
@@ -61,8 +61,8 @@ export function ChatPanel({ shopId }: { shopId: string }) {
             </Button>
           )}
         </div>
-      </CardHeader>
-      <CardContent className="space-y-3">
+      </Card.Header>
+      <Card.Content className="gap-3">
         {isLoading && (
           <div className="flex h-40 items-center justify-center gap-2 text-sm text-muted-foreground">
             <Spinner color="dark" size="sm" label="Memuat percakapan..." />
@@ -130,7 +130,7 @@ export function ChatPanel({ shopId }: { shopId: string }) {
             </Button>
           </div>
         )}
-      </CardContent>
+      </Card.Content>
     </Card>
   );
 }

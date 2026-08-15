@@ -11,7 +11,7 @@ import {
   Users,
   Wallet,
 } from "lucide-react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card } from "@heroui/react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { StatisticsSection } from "@/components/dashboard/statistics";
@@ -71,18 +71,17 @@ function KpiCard({
 
   return (
     <Card
-      interactive
-      className="card-glow h-40 justify-between"
+      className="glass-card glass-card-hover card-glow h-40 justify-between"
       style={{ "--glow-y": "-20%" } as CSSProperties}
       onMouseMove={handleMouseMove}
     >
-      <CardHeader className="flex-row items-start justify-between">
+      <Card.Header className="flex-row items-start justify-between">
         <span className="text-sm font-medium text-muted-foreground">{label}</span>
         <div className={cn("flex size-10 items-center justify-center rounded-xl border border-primary/10 bg-gradient-to-br shadow-sm", accent)}>
           <Icon className="size-5" />
         </div>
-      </CardHeader>
-      <CardContent className="space-y-2">
+      </Card.Header>
+      <Card.Content className="gap-2">
         {value === undefined ? (
           <Spinner color="brand" size="sm" label="Memuat data..." />
         ) : (
@@ -96,7 +95,7 @@ function KpiCard({
             </div>
           </>
         )}
-      </CardContent>
+      </Card.Content>
     </Card>
   );
 }

@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { ArrowLeft, CheckCircle2, FileCheck2, Gavel, Store, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@heroui/react";
 import {
   Dialog,
   DialogClose,
@@ -113,16 +113,16 @@ export default function VerificationDetailPage() {
         </Badge>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
+      <Card className="glass-card">
+        <Card.Header>
+          <Card.Title className="flex items-center gap-2 text-base text-foreground">
             <span className="icon-tile size-8">
               <Store className="size-4" />
             </span>
             Informasi toko
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
+          </Card.Title>
+        </Card.Header>
+        <Card.Content className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
           <div>
             <p className="text-muted-foreground">Pemilik</p>
             <p className="font-medium">{owner?.name ?? "—"}</p>
@@ -153,7 +153,7 @@ export default function VerificationDetailPage() {
             <p className="text-muted-foreground">Revisi diminta</p>
             <p className="font-medium">{shop.revision_count}x</p>
           </div>
-        </CardContent>
+        </Card.Content>
       </Card>
 
       <div>
@@ -181,16 +181,16 @@ export default function VerificationDetailPage() {
 
       <ChatPanel shopId={shop.id} />
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
+      <Card className="glass-card">
+        <Card.Header>
+          <Card.Title className="flex items-center gap-2 text-base text-foreground">
             <span className="icon-tile size-8">
               <Gavel className="size-4" />
             </span>
             Keputusan akhir
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-wrap gap-3">
+          </Card.Title>
+        </Card.Header>
+        <Card.Content className="flex flex-wrap gap-3">
           <Button disabled={verifyShop.isPending} onClick={handleApprove} className="gap-2">
             {verifyShop.isPending ? (
               <Spinner color="success" size="xs" label="Menyetujui..." />
@@ -236,7 +236,7 @@ export default function VerificationDetailPage() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
-        </CardContent>
+        </Card.Content>
       </Card>
     </div>
   );

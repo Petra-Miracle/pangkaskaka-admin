@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@heroui/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -63,14 +63,14 @@ export function DocumentReviewCard({
   const reviewedAt = doc.reviewed_at ? new Date(doc.reviewed_at).toLocaleString("id-ID") : null;
 
   return (
-    <Card className={cn("border-t-2 transition-colors", STATUS_ACCENT[doc.status])}>
-      <CardHeader>
+    <Card className={cn("glass-card border-t-2 transition-colors", STATUS_ACCENT[doc.status])}>
+      <Card.Header>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base">{label}</CardTitle>
+          <Card.Title className="text-base text-foreground">{label}</Card.Title>
           <Badge variant={STATUS_VARIANT[doc.status]}>{STATUS_LABEL[doc.status]}</Badge>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-3">
+      </Card.Header>
+      <Card.Content className="gap-3">
         {doc.url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -128,7 +128,7 @@ export function DocumentReviewCard({
             {doc.reviewed_by ? ` oleh ${doc.reviewed_by}` : ""}
           </p>
         )}
-      </CardContent>
+      </Card.Content>
     </Card>
   );
 }

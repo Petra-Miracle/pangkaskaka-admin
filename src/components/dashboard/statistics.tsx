@@ -14,7 +14,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { ApexChart } from "@/components/ui/apex-chart";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@heroui/react";
 import {
   Select,
   SelectContent,
@@ -132,17 +132,17 @@ function ShopsByFilterChart() {
   };
 
   return (
-    <Card className="lg:col-span-2">
-      <CardHeader className="flex-row items-start justify-between gap-4">
+    <Card className="glass-card lg:col-span-2">
+      <Card.Header className="flex-row items-start justify-between gap-4">
         <div className="flex items-start gap-3">
           <div className="icon-tile size-10">
             <BarChart3 className="size-4.5" />
           </div>
           <div>
-            <CardTitle>Jumlah toko terdaftar</CardTitle>
-            <CardDescription>
+            <Card.Title className="text-base text-foreground">Jumlah toko terdaftar</Card.Title>
+            <Card.Description className="leading-relaxed text-muted-foreground">
               Menghitung setiap toko yang terdaftar di platform, difilter per {SHOP_FILTER_MODES.find((m) => m.value === mode)?.label.toLowerCase()}.
-            </CardDescription>
+            </Card.Description>
           </div>
         </div>
         <Select value={mode} onValueChange={(value) => setMode((value as ShopFilterMode) ?? "category")}>
@@ -159,8 +159,8 @@ function ShopsByFilterChart() {
             ))}
           </SelectContent>
         </Select>
-      </CardHeader>
-      <CardContent>
+      </Card.Header>
+      <Card.Content>
         {isLoading ? (
           <ChartLoading label="Memuat data toko..." />
         ) : grouped.length === 0 ? (
@@ -171,7 +171,7 @@ function ShopsByFilterChart() {
         <p className="mt-3 text-xs text-muted-foreground">
           Total {shops?.length ?? 0} toko terdaftar (disetujui + menunggu verifikasi).
         </p>
-      </CardContent>
+      </Card.Content>
     </Card>
   );
 }
@@ -208,21 +208,21 @@ function UserRolesPieChart() {
   };
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="glass-card">
+      <Card.Header>
         <div className="flex items-start gap-3">
           <div className="icon-tile size-10">
             <PieChart className="size-4.5" />
           </div>
           <div>
-            <CardTitle>Total pengguna per role</CardTitle>
-            <CardDescription>
+            <Card.Title className="text-base text-foreground">Total pengguna per role</Card.Title>
+            <Card.Description className="leading-relaxed text-muted-foreground">
               Total di seluruh platform — karyawan &amp; customer belum bisa dipecah per toko karena API belum menyimpan relasi karyawan ke toko.
-            </CardDescription>
+            </Card.Description>
           </div>
         </div>
-      </CardHeader>
-      <CardContent>
+      </Card.Header>
+      <Card.Content>
         {isLoading ? (
           <ChartLoading label="Memuat data pengguna..." />
         ) : total === 0 ? (
@@ -230,7 +230,7 @@ function UserRolesPieChart() {
         ) : (
           <ApexChart options={options} />
         )}
-      </CardContent>
+      </Card.Content>
     </Card>
   );
 }
@@ -274,21 +274,21 @@ function AvgRatingRadialChart() {
   };
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="glass-card">
+      <Card.Header>
         <div className="flex items-start gap-3">
           <div className="icon-tile size-10">
             <Star className="size-4.5" />
           </div>
           <div>
-            <CardTitle>Rata-rata rating toko</CardTitle>
-            <CardDescription>Skala 0–5, dihitung dari seluruh toko di platform.</CardDescription>
+            <Card.Title className="text-base text-foreground">Rata-rata rating toko</Card.Title>
+            <Card.Description className="leading-relaxed text-muted-foreground">Skala 0–5, dihitung dari seluruh toko di platform.</Card.Description>
           </div>
         </div>
-      </CardHeader>
-      <CardContent>
+      </Card.Header>
+      <Card.Content>
         {isLoading ? <ChartLoading label="Memuat rating..." /> : <ApexChart options={options} />}
-      </CardContent>
+      </Card.Content>
     </Card>
   );
 }
@@ -334,21 +334,21 @@ function GrowthBarChart() {
   };
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="glass-card">
+      <Card.Header>
         <div className="flex items-start gap-3">
           <div className="icon-tile size-10">
             <TrendingUp className="size-4.5" />
           </div>
           <div>
-            <CardTitle>Pertumbuhan bulan ini</CardTitle>
-            <CardDescription>Persentase pertumbuhan pelanggan &amp; pendapatan dari `/analytics/admin`.</CardDescription>
+            <Card.Title className="text-base text-foreground">Pertumbuhan bulan ini</Card.Title>
+            <Card.Description className="leading-relaxed text-muted-foreground">Persentase pertumbuhan pelanggan &amp; pendapatan dari `/analytics/admin`.</Card.Description>
           </div>
         </div>
-      </CardHeader>
-      <CardContent>
+      </Card.Header>
+      <Card.Content>
         {isLoading ? <ChartLoading label="Memuat data pertumbuhan..." /> : <ApexChart options={options} />}
-      </CardContent>
+      </Card.Content>
     </Card>
   );
 }
@@ -380,19 +380,19 @@ function KecamatanDonutChart() {
   };
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="glass-card">
+      <Card.Header>
         <div className="flex items-start gap-3">
           <div className="icon-tile size-10">
             <MapPin className="size-4.5" />
           </div>
           <div>
-            <CardTitle>Distribusi toko per kecamatan</CardTitle>
-            <CardDescription>Dihitung langsung oleh backend (`distribution`), bukan hasil filter di halaman ini.</CardDescription>
+            <Card.Title className="text-base text-foreground">Distribusi toko per kecamatan</Card.Title>
+            <Card.Description className="leading-relaxed text-muted-foreground">Dihitung langsung oleh backend (`distribution`), bukan hasil filter di halaman ini.</Card.Description>
           </div>
         </div>
-      </CardHeader>
-      <CardContent>
+      </Card.Header>
+      <Card.Content>
         {isLoading ? (
           <ChartLoading label="Memuat distribusi..." />
         ) : distribution.length === 0 ? (
@@ -400,7 +400,7 @@ function KecamatanDonutChart() {
         ) : (
           <ApexChart options={options} />
         )}
-      </CardContent>
+      </Card.Content>
     </Card>
   );
 }
@@ -410,19 +410,19 @@ function AtRiskShopsList() {
   const shops = data?.health.warning_shops ?? [];
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="glass-card h-full">
+      <Card.Header>
         <div className="flex items-start gap-3">
           <div className="icon-tile size-10">
             <AlertTriangle className="size-4.5" />
           </div>
           <div>
-            <CardTitle>Toko berisiko</CardTitle>
-            <CardDescription>Rating toko turun lebih dari 0.5 dalam seminggu terakhir.</CardDescription>
+            <Card.Title className="text-base text-foreground">Toko berisiko</Card.Title>
+            <Card.Description className="leading-relaxed text-muted-foreground">Rating toko turun lebih dari 0.5 dalam seminggu terakhir.</Card.Description>
           </div>
         </div>
-      </CardHeader>
-      <CardContent className="flex-1">
+      </Card.Header>
+      <Card.Content className="flex-1">
         {isLoading ? (
           <div className="space-y-2">
             {Array.from({ length: 3 }).map((_, i) => (
@@ -452,7 +452,7 @@ function AtRiskShopsList() {
             ))}
           </ul>
         )}
-      </CardContent>
+      </Card.Content>
     </Card>
   );
 }
