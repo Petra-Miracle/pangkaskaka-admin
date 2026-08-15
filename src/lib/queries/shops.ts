@@ -54,6 +54,25 @@ export function useReviewDocument(shopId: string) {
   });
 }
 
+// POST /admin/shops/{shop_id}/suspend exists today (AGENT_BRIEF.md section 4,
+// "already exist" table) — only the *listing* endpoint is missing. Unscoped
+// (takes shopId per-call) since it's invoked from a directory table with many
+// rows, unlike useVerifyShop which lives on a single shop's detail page.
+export function useSuspendShop() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ shopId, reason }: { shopId: string; reason?: string }) =>
+      apiFetch(`/admin/shops/${shopId}/suspend`, {
+        method: "POST",
+        body: { reason },
+      }),
+    onSuccess: (_data, { shopId }) => {
+      queryClient.invalidateQueries({ queryKey: ["shops", "all"] });
+      queryClient.invalidateQueries({ queryKey: ["shop", shopId] });
+    },
+  });
+}
+
 export function useVerifyShop(shopId: string) {
   const queryClient = useQueryClient();
   return useMutation({
