@@ -5,6 +5,11 @@ export type DashboardStats = {
   revenue_today: number;
 };
 
+export type RecruitmentCriteria = {
+  items: string[];
+  updated_at: string;
+};
+
 export type AnalyticsDistribution = {
   name: string;
   count: number;
