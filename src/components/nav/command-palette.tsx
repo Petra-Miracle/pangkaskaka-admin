@@ -6,9 +6,18 @@ import { useTheme } from "next-themes";
 import { Command, CornerDownLeft, LogOut, Moon, Search, Sun } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { NAV_ITEMS } from "@/lib/nav-items";
+import { NAV_SECTIONS } from "@/lib/nav-items";
 import { clearSession } from "@/lib/auth";
 import { cn } from "@/lib/utils";
+
+type PaletteItem = {
+  id: string;
+  label: string;
+  hint: string;
+  group: string;
+  icon: typeof Search;
+  onSelect: () => void;
+};
 
 export function CommandPalette() {
   const router = useRouter();
@@ -40,21 +49,27 @@ export function CommandPalette() {
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const pages = NAV_ITEMS.filter((item) => !q || item.label.toLowerCase().includes(q)).map((item) => ({
-      id: item.href,
-      label: item.label,
-      hint: item.blocked ? "Segera" : "Buka halaman",
-      icon: item.icon,
-      onSelect: () => {
-        setOpen(false);
-        router.push(item.href);
-      },
-    }));
-    const actions = [
+    const pages: PaletteItem[] = NAV_SECTIONS.flatMap((section) =>
+      section.items
+        .filter((item) => !q || item.label.toLowerCase().includes(q) || section.label.toLowerCase().includes(q))
+        .map((item) => ({
+          id: item.href,
+          label: item.label,
+          hint: item.blocked ? "Segera" : "Buka halaman",
+          group: section.label,
+          icon: item.icon,
+          onSelect: () => {
+            setOpen(false);
+            router.push(item.href);
+          },
+        }))
+    );
+    const actions: PaletteItem[] = [
       {
         id: "theme",
         label: resolvedTheme === "dark" ? "Aktifkan mode terang" : "Aktifkan mode gelap",
         hint: "Pengaturan tampilan",
+        group: "Aksi",
         icon: resolvedTheme === "dark" ? Sun : Moon,
         onSelect: () => setTheme(resolvedTheme === "dark" ? "light" : "dark"),
       },
@@ -62,6 +77,7 @@ export function CommandPalette() {
         id: "logout",
         label: "Keluar",
         hint: "Akhiri sesi",
+        group: "Aksi",
         icon: LogOut,
         onSelect: () => {
           clearSession();
@@ -73,6 +89,16 @@ export function CommandPalette() {
     return [...pages, ...actions];
   }, [query, resolvedTheme, router, setTheme]);
 
+  const grouped = useMemo(() => {
+    const map = new Map<string, PaletteItem[]>();
+    for (const item of results) {
+      const list = map.get(item.group) ?? [];
+      list.push(item);
+      map.set(item.group, list);
+    }
+    return Array.from(map.entries());
+  }, [results]);
+
   function run(index: number) {
     const item = results[index];
     if (item) item.onSelect();
@@ -82,7 +108,7 @@ export function CommandPalette() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
         showCloseButton={false}
-        className="top-20 left-1/2 w-[min(560px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-0 rounded-2xl p-0"
+        className="top-16 left-1/2 w-[min(600px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-0 rounded-2xl p-0 shadow-popover"
       >
         <DialogTitle className="sr-only">Pencarian cepat</DialogTitle>
         <div className="flex items-center gap-2.5 border-b border-border px-4">
@@ -109,46 +135,54 @@ export function CommandPalette() {
             autoFocus
             className="h-12 border-0 bg-transparent text-base shadow-none focus-visible:ring-0"
           />
-          <kbd className="flex items-center gap-0.5 rounded-md border border-border bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">
+          <kbd className="kbd">
             <Command className="size-2.5" /> K
           </kbd>
         </div>
-        <div className="max-h-80 overflow-y-auto p-2">
+        <div className="max-h-[min(480px,60vh)] overflow-y-auto p-2">
           {results.length === 0 && (
-            <p className="px-3 py-8 text-center text-sm text-muted-foreground">
+            <p className="px-3 py-10 text-center text-sm text-muted-foreground">
               Tidak ada hasil untuk “{query}”.
             </p>
           )}
-          <div className="space-y-0.5">
-            {results.map((item, i) => {
-              const Icon = item.icon;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => run(i)}
-                  onMouseEnter={() => setSelected(i)}
-                  className={cn(
-                    "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors",
-                    i === selected ? "bg-primary/10 text-foreground" : "text-muted-foreground"
-                  )}
-                >
-                  <Icon className={cn("size-4 shrink-0", i === selected && "text-primary")} />
-                  <span className="flex-1 font-medium">{item.label}</span>
-                  <span className="text-xs text-muted-foreground/70">{item.hint}</span>
-                  {i === selected && <CornerDownLeft className="size-3.5 text-muted-foreground" />}
-                </button>
-              );
-            })}
-          </div>
+          {grouped.map(([group, items]) => (
+            <div key={group} className="mb-1">
+              <p className="px-3 pt-2 pb-1 text-[10px] font-semibold tracking-[0.14em] text-muted-foreground/60 uppercase">
+                {group}
+              </p>
+              <div className="space-y-0.5">
+                {items.map((item) => {
+                  const index = results.indexOf(item);
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => run(index)}
+                      onMouseEnter={() => setSelected(index)}
+                      className={cn(
+                        "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors",
+                        index === selected ? "bg-primary/10 text-foreground" : "text-muted-foreground"
+                      )}
+                    >
+                      <Icon className={cn("size-4 shrink-0", index === selected && "text-primary")} />
+                      <span className="flex-1 font-medium">{item.label}</span>
+                      <span className="text-xs text-muted-foreground/70">{item.hint}</span>
+                      {index === selected && <CornerDownLeft className="size-3.5 text-muted-foreground" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
         <div className="flex items-center gap-3 border-t border-border px-4 py-2 text-[11px] text-muted-foreground">
           <span className="flex items-center gap-1">
-            <kbd className="rounded border border-border bg-muted px-1">↑</kbd>
-            <kbd className="rounded border border-border bg-muted px-1">↓</kbd>
+            <kbd className="kbd">↑</kbd>
+            <kbd className="kbd">↓</kbd>
             navigasi
           </span>
           <span className="flex items-center gap-1">
-            <kbd className="rounded border border-border bg-muted px-1">↵</kbd>
+            <kbd className="kbd">↵</kbd>
             pilih
           </span>
           <span className="ml-auto">PangkasKAKA Console</span>

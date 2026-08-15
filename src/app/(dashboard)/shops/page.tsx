@@ -3,19 +3,14 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Ban, ExternalLink, Store as StoreIcon } from "lucide-react";
+import { Ban, ExternalLink, Info, Store as StoreIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/nav/page-header";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { DataTable, legacyCreateColumnHelper } from "@/components/ui/data-table";
+import type { LegacyColumnDef } from "@tanstack/react-table/legacy";
 import {
   Dialog,
   DialogClose,
@@ -28,14 +23,6 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { useAllShops, useSuspendShop } from "@/lib/queries/shops";
 import { getSafeErrorMessage } from "@/lib/api";
 import { cn, formatRelativeTime } from "@/lib/utils";
@@ -54,31 +41,6 @@ function StatusBadge({ status }: { status: string }) {
     <Badge variant="outline" className={cn("border-transparent font-medium", meta?.className ?? "bg-muted text-muted-foreground")}>
       {meta?.label ?? status}
     </Badge>
-  );
-}
-
-function SkeletonRows({ rows = 6 }: { rows?: number }) {
-  return (
-    <>
-      {Array.from({ length: rows }).map((_, i) => (
-        <TableRow key={i}>
-          <TableCell>
-            <div className="flex items-center gap-3">
-              <div className="skeleton size-9 shrink-0 rounded-xl" />
-              <div className="space-y-1.5">
-                <div className="skeleton h-3 w-32" />
-                <div className="skeleton h-2.5 w-44 opacity-60" />
-              </div>
-            </div>
-          </TableCell>
-          <TableCell><div className="skeleton h-5 w-20 rounded-full" /></TableCell>
-          <TableCell><div className="skeleton h-3 w-24" /></TableCell>
-          <TableCell><div className="skeleton h-5 w-20 rounded-full" /></TableCell>
-          <TableCell><div className="skeleton h-3 w-20" /></TableCell>
-          <TableCell><div className="skeleton h-7 w-36 rounded-lg" /></TableCell>
-        </TableRow>
-      ))}
-    </>
   );
 }
 
@@ -142,30 +104,95 @@ function SuspendDialog({ shop }: { shop: Shop }) {
   );
 }
 
+const columnHelper = legacyCreateColumnHelper<Shop>();
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TanStack v9 column defs are invariant over TValue
+const columns: LegacyColumnDef<Shop, any>[] = [
+  columnHelper.accessor("name", {
+    header: "Toko",
+    cell: ({ row }) => (
+      <div className="flex items-center gap-3">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-primary/10 bg-gradient-to-br from-primary/12 to-primary/5 text-sm font-bold text-primary">
+          {row.original.name?.charAt(0).toUpperCase()}
+        </span>
+        <div className="min-w-0 leading-tight">
+          <p className="max-w-52 truncate font-semibold">{row.original.name}</p>
+          <p className="max-w-52 truncate text-xs text-muted-foreground">{row.original.address}</p>
+        </div>
+      </div>
+    ),
+  }),
+  columnHelper.accessor("category", {
+    header: "Kategori",
+    cell: (info) => (
+      <Badge variant="secondary" className="font-normal">
+        {info.getValue() as string}
+      </Badge>
+    ),
+  }),
+  columnHelper.accessor("rating", {
+    header: "Rating",
+    cell: (info) => (
+      <span className="text-muted-foreground">
+        {rowRating(info.row.original)}
+      </span>
+    ),
+  }),
+  columnHelper.accessor("verification_status", {
+    header: "Status",
+    cell: (info) => <StatusBadge status={info.getValue() as string} />,
+  }),
+  columnHelper.accessor("created_at", {
+    header: "Terdaftar",
+    cell: (info) => (
+      <span className="text-muted-foreground" title={new Date(info.getValue() as string).toLocaleString("id-ID")}>
+        {formatRelativeTime(info.getValue() as string)}
+      </span>
+    ),
+  }),
+  columnHelper.display({
+    id: "actions",
+    header: () => <span className="sr-only">Aksi</span>,
+    cell: ({ row }) => (
+      <div className="flex justify-end gap-2">
+        <Button
+          size="sm"
+          variant="outline"
+          nativeButton={false}
+          className="gap-1.5"
+          render={
+            <Link href={`/verifications/${row.original.id}`}>
+              <ExternalLink className="size-3.5" />
+              Detail
+            </Link>
+          }
+        />
+        <SuspendDialog shop={row.original} />
+      </div>
+    ),
+  }),
+];
+
+function rowRating(shop: Shop) {
+  return shop.rating > 0 ? `${shop.rating.toFixed(1)} ★ (${shop.reviews_count})` : "Belum ada rating";
+}
+
 export default function ShopsPage() {
   const { data: shops, isLoading, isError } = useAllShops();
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("all");
-
-  const statuses = useMemo(() => {
-    const set = new Set<string>();
-    for (const s of shops ?? []) set.add(s.verification_status);
-    return Array.from(set);
-  }, [shops]);
 
   const filtered = useMemo(() => {
     if (!shops) return [];
     const q = search.trim().toLowerCase();
     return shops.filter((s) => {
-      const matchesStatus = status === "all" || s.verification_status === status;
-      const matchesSearch =
+      return (
         !q ||
         s.name?.toLowerCase().includes(q) ||
         s.address?.toLowerCase().includes(q) ||
-        s.category?.toLowerCase().includes(q);
-      return matchesStatus && matchesSearch;
+        s.category?.toLowerCase().includes(q)
+      );
     });
-  }, [shops, search, status]);
+  }, [shops, search]);
 
   return (
     <div className="space-y-6">
@@ -181,117 +208,45 @@ export default function ShopsPage() {
         </div>
       )}
 
-      <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-2.5 text-xs text-amber-700 dark:text-amber-400">
-        Backend belum punya endpoint <code className="font-mono">GET /admin/shops</code>, jadi
-        daftar ini digabung dari <code className="font-mono">/shops</code> (disetujui) +{" "}
-        <code className="font-mono">/admin/pending-shops</code> (menunggu). Toko yang pernah{" "}
-        <strong>ditolak</strong> tidak muncul di endpoint mana pun sehingga tidak terlihat di sini.
+      <div className="flex items-start gap-2 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-2.5 text-xs text-amber-700 dark:text-amber-400">
+        <Info className="mt-0.5 size-3.5 shrink-0" />
+        <p>
+          Backend belum punya endpoint <code className="font-mono">GET /admin/shops</code>, jadi daftar ini
+          digabung dari <code className="font-mono">/shops</code> (disetujui) +{" "}
+          <code className="font-mono">/admin/pending-shops</code> (menunggu). Toko yang pernah{" "}
+          <strong>ditolak</strong> tidak muncul di endpoint mana pun sehingga tidak terlihat di sini.
+        </p>
       </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <Input
-          placeholder="Cari nama, alamat, atau kategori..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="sm:max-w-xs"
-        />
-        <Select value={status} onValueChange={(value) => setStatus(value ?? "all")}>
-          <SelectTrigger className="sm:w-48">
-            <SelectValue>
-              {(value: string) => (value === "all" ? "Semua status" : (STATUS_META[value]?.label ?? value))}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Semua status</SelectItem>
-            {statuses.map((s) => (
-              <SelectItem key={s} value={s}>
-                {STATUS_META[s]?.label ?? s}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="relative flex-1 sm:max-w-sm">
+          <Input
+            placeholder="Cari nama, alamat, atau kategori..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9"
+          />
+          <StoreIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+        </div>
       </div>
 
-      <Card>
-        <CardContent className="overflow-x-auto p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Toko</TableHead>
-                <TableHead>Kategori</TableHead>
-                <TableHead>Rating</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Terdaftar</TableHead>
-                <TableHead className="text-right">Aksi</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading && <SkeletonRows />}
-
-              {!isLoading && filtered.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={6} className="py-14 text-center">
-                    <div className="mx-auto flex max-w-xs flex-col items-center gap-2 text-muted-foreground">
-                      <div className="flex size-12 items-center justify-center rounded-2xl border border-border bg-muted/50">
-                        <StoreIcon className="size-5" />
-                      </div>
-                      <p className="text-sm font-medium">Tidak ada toko yang cocok dengan filter saat ini.</p>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )}
-
-              {!isLoading &&
-                filtered.map((shop) => (
-                  <TableRow key={shop.id} className="group transition-colors hover:bg-primary/[0.03]">
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-3">
-                        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-primary/10 bg-gradient-to-br from-primary/12 to-primary/5 text-sm font-bold text-primary transition-transform group-hover:scale-105">
-                          {shop.name?.charAt(0).toUpperCase()}
-                        </span>
-                        <div className="min-w-0 leading-tight">
-                          <p className="max-w-52 truncate font-semibold">{shop.name}</p>
-                          <p className="max-w-52 truncate text-xs text-muted-foreground">{shop.address}</p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="secondary" className="font-normal">
-                        {shop.category}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {shop.rating > 0 ? `${shop.rating.toFixed(1)} ★ (${shop.reviews_count})` : "Belum ada rating"}
-                    </TableCell>
-                    <TableCell>
-                      <StatusBadge status={shop.verification_status} />
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      <span title={new Date(shop.created_at).toLocaleString("id-ID")}>
-                        {formatRelativeTime(shop.created_at)}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          nativeButton={false}
-                          className="gap-1.5"
-                          render={
-                            <Link href={`/verifications/${shop.id}`}>
-                              <ExternalLink className="size-3.5" />
-                              Detail
-                            </Link>
-                          }
-                        />
-                        <SuspendDialog shop={shop} />
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-            </TableBody>
-          </Table>
+      <Card className="overflow-hidden">
+        <CardContent className="p-0">
+          <DataTable
+            columns={columns}
+            data={filtered}
+            loading={isLoading}
+            initialSorting={[{ id: "created_at", desc: true }]}
+            pageSize={10}
+            emptyState={
+              <div className="mx-auto flex max-w-xs flex-col items-center gap-2 text-muted-foreground">
+                <div className="flex size-12 items-center justify-center rounded-2xl border border-border bg-muted/50">
+                  <StoreIcon className="size-5" />
+                </div>
+                <p className="text-sm font-medium">Tidak ada toko yang cocok dengan filter saat ini.</p>
+              </div>
+            }
+          />
         </CardContent>
       </Card>
     </div>

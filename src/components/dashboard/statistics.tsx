@@ -461,13 +461,13 @@ export function StatisticsSection() {
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="flex items-center gap-2 text-xl font-bold tracking-tight text-heading">
+        <h2 className="flex items-center gap-2.5 text-xl font-bold tracking-tight text-foreground">
           <span className="icon-tile size-9">
             <ChartNoAxesColumnIncreasing className="size-4.5" />
           </span>
           Statistik
         </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="mt-1.5 text-sm text-muted-foreground">
           Jumlah toko, pengguna, dan pertumbuhan platform.
         </p>
       </div>

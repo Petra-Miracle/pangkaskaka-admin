@@ -1,6 +1,6 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import type { CSSProperties, MouseEvent } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -63,8 +63,19 @@ function KpiCard({
 }) {
   const animated = useAnimatedNumber(value ?? 0, 900);
 
+  function handleMouseMove(e: MouseEvent<HTMLDivElement>) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty("--glow-x", `${e.clientX - rect.left}px`);
+    e.currentTarget.style.setProperty("--glow-y", `${e.clientY - rect.top}px`);
+  }
+
   return (
-    <Card interactive className="card-glow h-40 justify-between" style={{ "--glow-y": "-20%" } as CSSProperties}>
+    <Card
+      interactive
+      className="card-glow h-40 justify-between"
+      style={{ "--glow-y": "-20%" } as CSSProperties}
+      onMouseMove={handleMouseMove}
+    >
       <CardHeader className="flex-row items-start justify-between">
         <span className="text-sm font-medium text-muted-foreground">{label}</span>
         <div className={cn("flex size-10 items-center justify-center rounded-xl border border-primary/10 bg-gradient-to-br shadow-sm", accent)}>
@@ -104,8 +115,9 @@ export default function DashboardHomePage() {
   return (
     <div className="space-y-6">
       {/* Hero banner */}
-      <div className="hero-panel relative overflow-hidden rounded-3xl p-6 text-white shadow-xl shadow-primary/20 md:p-8">
+      <div className="bg-aurora hero-panel relative overflow-hidden rounded-3xl p-6 text-white shadow-xl shadow-primary/20 md:p-8">
         <div className="bg-grid pointer-events-none absolute inset-0 opacity-20" />
+        <div className="bg-noise pointer-events-none absolute inset-0" />
         <div className="pointer-events-none absolute -top-24 -right-16 size-72 rounded-full bg-white/10 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-32 left-1/3 size-80 rounded-full bg-white/5 blur-3xl" />
 
@@ -159,7 +171,7 @@ export default function DashboardHomePage() {
             ].map(({ label, value, icon: Icon, money }) => (
               <div
                 key={label}
-                className="rounded-2xl border border-white/15 bg-white/10 p-3.5 backdrop-blur-md"
+                className="rounded-2xl border border-white/15 bg-white/10 p-3.5 backdrop-blur-md transition-transform duration-200 hover:-translate-y-0.5 hover:bg-white/15"
               >
                 <Icon className="mb-2 size-4 text-white/70" />
                 <p className="text-lg leading-tight font-bold tabular-nums">

@@ -105,7 +105,7 @@ export default function VerificationDetailPage() {
           <ArrowLeft className="size-4" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-primary md:text-3xl">{shop.name}</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">{shop.name}</h1>
           <p className="text-sm text-muted-foreground">{shop.address}</p>
         </div>
         <Badge variant={shop.verification_status === "pending" ? "outline" : "default"} className="ml-auto">

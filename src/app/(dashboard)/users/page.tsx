@@ -1,27 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Users as UsersIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { PageHeader } from "@/components/nav/page-header";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { DataTable, legacyCreateColumnHelper } from "@/components/ui/data-table";
+import type { LegacyColumnDef } from "@tanstack/react-table/legacy";
 import { useAllUsers } from "@/lib/queries/users";
-import { ADMIN_USER_ROLES, type AdminUserRole } from "@/types/admin";
+import { ADMIN_USER_ROLES, type AdminUser, type AdminUserRole } from "@/types/admin";
 import { cn, formatRelativeTime } from "@/lib/utils";
 
 const ROLE_META: Record<AdminUserRole, { label: string; chip: string; dot: string }> = {
@@ -40,29 +28,57 @@ function initialsOf(name: string | undefined) {
     .toUpperCase();
 }
 
-function SkeletonRows({ rows = 6 }: { rows?: number }) {
-  return (
-    <>
-      {Array.from({ length: rows }).map((_, i) => (
-        <TableRow key={i}>
-          <TableCell>
-            <div className="flex items-center gap-3">
-              <div className="skeleton size-9 shrink-0 rounded-full" />
-              <div className="space-y-1.5">
-                <div className="skeleton h-3 w-28" />
-                <div className="skeleton h-2.5 w-40 opacity-60" />
-              </div>
-            </div>
-          </TableCell>
-          <TableCell><div className="skeleton h-3 w-44" /></TableCell>
-          <TableCell><div className="skeleton h-3 w-24" /></TableCell>
-          <TableCell><div className="skeleton h-5 w-16 rounded-full" /></TableCell>
-          <TableCell><div className="skeleton h-3 w-20" /></TableCell>
-        </TableRow>
-      ))}
-    </>
-  );
-}
+const columnHelper = legacyCreateColumnHelper<AdminUser>();
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TanStack v9 column defs are invariant over TValue
+const columns: LegacyColumnDef<AdminUser, any>[] = [
+  columnHelper.accessor("name", {
+    header: "Nama",
+    cell: ({ row, getValue }) => (
+      <div className="flex items-center gap-3">
+        <Avatar className="size-9 border border-primary/10">
+          <AvatarFallback className="bg-gradient-to-br from-primary/12 to-primary/5 text-xs font-bold text-primary">
+            {initialsOf(getValue() as string | undefined)}
+          </AvatarFallback>
+        </Avatar>
+        <div className="min-w-0 leading-tight">
+          <p className="max-w-52 truncate font-semibold">{getValue() as string}</p>
+          <p className="truncate text-xs text-muted-foreground">{row.original.phone || "—"}</p>
+        </div>
+      </div>
+    ),
+  }),
+  columnHelper.accessor("email", {
+    header: "Email",
+    cell: (info) => <span className="text-muted-foreground">{info.getValue() as string}</span>,
+  }),
+  columnHelper.accessor("role", {
+    header: "Role",
+    cell: (info) => {
+      const role = info.getValue() as AdminUserRole;
+      const meta = ROLE_META[role];
+      return (
+        <span
+          className={cn(
+            "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium",
+            meta?.chip ?? "bg-muted text-muted-foreground"
+          )}
+        >
+          <span className={cn("size-1.5 rounded-full", meta?.dot ?? "bg-muted-foreground")} />
+          {meta?.label ?? role}
+        </span>
+      );
+    },
+  }),
+  columnHelper.accessor("created_at", {
+    header: "Terdaftar",
+    cell: (info) => (
+      <span className="text-muted-foreground" title={new Date(info.getValue() as string).toLocaleString("id-ID")}>
+        {formatRelativeTime(info.getValue() as string)}
+      </span>
+    ),
+  }),
+];
 
 export default function UsersPage() {
   const { data: users, isLoading, isError } = useAllUsers();
@@ -114,7 +130,7 @@ export default function UsersPage() {
             key={r}
             onClick={() => setRole(role === r ? "all" : r)}
             className={cn(
-              "flex items-center gap-2.5 rounded-xl border px-3.5 py-2.5 text-left transition-all",
+              "group flex items-center gap-2.5 rounded-xl border px-3.5 py-2.5 text-left transition-all",
               role === r
                 ? "border-primary/30 bg-primary/5 shadow-sm"
                 : "border-border/70 bg-card/60 hover:border-primary/20 hover:bg-primary/[0.03]"
@@ -130,81 +146,35 @@ export default function UsersPage() {
         ))}
       </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <Input
-          placeholder="Cari nama, email, atau nomor telepon..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="sm:max-w-xs"
-        />
-        <Select value={role} onValueChange={(value) => setRole(value ?? "all")}>
-          <SelectTrigger className="sm:w-48">
-            <SelectValue placeholder="Semua role" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Semua role</SelectItem>
-            {ADMIN_USER_ROLES.map((r) => (
-              <SelectItem key={r} value={r}>
-                {ROLE_META[r].label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="relative flex-1 sm:max-w-sm">
+          <Input
+            placeholder="Cari nama, email, atau nomor telepon..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9"
+          />
+          <UsersIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+        </div>
       </div>
 
-      <Card>
-        <CardContent className="overflow-x-auto p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nama</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Telepon</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Terdaftar</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading && <SkeletonRows />}
-
-              {!isLoading && filtered.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={5} className="py-14 text-center text-muted-foreground">
-                    Tidak ada user yang cocok dengan filter saat ini.
-                  </TableCell>
-                </TableRow>
-              )}
-
-              {!isLoading &&
-                filtered.map((u) => (
-                  <TableRow key={u.id} className="group transition-colors hover:bg-primary/[0.03]">
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar className="size-9 border border-primary/10">
-                          <AvatarFallback className="bg-gradient-to-br from-primary/12 to-primary/5 text-xs font-bold text-primary transition-transform group-hover:scale-105">
-                            {initialsOf(u.name)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="font-medium">{u.name || "—"}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{u.email}</TableCell>
-                    <TableCell className="text-muted-foreground">{u.phone || "—"}</TableCell>
-                    <TableCell>
-                      <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium", ROLE_META[u.role as AdminUserRole]?.chip ?? "bg-muted text-muted-foreground")}>
-                        <span className={cn("size-1.5 rounded-full", ROLE_META[u.role as AdminUserRole]?.dot ?? "bg-muted-foreground")} />
-                        {ROLE_META[u.role as AdminUserRole]?.label ?? u.role}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      <span title={new Date(u.created_at).toLocaleString("id-ID")}>
-                        {formatRelativeTime(u.created_at)}
-                      </span>
-                    </TableCell>
-                  </TableRow>
-                ))}
-            </TableBody>
-          </Table>
+      <Card className="overflow-hidden">
+        <CardContent className="p-0">
+          <DataTable
+            columns={columns}
+            data={filtered}
+            loading={isLoading}
+            initialSorting={[{ id: "created_at", desc: true }]}
+            pageSize={10}
+            emptyState={
+              <div className="mx-auto flex max-w-xs flex-col items-center gap-2 text-muted-foreground">
+                <div className="flex size-12 items-center justify-center rounded-2xl border border-border bg-muted/50">
+                  <UsersIcon className="size-5" />
+                </div>
+                <p className="text-sm font-medium">Tidak ada user yang cocok dengan filter saat ini.</p>
+              </div>
+            }
+          />
         </CardContent>
       </Card>
     </div>

@@ -9,6 +9,7 @@ import {
   Mail,
   Scissors,
   ShieldCheck,
+  Sparkles,
   Store,
   Users,
 } from "lucide-react";
@@ -155,93 +156,88 @@ function LoginForm() {
   }
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 py-10">
-      <div className="pointer-events-none absolute -top-32 -left-32 size-96 rounded-full bg-primary/10 blur-3xl" />
-      <div className="pointer-events-none absolute -right-32 -bottom-32 size-96 rounded-full bg-primary/15 blur-3xl" />
-
-      <div className="relative w-full max-w-sm">
-        <div className="mb-6 flex flex-col items-center text-center">
-          <div className="relative mb-4 flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary via-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/30 ring-1 ring-white/40 ring-inset">
-            <Scissors className="size-6.5" />
-            <span className="absolute -right-0.5 -bottom-0.5 size-3 rounded-full border-2 border-white bg-emerald-500" />
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">PangkasKAKA Admin</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Masuk dengan akun admin untuk mengelola platform.
-          </p>
+    <div className="relative w-full max-w-md px-4 py-10">
+      <div className="mb-8 flex flex-col items-center text-center">
+        <div className="relative mb-5 flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary via-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/30 ring-1 ring-white/40 ring-inset">
+          <Scissors className="size-6.5" />
+          <span className="absolute -right-0.5 -bottom-0.5 size-3 rounded-full border-2 border-white bg-emerald-500" />
         </div>
-
-        <Card className="shadow-2xl shadow-primary/10">
-          <CardContent className="pt-6">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <div className="relative">
-                  <Mail className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    placeholder="admin@pangkaskaka.id"
-                    className="h-9 pl-9"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <div className="relative">
-                  <Lock className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    autoComplete="current-password"
-                    required
-                    placeholder="••••••••"
-                    className="h-9 pr-9 pl-9"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((v) => !v)}
-                    aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
-                    className="absolute top-1/2 right-2.5 -translate-y-1/2 rounded-md p-0.5 text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                  </button>
-                </div>
-              </div>
-
-              {error && (
-                <div className="rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2.5 text-sm text-destructive animate-scale-in">
-                  {error}
-                  {isLocked && ` Coba lagi dalam ${remainingSeconds} detik.`}
-                </div>
-              )}
-
-              <Button type="submit" className="h-9 w-full gap-2 shadow-md shadow-primary/20" disabled={loading || isLocked}>
-                {loading ? (
-                  <>
-                    <Spinner color="brand" size="xs" label="Memproses..." />
-                    Memproses...
-                  </>
-                ) : isLocked ? (
-                  `Coba lagi dalam ${remainingSeconds}d`
-                ) : (
-                  "Masuk"
-                )}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-
-        <p className="mt-6 text-center text-xs text-muted-foreground">
-          PangkasKAKA SuperAdmin Console · Akses terbatas untuk administrator platform.
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">PangkasKAKA Admin</h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
+          Masuk dengan akun admin untuk mengelola platform.
         </p>
       </div>
+
+      <Card className="glass-card shadow-popover">
+        <CardContent className="pt-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <div className="relative">
+                <Mail className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  placeholder="admin@pangkaskaka.id"
+                  className="h-10 pl-9"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Lock className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  required
+                  placeholder="••••••••"
+                  className="h-10 pr-10 pl-9"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
+                  className="absolute top-1/2 right-2.5 -translate-y-1/2 rounded-md p-0.5 text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
+              </div>
+            </div>
+
+            {error && (
+              <div className="rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2.5 text-sm text-destructive animate-scale-in">
+                {error}
+                {isLocked && ` Coba lagi dalam ${remainingSeconds} detik.`}
+              </div>
+            )}
+
+            <Button type="submit" className="h-10 w-full gap-2 shadow-glow" disabled={loading || isLocked}>
+              {loading ? (
+                <>
+                  <Spinner color="brand" size="xs" label="Memproses..." />
+                  Memproses...
+                </>
+              ) : isLocked ? (
+                `Coba lagi dalam ${remainingSeconds}d`
+              ) : (
+                "Masuk"
+              )}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      <p className="mt-6 text-center text-xs text-muted-foreground">
+        PangkasKAKA SuperAdmin Console · Akses terbatas untuk administrator platform.
+      </p>
     </div>
   );
 }
@@ -250,8 +246,9 @@ export default function LoginPage() {
   return (
     <div className="bg-animated-mesh flex min-h-screen">
       {/* Brand panel (desktop only) */}
-      <div className="hero-panel relative hidden w-[46%] shrink-0 overflow-hidden lg:block">
+      <div className="bg-aurora hero-panel relative hidden w-[46%] shrink-0 overflow-hidden lg:block">
         <div className="bg-grid pointer-events-none absolute inset-0 opacity-20" />
+        <div className="bg-noise pointer-events-none absolute inset-0" />
         <div className="pointer-events-none absolute -top-24 -left-24 size-96 rounded-full bg-white/10 blur-3xl" />
         <div className="pointer-events-none absolute -right-32 -bottom-24 size-96 rounded-full bg-white/5 blur-3xl" />
 
@@ -277,8 +274,8 @@ export default function LoginPage() {
 
             <div className="mt-8 space-y-4">
               {FEATURES.map(({ icon: Icon, title, desc }) => (
-                <div key={title} className="flex items-start gap-3.5">
-                  <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-white/10 backdrop-blur-md">
+                <div key={title} className="group flex items-start gap-3.5">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-white/10 backdrop-blur-md transition-colors group-hover:bg-white/20">
                     <Icon className="size-4" />
                   </div>
                   <div>
@@ -287,6 +284,11 @@ export default function LoginPage() {
                   </div>
                 </div>
               ))}
+            </div>
+
+            <div className="mt-8 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-white/70 backdrop-blur-md">
+              <Sparkles className="size-3.5 text-white/80" />
+              Console terbaru · build modern
             </div>
           </div>
 
