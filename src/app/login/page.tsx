@@ -2,17 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  Eye,
-  EyeOff,
-  Lock,
-  Mail,
-  Scissors,
-  ShieldCheck,
-  Sparkles,
-  Store,
-  Users,
-} from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, Scissors } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,12 +16,6 @@ type LoginResponse = {
   token: string;
   user: AdminUser;
 };
-
-const FEATURES = [
-  { icon: ShieldCheck, title: "Verifikasi toko", desc: "Review dokumen dan kelola antrian pendaftaran barbershop." },
-  { icon: Store, title: "Pengawasan operasional", desc: "Pantau toko, rating, dan toko berisiko dalam satu layar." },
-  { icon: Users, title: "Manajemen pengguna", desc: "Cari dan filter seluruh akun di platform dengan cepat." },
-];
 
 // SECURITY_AUDIT.md S3: no backend rate-limit exists on /auth/login yet, so
 // this is a client-side speed bump only (a scripted attacker can clear
@@ -156,22 +140,21 @@ function LoginForm() {
   }
 
   return (
-    <div className="relative w-full max-w-md px-4 py-10">
-      <div className="mb-8 flex flex-col items-center text-center">
-        <div className="relative mb-5 flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary via-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/30 ring-1 ring-white/40 ring-inset">
-          <Scissors className="size-6.5" />
+    <div className="w-full max-w-sm">
+      <div className="mb-7 flex flex-col items-center text-center">
+        <div className="relative mb-4 flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary via-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/30 ring-1 ring-white/40 ring-inset">
+          <Scissors className="size-6" />
           <span className="absolute -right-0.5 -bottom-0.5 size-3 rounded-full border-2 border-white bg-emerald-500" />
         </div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">PangkasKAKA Admin</h1>
-        <p className="mt-1.5 text-sm text-muted-foreground">
-          Masuk dengan akun admin untuk mengelola platform.
-        </p>
+        <h1 className="text-xl font-bold tracking-tight text-foreground">PangkasKAKA</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Masuk untuk mengelola platform</p>
       </div>
 
       <Card className="glass-card shadow-popover">
-        <CardContent className="pt-6">
+        <div className="divider-gradient mx-4" />
+        <CardContent className="pt-5">
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
                 <Mail className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -187,7 +170,7 @@ function LoginForm() {
                 />
               </div>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Lock className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -219,7 +202,11 @@ function LoginForm() {
               </div>
             )}
 
-            <Button type="submit" className="h-10 w-full gap-2 shadow-glow" disabled={loading || isLocked}>
+            <Button
+              type="submit"
+              className="btn-shine relative h-10 w-full gap-2 overflow-hidden shadow-glow"
+              disabled={loading || isLocked}
+            >
               {loading ? (
                 <>
                   <Spinner color="brand" size="xs" label="Memproses..." />
@@ -235,8 +222,8 @@ function LoginForm() {
         </CardContent>
       </Card>
 
-      <p className="mt-6 text-center text-xs text-muted-foreground">
-        PangkasKAKA SuperAdmin Console · Akses terbatas untuk administrator platform.
+      <p className="mt-6 text-center text-[11px] text-muted-foreground">
+        Akses terbatas untuk administrator · © {new Date().getFullYear()} PangkasKAKA
       </p>
     </div>
   );
@@ -244,61 +231,13 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="bg-animated-mesh flex min-h-screen">
-      {/* Brand panel (desktop only) */}
-      <div className="bg-aurora hero-panel relative hidden w-[46%] shrink-0 overflow-hidden lg:block">
-        <div className="bg-grid pointer-events-none absolute inset-0 opacity-20" />
-        <div className="bg-noise pointer-events-none absolute inset-0" />
-        <div className="pointer-events-none absolute -top-24 -left-24 size-96 rounded-full bg-white/10 blur-3xl" />
-        <div className="pointer-events-none absolute -right-32 -bottom-24 size-96 rounded-full bg-white/5 blur-3xl" />
+    <div className="bg-animated-mesh relative flex min-h-screen overflow-hidden">
+      <div className="bg-noise pointer-events-none absolute inset-0" />
+      <div className="pointer-events-none absolute -top-40 -left-32 size-[28rem] animate-float-soft rounded-full bg-primary/15 blur-3xl" />
+      <div className="pointer-events-none absolute -right-40 -bottom-40 size-[30rem] animate-float-soft rounded-full bg-violet-500/15 blur-3xl [animation-delay:-6s]" />
+      <div className="pointer-events-none absolute top-1/3 right-1/4 size-40 rounded-full bg-sky-500/10 blur-3xl" />
 
-        <div className="relative z-10 flex h-full flex-col justify-between p-12 text-white">
-          <div className="flex items-center gap-3">
-            <div className="flex size-11 items-center justify-center rounded-2xl bg-white/15 text-white ring-1 ring-white/30 backdrop-blur-md">
-              <Scissors className="size-5.5" />
-            </div>
-            <div className="leading-tight">
-              <p className="text-base font-bold tracking-tight">PangkasKAKA</p>
-              <p className="text-xs font-medium text-white/60">SuperAdmin Console</p>
-            </div>
-          </div>
-
-          <div className="max-w-md">
-            <h2 className="text-3xl leading-tight font-bold tracking-tight">
-              Kelola seluruh platform
-              <span className="text-gradient-hero"> barbershop Kupang</span> dari satu tempat.
-            </h2>
-            <p className="mt-3 text-sm leading-relaxed text-white/70">
-              Verifikasi toko baru, pantau operasional, dan awasi pertumbuhan bisnis para mitra PangkasKAKA.
-            </p>
-
-            <div className="mt-8 space-y-4">
-              {FEATURES.map(({ icon: Icon, title, desc }) => (
-                <div key={title} className="group flex items-start gap-3.5">
-                  <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-white/10 backdrop-blur-md transition-colors group-hover:bg-white/20">
-                    <Icon className="size-4" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold">{title}</p>
-                    <p className="text-xs text-white/60">{desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-8 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-white/70 backdrop-blur-md">
-              <Sparkles className="size-3.5 text-white/80" />
-              Console terbaru · build modern
-            </div>
-          </div>
-
-          <p className="text-xs text-white/40">
-            © {new Date().getFullYear()} PangkasKAKA · Kupang, NTT
-          </p>
-        </div>
-      </div>
-
-      <div className="relative flex flex-1 items-center justify-center">
+      <div className="relative z-10 flex flex-1 items-center justify-center px-4 py-10">
         <Suspense fallback={null}>
           <LoginForm />
         </Suspense>

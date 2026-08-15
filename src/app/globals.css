@@ -511,4 +511,45 @@
   .shadow-glow {
     box-shadow: var(--shadow-glow);
   }
+
+  .btn-shine {
+    position: relative;
+  }
+  .btn-shine::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      110deg,
+      transparent 30%,
+      oklch(1 0 0 / 22%) 50%,
+      transparent 70%
+    );
+    transform: translateX(-130%);
+    animation: btn-shine 3s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes btn-shine {
+    0%,
+    55% {
+      transform: translateX(-130%);
+    }
+    85%,
+    100% {
+      transform: translateX(130%);
+    }
+  }
+
+  .animate-float-soft {
+    animation: float-soft 12s ease-in-out infinite;
+  }
+  @keyframes float-soft {
+    0%,
+    100% {
+      transform: translate(0, 0);
+    }
+    50% {
+      transform: translate(12px, -18px);
+    }
+  }
 }
