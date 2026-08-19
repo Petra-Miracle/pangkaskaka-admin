@@ -28,6 +28,14 @@ export type Hairstyle = {
   description: string;
   suitable_shapes: FaceShape[];
   match_score_map: Partial<Record<FaceShape, number>>;
+  created_at: string;
+};
+
+export type HairstyleInput = {
+  name: string;
+  image_url: string;
+  description: string;
+  match_score_map: Partial<Record<FaceShape, number>>;
 };
 
 export type AnalyticsDistribution = {
