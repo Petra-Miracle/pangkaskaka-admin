@@ -1,6 +1,7 @@
-import { CalendarClock, Clock } from "lucide-react";
+import { CalendarClock, Clock, Plug } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@heroui/react";
+import { CodeBlock } from "@/components/ui/code-block";
 import { PageHeader } from "@/components/nav/page-header";
 
 const BOOKINGS_SPEC = `{
@@ -59,7 +60,7 @@ export default function BookingsPage() {
             </div>
           </div>
         </Card.Header>
-        <Card.Content className="gap-5 text-sm">
+        <Card.Content className="stagger-children gap-5 text-sm">
           <div className="flex items-start gap-2 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-amber-700 dark:text-amber-400">
             <Clock className="mt-0.5 size-4 shrink-0" />
             Kirim spesifikasi di bawah ke pemilik/pengelola repo backend (di luar proyek ini) — lihat juga
@@ -67,17 +68,19 @@ export default function BookingsPage() {
           </div>
 
           <div>
-            <p className="mb-2 font-semibold text-foreground">Endpoint yang dibutuhkan</p>
-            <pre className="overflow-x-auto rounded-lg border border-border bg-muted/50 p-3 font-mono text-xs">
-              GET /admin/bookings?shop_id=&amp;status=&amp;search=&amp;page=&amp;size=
-            </pre>
+            <p className="mb-2 flex items-center gap-1.5 font-semibold text-foreground">
+              <Plug className="size-3.5 text-primary" />
+              Endpoint yang dibutuhkan
+            </p>
+            <CodeBlock title="GET /admin/bookings">GET /admin/bookings?shop_id=&amp;status=&amp;search=&amp;page=&amp;size=</CodeBlock>
           </div>
 
           <div>
-            <p className="mb-2 font-semibold text-foreground">Bentuk response yang diusulkan</p>
-            <pre className="overflow-x-auto rounded-lg border border-border bg-muted/50 p-3 font-mono text-xs leading-relaxed whitespace-pre">
-              {BOOKINGS_SPEC}
-            </pre>
+            <p className="mb-2 flex items-center gap-1.5 font-semibold text-foreground">
+              <CalendarClock className="size-3.5 text-primary" />
+              Bentuk response yang diusulkan
+            </p>
+            <CodeBlock title="response.json">{BOOKINGS_SPEC}</CodeBlock>
           </div>
         </Card.Content>
       </Card>

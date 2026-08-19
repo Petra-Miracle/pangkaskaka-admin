@@ -94,7 +94,7 @@ export default function RecruitmentPage() {
             </div>
           </div>
         </Card.Header>
-        <Card.Content className="gap-2.5">
+        <Card.Content className="stagger-children gap-2.5">
           {isLoading ? (
             <div className="flex h-32 items-center justify-center">
               <Spinner color="brand" size="sm" label="Memuat kriteria..." />
@@ -106,7 +106,7 @@ export default function RecruitmentPage() {
           ) : (
             items.map((item, index) => (
               <div key={index} className="flex items-center gap-2">
-                <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-muted text-xs font-semibold text-muted-foreground">
+                <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary/12 to-primary/5 text-xs font-bold text-primary tabular-nums">
                   {index + 1}
                 </span>
                 <Input

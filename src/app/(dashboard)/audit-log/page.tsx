@@ -1,6 +1,7 @@
-import { Clock, History } from "lucide-react";
+import { Clock, Database, History, Plug, ShieldCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@heroui/react";
+import { CodeBlock } from "@/components/ui/code-block";
 import { PageHeader } from "@/components/nav/page-header";
 
 const AUDIT_LOG_SPEC = `{
@@ -62,7 +63,7 @@ export default function AuditLogPage() {
             </div>
           </div>
         </Card.Header>
-        <Card.Content className="gap-5 text-sm">
+        <Card.Content className="stagger-children gap-5 text-sm">
           <div className="flex items-start gap-2 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-amber-700 dark:text-amber-400">
             <Clock className="mt-0.5 size-4 shrink-0" />
             Kirim spesifikasi di bawah ke pemilik/pengelola repo backend (di luar proyek ini) — lihat juga
@@ -70,30 +71,43 @@ export default function AuditLogPage() {
           </div>
 
           <div>
-            <p className="mb-2 font-semibold text-foreground">1. Koleksi baru + tulis log di setiap aksi admin</p>
+            <p className="mb-2 flex items-center gap-1.5 font-semibold text-foreground">
+              <Database className="size-3.5 text-primary" />
+              1. Koleksi baru + tulis log di setiap aksi admin
+            </p>
             <p className="mb-2 text-muted-foreground">
               Koleksi <code className="font-mono">admin_audit_log</code>, ditulis dari dalam setiap endpoint di
               bawah ini (identitas admin sudah tersedia dari token JWT yang sedang dipakai):
             </p>
-            <ul className="list-disc space-y-1 pl-5 font-mono text-xs text-muted-foreground">
+            <ul className="space-y-1.5">
               {WRITE_SITES.map((site) => (
-                <li key={site}>{site}</li>
+                <li
+                  key={site}
+                  className="flex items-center gap-2.5 rounded-lg border border-border/70 bg-muted/30 px-3 py-2 font-mono text-xs text-muted-foreground"
+                >
+                  <ShieldCheck className="size-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                  {site}
+                </li>
               ))}
             </ul>
           </div>
 
           <div>
-            <p className="mb-2 font-semibold text-foreground">2. Endpoint baca yang dibutuhkan</p>
-            <pre className="overflow-x-auto rounded-lg border border-border bg-muted/50 p-3 font-mono text-xs">
+            <p className="mb-2 flex items-center gap-1.5 font-semibold text-foreground">
+              <Plug className="size-3.5 text-primary" />
+              2. Endpoint baca yang dibutuhkan
+            </p>
+            <CodeBlock title="GET /admin/audit-log">
               GET /admin/audit-log?admin_id=&amp;action=&amp;target_type=&amp;page=&amp;size=
-            </pre>
+            </CodeBlock>
           </div>
 
           <div>
-            <p className="mb-2 font-semibold text-foreground">Bentuk response yang diusulkan</p>
-            <pre className="overflow-x-auto rounded-lg border border-border bg-muted/50 p-3 font-mono text-xs leading-relaxed whitespace-pre">
-              {AUDIT_LOG_SPEC}
-            </pre>
+            <p className="mb-2 flex items-center gap-1.5 font-semibold text-foreground">
+              <History className="size-3.5 text-primary" />
+              Bentuk response yang diusulkan
+            </p>
+            <CodeBlock title="response.json">{AUDIT_LOG_SPEC}</CodeBlock>
           </div>
         </Card.Content>
       </Card>
