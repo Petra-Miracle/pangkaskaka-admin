@@ -141,8 +141,8 @@ function LoginForm() {
 
   return (
     <div className="w-full max-w-sm">
-      <div className="mb-7 flex flex-col items-center text-center">
-        <div className="relative mb-4 flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary via-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/30 ring-1 ring-white/40 ring-inset">
+      <div className="mb-7 flex flex-col items-center text-center animate-fade-up">
+        <div className="relative mb-4 flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary via-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/30 ring-1 ring-white/40 ring-inset animate-float">
           <Scissors className="size-6" />
           <span className="absolute -right-0.5 -bottom-0.5 size-3 rounded-full border-2 border-white bg-emerald-500" />
         </div>
@@ -150,7 +150,14 @@ function LoginForm() {
         <p className="mt-1 text-sm text-muted-foreground">Masuk untuk mengelola platform</p>
       </div>
 
-      <Card className="glass-card shadow-popover">
+      <Card
+        className="glass-card card-glow shadow-popover animate-fade-up [animation-delay:80ms]"
+        onMouseMove={(e) => {
+          const rect = e.currentTarget.getBoundingClientRect();
+          e.currentTarget.style.setProperty("--glow-x", `${e.clientX - rect.left}px`);
+          e.currentTarget.style.setProperty("--glow-y", `${e.clientY - rect.top}px`);
+        }}
+      >
         <div className="divider-gradient mx-4" />
         <Card.Content>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -163,6 +170,7 @@ function LoginForm() {
                   type="email"
                   autoComplete="email"
                   required
+                  autoFocus
                   placeholder="admin@pangkaskaka.id"
                   className="h-10 pl-9"
                   value={email}
@@ -222,7 +230,7 @@ function LoginForm() {
         </Card.Content>
       </Card>
 
-      <p className="mt-6 text-center text-[11px] text-muted-foreground">
+      <p className="mt-6 text-center text-[11px] text-muted-foreground animate-fade-up [animation-delay:160ms]">
         Akses terbatas untuk administrator · © {new Date().getFullYear()} PangkasKAKA
       </p>
     </div>
