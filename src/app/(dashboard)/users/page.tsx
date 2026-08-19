@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Users as UsersIcon } from "lucide-react";
+import { Scissors, ShieldCheck, Store, Users as UsersIcon } from "lucide-react";
 import { Card } from "@heroui/react";
 import { SearchBox } from "@/components/ui/search-box";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -12,11 +12,31 @@ import { useAllUsers } from "@/lib/queries/users";
 import { ADMIN_USER_ROLES, type AdminUser, type AdminUserRole } from "@/types/admin";
 import { cn, formatRelativeTime } from "@/lib/utils";
 
-const ROLE_META: Record<AdminUserRole, { label: string; chip: string; dot: string }> = {
-  admin: { label: "Admin", chip: "bg-primary/10 text-primary", dot: "bg-primary" },
-  owner: { label: "Pemilik toko", chip: "bg-sky-500/10 text-sky-600 dark:text-sky-400", dot: "bg-sky-500" },
-  karyawan: { label: "Karyawan", chip: "bg-violet-500/10 text-violet-600 dark:text-violet-400", dot: "bg-violet-500" },
-  customer: { label: "Customer", chip: "bg-muted text-muted-foreground", dot: "bg-muted-foreground" },
+const ROLE_META: Record<AdminUserRole, { label: string; chip: string; dot: string; icon: typeof UsersIcon }> = {
+  admin: {
+    label: "Admin",
+    chip: "bg-primary/10 text-primary",
+    dot: "bg-primary",
+    icon: ShieldCheck,
+  },
+  owner: {
+    label: "Pemilik toko",
+    chip: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
+    dot: "bg-sky-500",
+    icon: Store,
+  },
+  karyawan: {
+    label: "Karyawan",
+    chip: "bg-violet-500/10 text-violet-600 dark:text-violet-400",
+    dot: "bg-violet-500",
+    icon: Scissors,
+  },
+  customer: {
+    label: "Customer",
+    chip: "bg-muted text-muted-foreground",
+    dot: "bg-muted-foreground",
+    icon: UsersIcon,
+  },
 };
 
 function initialsOf(name: string | undefined) {
@@ -131,26 +151,38 @@ export default function UsersPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {ADMIN_USER_ROLES.map((r) => (
-          <button
-            key={r}
-            onClick={() => setRole(role === r ? "all" : r)}
-            className={cn(
-              "group flex items-center gap-2.5 rounded-xl border px-3.5 py-2.5 text-left transition-all",
-              role === r
-                ? "border-primary/30 bg-primary/5 shadow-sm"
-                : "border-border/70 bg-card/60 hover:border-primary/20 hover:bg-primary/[0.03]"
-            )}
-            title={`Filter user dengan role ${ROLE_META[r].label}`}
-          >
-            <span className={cn("size-2 shrink-0 rounded-full", ROLE_META[r].dot)} />
-            <div className="min-w-0 leading-tight">
-              <p className="text-lg font-bold tabular-nums">{isLoading ? "…" : counts.get(r)}</p>
-              <p className="truncate text-[11px] font-medium text-muted-foreground">{ROLE_META[r].label}</p>
-            </div>
-          </button>
-        ))}
+      <div className="stagger-children grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {ADMIN_USER_ROLES.map((r) => {
+          const meta = ROLE_META[r];
+          const Icon = meta.icon;
+          return (
+            <button
+              key={r}
+              onClick={() => setRole(role === r ? "all" : r)}
+              className={cn(
+                "group flex items-center gap-2.5 rounded-xl border px-3.5 py-2.5 text-left transition-all",
+                role === r
+                  ? "border-primary/30 bg-primary/5 shadow-sm"
+                  : "border-border/70 bg-card/60 hover:border-primary/20 hover:bg-primary/[0.03]"
+              )}
+              title={`Filter user dengan role ${meta.label}`}
+            >
+              <span
+                className={cn(
+                  "flex size-8 shrink-0 items-center justify-center rounded-lg border transition-colors",
+                  meta.chip,
+                  role === r ? "border-primary/20" : "border-border/70"
+                )}
+              >
+                <Icon className="size-3.5" />
+              </span>
+              <div className="min-w-0 leading-tight">
+                <p className="text-lg font-bold tabular-nums">{isLoading ? "…" : counts.get(r)}</p>
+                <p className="truncate text-[11px] font-medium text-muted-foreground">{meta.label}</p>
+              </div>
+            </button>
+          );
+        })}
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -163,7 +195,7 @@ export default function UsersPage() {
         />
       </div>
 
-      <Card className="glass-card overflow-hidden p-0">
+      <Card className="glass-card overflow-hidden p-0 animate-fade-up [animation-delay:120ms]">
         <Card.Content className="p-0">
           <DataTable
             columns={columns}

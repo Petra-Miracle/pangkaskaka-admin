@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { Download, Upload } from "lucide-react";
+import { Download, FileSpreadsheet, Upload } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
 import { getSafeErrorMessage } from "@/lib/api";
+import { cn } from "@/lib/utils";
 import { buildCsvTemplate, parseHairstylesFile, type ImportRowResult } from "@/lib/hairstyle-import";
 import { useCreateHairstyle } from "@/lib/queries/hairstyles";
 import { FACE_SHAPE_LABELS, type FaceShape } from "@/types/admin";
@@ -37,6 +38,7 @@ export function HairstylesImportDialog() {
   const [rows, setRows] = useState<ImportRowResult[] | null>(null);
   const [importing, setImporting] = useState(false);
   const [results, setResults] = useState<ImportOutcome[] | null>(null);
+  const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const createHairstyle = useCreateHairstyle();
 
@@ -47,12 +49,25 @@ export function HairstylesImportDialog() {
     setFileName(null);
     setRows(null);
     setResults(null);
+    setDragOver(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
   function handleOpenChange(next: boolean) {
     setOpen(next);
     if (!next) reset();
+  }
+
+  function handleDrop(e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file && fileInputRef.current) {
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      fileInputRef.current.files = dt.files;
+      handleFileChange({ target: fileInputRef.current } as React.ChangeEvent<HTMLInputElement>);
+    }
   }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -138,12 +153,46 @@ export function HairstylesImportDialog() {
             </span>
           </div>
 
+          <div
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragOver(true);
+            }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={handleDrop}
+            className={cn(
+              "flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed px-4 py-6 text-center transition-all",
+              dragOver
+                ? "border-primary/50 bg-primary/5"
+                : "border-border bg-muted/30 hover:border-primary/30 hover:bg-primary/[0.03]"
+            )}
+            onClick={() => fileInputRef.current?.click()}
+            role="button"
+            aria-label="Pilih atau seret file untuk diimpor"
+          >
+            <span className="flex size-10 items-center justify-center rounded-xl border border-border bg-background text-primary shadow-soft">
+              {fileName ? <FileSpreadsheet className="size-5" /> : <Upload className="size-5" />}
+            </span>
+            <div className="space-y-0.5">
+              {fileName ? (
+                <p className="text-sm font-medium text-foreground">{fileName}</p>
+              ) : (
+                <>
+                  <p className="text-sm font-medium">
+                    Seret file ke sini atau{" "}
+                    <span className="text-primary underline-offset-2 hover:underline">pilih file</span>
+                  </p>
+                  <p className="text-xs text-muted-foreground">CSV, Excel (.xlsx), atau JSON</p>
+                </>
+              )}
+            </div>
+          </div>
           <input
             ref={fileInputRef}
             type="file"
             accept=".csv,.xlsx,.xls,.json"
             onChange={handleFileChange}
-            className="block w-full text-sm text-muted-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-sm file:font-medium file:text-primary-foreground hover:file:bg-primary/90"
+            className="sr-only"
           />
 
           {parsing && (

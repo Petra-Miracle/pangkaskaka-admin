@@ -37,6 +37,7 @@ import {
   useUpdateHairstyle,
 } from "@/lib/queries/hairstyles";
 import { getSafeErrorMessage } from "@/lib/api";
+import { cn } from "@/lib/utils";
 import { FACE_SHAPE_LABELS, FACE_SHAPES, type FaceShape, type Hairstyle } from "@/types/admin";
 
 function HairstyleImage({ src, alt }: { src: string; alt: string }) {
@@ -51,15 +52,31 @@ function HairstyleImage({ src, alt }: { src: string; alt: string }) {
   }
 
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      key={src}
-      src={src}
-      alt={alt}
-      loading="lazy"
-      onError={() => setFailed(true)}
-      className="aspect-video w-full rounded-lg border border-border object-cover"
-    />
+    <div className="img-zoom group overflow-hidden rounded-lg border border-border">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        key={src}
+        src={src}
+        alt={alt}
+        loading="lazy"
+        onError={() => setFailed(true)}
+        className="aspect-video w-full object-cover"
+      />
+    </div>
+  );
+}
+
+function ScoreBadge({ score }: { score: number }) {
+  const tone =
+    score >= 70
+      ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+      : score >= 40
+        ? "bg-amber-500/10 text-amber-700 dark:text-amber-400"
+        : "bg-muted text-muted-foreground";
+  return (
+    <span className={cn("inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums", tone)}>
+      {score}
+    </span>
   );
 }
 
@@ -352,7 +369,7 @@ export default function HairstylesPage() {
         </Select>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="stagger-children grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {isLoading && <SkeletonCards />}
 
         {!isLoading && filtered.length === 0 && (
@@ -370,7 +387,7 @@ export default function HairstylesPage() {
 
         {!isLoading &&
           filtered.map((h) => (
-            <Card key={h.id} className="glass-card glass-card-hover">
+            <Card key={h.id} className="glass-card glass-card-hover card-glow group">
               <Card.Content className="gap-3 pt-4">
                 <HairstyleImage src={h.image_url} alt={h.name} />
                 <div>
@@ -382,15 +399,15 @@ export default function HairstylesPage() {
                     <span className="text-xs text-muted-foreground">Belum ada skor bentuk wajah</span>
                   )}
                   {h.suitable_shapes.map((s) => (
-                    <Badge key={s} variant="secondary" className="font-normal">
+                    <Badge key={s} variant="secondary" className="gap-1.5 font-normal">
                       {FACE_SHAPE_LABELS[s] ?? s}
                       {h.match_score_map?.[s] !== undefined && (
-                        <span className="ml-1 tabular-nums opacity-70">{h.match_score_map[s]}</span>
+                        <ScoreBadge score={h.match_score_map[s]} />
                       )}
                     </Badge>
                   ))}
                 </div>
-                <div className="flex justify-end gap-1.5 border-t border-border pt-3">
+                <div className="flex justify-end gap-1.5 border-t border-border pt-3 opacity-90 transition-opacity group-hover:opacity-100">
                   <HairstyleFormDialog
                     hairstyle={h}
                     trigger={

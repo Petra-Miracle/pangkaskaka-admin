@@ -215,9 +215,11 @@ export default function ShopsPage() {
         </div>
       )}
 
-      <div className="flex items-start gap-2 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-2.5 text-xs text-amber-700 dark:text-amber-400">
-        <Info className="mt-0.5 size-3.5 shrink-0" />
-        <p>
+      <div className="flex items-start gap-2.5 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-xs text-amber-700 dark:text-amber-400 animate-fade-up [animation-delay:60ms]">
+        <span className="flex size-6 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-600 dark:text-amber-400">
+          <Info className="size-3.5" />
+        </span>
+        <p className="leading-relaxed">
           Backend belum punya endpoint <code className="font-mono">GET /admin/shops</code>, jadi daftar ini
           digabung dari <code className="font-mono">/shops</code> (disetujui) +{" "}
           <code className="font-mono">/admin/pending-shops</code> (menunggu). Toko yang pernah{" "}
@@ -235,7 +237,7 @@ export default function ShopsPage() {
         />
       </div>
 
-      <Card className="glass-card overflow-hidden p-0">
+      <Card className="glass-card overflow-hidden p-0 animate-fade-up [animation-delay:120ms]">
         <Card.Content className="p-0">
           <DataTable
             columns={columns}
