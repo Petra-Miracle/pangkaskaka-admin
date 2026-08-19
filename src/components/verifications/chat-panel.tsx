@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Send, Lock, MessageSquare } from "lucide-react";
+import { Lock, MessageSquare, Send } from "lucide-react";
 import { Card } from "@heroui/react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,13 +11,28 @@ import { useChatThread, useCloseChatThread, useSendChatMessage } from "@/lib/que
 import { getSafeErrorMessage } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
+function timeOf(value: string | undefined) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+}
+
 export function ChatPanel({ shopId }: { shopId: string }) {
   const { data, isLoading, isError } = useChatThread(shopId);
   const sendMessage = useSendChatMessage(shopId);
   const closeThread = useCloseChatThread(shopId);
   const [draft, setDraft] = useState("");
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const closed = data?.shop?.closed ?? false;
+
+  useEffect(() => {
+    if (data && scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- scroll only on message count / closed change
+  }, [data?.messages.length, closed]);
 
   function handleSend() {
     if (!draft.trim()) return;
@@ -72,23 +87,27 @@ export function ChatPanel({ shopId }: { shopId: string }) {
         {isError && <p className="text-sm text-destructive">Gagal memuat percakapan.</p>}
 
         {data && (
-          <div className="max-h-80 space-y-2.5 overflow-y-auto rounded-lg border border-border bg-muted/30 p-3">
+          <div
+            ref={scrollRef}
+            className="max-h-80 space-y-2.5 overflow-y-auto rounded-lg border border-border bg-muted/30 p-3"
+          >
             {data.messages.length === 0 && (
               <p className="py-6 text-center text-sm text-muted-foreground">Belum ada pesan.</p>
             )}
             {data.messages.map((msg, i) => {
               const isAdmin = msg.sender_role === "admin";
               const text = msg.message ?? msg.text ?? JSON.stringify(msg);
+              const time = timeOf(msg.created_at);
               return (
                 <div
                   key={msg.id ?? i}
-                  className={cn("flex", isAdmin ? "justify-end" : "justify-start")}
+                  className={cn("flex animate-fade-in", isAdmin ? "justify-end" : "justify-start")}
                 >
                   <div
                     className={cn(
                       "max-w-[80%] rounded-2xl px-3.5 py-2 text-sm shadow-sm",
                       isAdmin
-                        ? "rounded-br-md bg-primary text-primary-foreground"
+                        ? "rounded-br-md bg-gradient-to-b from-primary to-primary/85 text-primary-foreground"
                         : "rounded-bl-md border border-border bg-background"
                     )}
                   >
@@ -98,6 +117,16 @@ export function ChatPanel({ shopId }: { shopId: string }) {
                       </p>
                     )}
                     <p className="break-words whitespace-pre-wrap">{text}</p>
+                    {time && (
+                      <p
+                        className={cn(
+                          "mt-1 text-right text-[10px] tabular-nums",
+                          isAdmin ? "text-primary-foreground/60" : "text-muted-foreground/70"
+                        )}
+                      >
+                        {time}
+                      </p>
+                    )}
                   </div>
                 </div>
               );

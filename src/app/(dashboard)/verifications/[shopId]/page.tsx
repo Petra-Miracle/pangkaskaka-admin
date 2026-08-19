@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ArrowLeft, CheckCircle2, FileCheck2, Gavel, Store, XCircle } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@heroui/react";
 import {
@@ -23,6 +22,7 @@ import { DocumentReviewCard } from "@/components/verifications/document-review-c
 import { ChatPanel } from "@/components/verifications/chat-panel";
 import { usePendingShops, useShop, useVerifyShop } from "@/lib/queries/shops";
 import { getSafeErrorMessage } from "@/lib/api";
+import { cn } from "@/lib/utils";
 import { DOC_LABELS, type DocKey } from "@/types/admin";
 
 export default function VerificationDetailPage() {
@@ -39,6 +39,21 @@ export default function VerificationDetailPage() {
   const reviewedDocCount = shop
     ? Object.values(shop.docs).filter((d) => d.status !== "pending").length
     : 0;
+
+  const STATUS_META: Record<string, { label: string; className: string }> = {
+    pending: {
+      label: "Menunggu verifikasi",
+      className: "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400",
+    },
+    approved: {
+      label: "Disetujui",
+      className: "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
+    },
+    rejected: {
+      label: "Ditolak",
+      className: "border-destructive/30 bg-destructive/10 text-destructive",
+    },
+  };
 
   function handleApprove() {
     verifyShop.mutate(
@@ -100,20 +115,36 @@ export default function VerificationDetailPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => router.push("/verifications")}>
+      <div className="flex items-center gap-3 animate-fade-up">
+        <Button variant="ghost" size="icon" onClick={() => router.push("/verifications")} aria-label="Kembali">
           <ArrowLeft className="size-4" />
         </Button>
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">{shop.name}</h1>
-          <p className="text-sm text-muted-foreground">{shop.address}</p>
+        <div className="min-w-0">
+          <h1 className="truncate text-2xl font-bold tracking-tight text-foreground md:text-3xl">{shop.name}</h1>
+          <p className="truncate text-sm text-muted-foreground">{shop.address}</p>
         </div>
-        <Badge variant={shop.verification_status === "pending" ? "outline" : "default"} className="ml-auto">
-          {shop.verification_status}
-        </Badge>
+        <span
+          className={cn(
+            "ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium",
+            STATUS_META[shop.verification_status]?.className ??
+              "border-border bg-muted text-muted-foreground"
+          )}
+        >
+          <span
+            className={cn(
+              "size-1.5 rounded-full",
+              shop.verification_status === "pending"
+                ? "animate-pulse-soft bg-amber-500"
+                : shop.verification_status === "approved"
+                  ? "bg-emerald-500"
+                  : "bg-destructive"
+            )}
+          />
+          {STATUS_META[shop.verification_status]?.label ?? shop.verification_status}
+        </span>
       </div>
 
-      <Card className="glass-card">
+      <Card className="glass-card animate-fade-up [animation-delay:60ms]">
         <Card.Header>
           <Card.Title className="flex items-center gap-2 text-base text-foreground">
             <span className="icon-tile size-8">
@@ -156,7 +187,7 @@ export default function VerificationDetailPage() {
         </Card.Content>
       </Card>
 
-      <div>
+      <div className="animate-fade-up [animation-delay:120ms]">
         <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold">
           <span className="icon-tile size-8">
             <FileCheck2 className="size-4" />
@@ -166,7 +197,7 @@ export default function VerificationDetailPage() {
             ({reviewedDocCount}/{Object.keys(DOC_LABELS).length} direview)
           </span>
         </h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="stagger-children grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {(Object.keys(DOC_LABELS) as DocKey[]).map((docKey) => (
             <DocumentReviewCard
               key={docKey}
@@ -181,7 +212,7 @@ export default function VerificationDetailPage() {
 
       <ChatPanel shopId={shop.id} />
 
-      <Card className="glass-card">
+      <Card className="glass-card animate-fade-up [animation-delay:180ms]">
         <Card.Header>
           <Card.Title className="flex items-center gap-2 text-base text-foreground">
             <span className="icon-tile size-8">
@@ -190,7 +221,11 @@ export default function VerificationDetailPage() {
             Keputusan akhir
           </Card.Title>
         </Card.Header>
-        <Card.Content className="flex flex-wrap gap-3">
+        <Card.Content className="gap-3">
+          <p className="text-xs text-muted-foreground">
+            Pastikan semua dokumen sudah direview dan chat verifikasi sudah selesai sebelum memutuskan.
+          </p>
+          <div className="flex flex-wrap gap-3">
           <Button disabled={verifyShop.isPending} onClick={handleApprove} className="gap-2">
             {verifyShop.isPending ? (
               <Spinner color="success" size="xs" label="Menyetujui..." />
@@ -236,6 +271,7 @@ export default function VerificationDetailPage() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+          </div>
         </Card.Content>
       </Card>
     </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRight, Inbox } from "lucide-react";
+import { ChevronRight, FileCheck2, Gavel, Inbox } from "lucide-react";
 import { usePendingShops } from "@/lib/queries/shops";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { Card } from "@heroui/react";
 import { PageHeader } from "@/components/nav/page-header";
 import { DataTable, legacyCreateColumnHelper } from "@/components/ui/data-table";
 import type { LegacyColumnDef } from "@tanstack/react-table/legacy";
-import { formatRelativeTime } from "@/lib/utils";
+import { cn, formatRelativeTime } from "@/lib/utils";
 import { DOC_LABELS, type DocKey, type Shop } from "@/types/admin";
 
 function reviewedCount(docs: Record<DocKey, { status: string }> | undefined) {
@@ -128,6 +128,38 @@ export default function VerificationsPage() {
   const { data: shops, isLoading, isError } = usePendingShops();
   const count = shops?.length ?? 0;
 
+  const reviewedDocs = shops
+    ? shops.reduce((sum, s) => sum + reviewedCount(s.docs), 0)
+    : 0;
+  const totalDocs = shops ? shops.length * TOTAL_DOCS : 0;
+  const readyToDecide = shops
+    ? shops.filter((s) => reviewedCount(s.docs) === TOTAL_DOCS).length
+    : 0;
+
+  const summary = [
+    {
+      label: "Antrian menunggu",
+      value: isLoading ? "…" : count,
+      icon: Inbox,
+      accent: "text-amber-600 dark:text-amber-400",
+      tile: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+    },
+    {
+      label: "Dokumen direview",
+      value: isLoading ? "…" : `${reviewedDocs}/${totalDocs}`,
+      icon: FileCheck2,
+      accent: "text-primary",
+      tile: "bg-primary/10 text-primary",
+    },
+    {
+      label: "Siap diputuskan",
+      value: isLoading ? "…" : readyToDecide,
+      icon: Gavel,
+      accent: "text-emerald-600 dark:text-emerald-400",
+      tile: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+    },
+  ];
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -142,7 +174,24 @@ export default function VerificationsPage() {
         </div>
       )}
 
-      <Card className="glass-card overflow-hidden p-0">
+      <div className="stagger-children grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {summary.map((item) => (
+          <div
+            key={item.label}
+            className="flex items-center gap-3 rounded-xl border border-border/70 bg-card/60 p-3.5 shadow-soft transition-colors hover:border-primary/20"
+          >
+            <span className={cn("flex size-9 shrink-0 items-center justify-center rounded-xl", item.tile)}>
+              <item.icon className="size-4" />
+            </span>
+            <div className="min-w-0 leading-tight">
+              <p className={cn("text-lg font-bold tabular-nums", item.accent)}>{item.value}</p>
+              <p className="truncate text-[11px] font-medium text-muted-foreground">{item.label}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <Card className="glass-card overflow-hidden p-0 animate-fade-up [animation-delay:120ms]">
         <Card.Content className="p-0">
           <DataTable
             columns={columns}

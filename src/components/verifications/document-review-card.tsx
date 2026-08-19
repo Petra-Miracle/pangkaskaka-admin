@@ -63,21 +63,25 @@ export function DocumentReviewCard({
   const reviewedAt = doc.reviewed_at ? new Date(doc.reviewed_at).toLocaleString("id-ID") : null;
 
   return (
-    <Card className={cn("glass-card border-t-2 transition-colors", STATUS_ACCENT[doc.status])}>
+    <Card className={cn("glass-card glass-card-hover border-t-2 transition-colors", STATUS_ACCENT[doc.status])}>
       <Card.Header>
         <div className="flex items-center justify-between">
           <Card.Title className="text-base text-foreground">{label}</Card.Title>
-          <Badge variant={STATUS_VARIANT[doc.status]}>{STATUS_LABEL[doc.status]}</Badge>
+          <Badge variant={STATUS_VARIANT[doc.status]} className={doc.status === "pending" ? "animate-pulse-soft" : undefined}>
+            {STATUS_LABEL[doc.status]}
+          </Badge>
         </div>
       </Card.Header>
       <Card.Content className="gap-3">
         {doc.url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={doc.url}
-            alt={label}
-            className="h-48 w-full rounded-lg border border-border object-cover"
-          />
+          <div className="img-zoom group rounded-lg border border-border">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={doc.url}
+              alt={label}
+              className="h-48 w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+            />
+          </div>
         ) : (
           <div className="flex h-48 w-full items-center justify-center rounded-lg border border-dashed border-border text-sm text-muted-foreground">
             Belum diunggah
