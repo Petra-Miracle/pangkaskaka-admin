@@ -8,6 +8,7 @@ import {
   CreditCard,
   CalendarClock,
   History,
+  Sparkles,
 } from "lucide-react";
 
 export type NavItem = {
@@ -36,6 +37,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "Shops", href: "/shops", icon: Store },
       { label: "Users", href: "/users", icon: Users },
       { label: "Recruitment", href: "/recruitment", icon: ClipboardList },
+      { label: "Hairstyles", href: "/hairstyles", icon: Sparkles },
     ],
   },
   {

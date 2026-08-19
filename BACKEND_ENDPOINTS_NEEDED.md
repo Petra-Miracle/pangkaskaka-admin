@@ -19,6 +19,7 @@ Dibuat: 2026-08-15 | Terkait: `AGENT_BRIEF.md` bagian 4, `SECURITY_AUDIT.md` (S2
 | Payments | `GET /admin/payments?...` | Sedang — endpoint + kemungkinan model data baru | Tidak |
 | Bookings | `GET /admin/bookings?...` | Kecil-sedang — data booking sudah ada, cuma belum ada view lintas-toko | Tidak |
 | Audit Log | `GET /admin/audit-log` + tulis log di 5 endpoint lain | Besar — perlu koleksi baru + instrumentasi di banyak tempat | Tidak |
+| Hairstyles (tambah/edit/hapus) | `POST` / `PUT /admin/hairstyles/{id}` / `DELETE /admin/hairstyles/{id}` | Kecil-sedang — GET sudah ada, tinggal 3 endpoint tulis + validasi | Ya, parsial (baca saja, lihat di bawah) |
 | Recruitment criteria | *(bukan endpoint hilang — koreksi dokumentasi, lihat di bawah)* | — | — |
 
 ---
@@ -177,7 +178,67 @@ tidak perlu perubahan di sisi dashboard):
 
 ---
 
-## 5. Catatan tambahan — Recruitment criteria (bukan endpoint hilang, koreksi dokumentasi)
+## 5. Hairstyles — katalog gaya rambut untuk AI Face Scan (CRUD)
+
+**Endpoint yang dibutuhkan:**
+- `POST /admin/hairstyles`
+- `PUT /admin/hairstyles/{id}`
+- `DELETE /admin/hairstyles/{id}`
+
+**Yang sudah dicek:** `GET /hairstyles` (**tanpa** prefix `/admin`) sudah ada,
+**publik** (jalan tanpa Bearer token), dan mengembalikan data asli — 13 gaya
+rambut dengan bentuk field persis seperti yang sudah dipakai frontend:
+
+```json
+{
+  "hairstyles": [
+    {
+      "id": "string",
+      "name": "string",
+      "image_url": "string (URL)",
+      "description": "string",
+      "suitable_shapes": ["oval", "square"],
+      "match_score_map": { "oval": 92, "square": 85 }
+    }
+  ]
+}
+```
+
+Sebaliknya, **semua endpoint tulis tidak ada sama sekali** —
+`POST /admin/hairstyles` → 404, `PUT /admin/hairstyles/{id}` → 404,
+`DELETE /admin/hairstyles/{id}` → 404. Juga dicek varian tanpa prefix
+`/admin` untuk jaga-jaga (`POST /hairstyles` → 405 Method Not Allowed,
+`PUT` / `DELETE /hairstyles/{id}` → 404) — kesimpulannya sama: rute-rute
+tulis ini belum diimplementasikan di backend dalam bentuk apa pun, bukan
+cuma "belum di-deploy" atau salah path.
+
+**Dampak nyata:** Dashboard sudah menampilkan katalog ini di halaman
+`/hairstyles` (baca saja, dari `GET /hairstyles`) — admin bisa lihat &
+filter berdasarkan bentuk wajah, tapi tombol tambah/edit/hapus belum bisa
+dibangun sampai 3 endpoint di atas ada.
+
+**Validasi `match_score_map` yang perlu dipertahankan di endpoint baru:**
+key **harus** salah satu dari `oval | round | square | oblong | heart`
+(huruf kecil, persis), value angka 0–100. `suitable_shapes` sebaiknya tetap
+diturunkan otomatis oleh backend dari key-key yang ada di `match_score_map`
+(seperti pada `GET /hairstyles` yang sudah ada), bukan diinput terpisah, biar
+dua field itu tidak pernah tidak-sinkron.
+
+**Body yang diusulkan untuk POST/PUT** (identik, `PUT` mengganti seluruh
+field yang ada):
+
+```json
+{
+  "name": "string",
+  "image_url": "string (URL)",
+  "description": "string",
+  "match_score_map": { "oval": 92, "square": 85 }
+}
+```
+
+---
+
+## 6. Catatan tambahan — Recruitment criteria (bukan endpoint hilang, koreksi dokumentasi)
 
 AGENT_BRIEF.md bagian 4 cuma mencantumkan `PUT /admin/recruitment/criteria`
 dan mendeskripsikannya sebagai *"weighted scoring criteria"* — dua-duanya

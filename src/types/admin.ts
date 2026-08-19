@@ -10,6 +10,26 @@ export type RecruitmentCriteria = {
   updated_at: string;
 };
 
+export const FACE_SHAPES = ["oval", "round", "square", "oblong", "heart"] as const;
+export type FaceShape = (typeof FACE_SHAPES)[number];
+
+export const FACE_SHAPE_LABELS: Record<FaceShape, string> = {
+  oval: "Oval",
+  round: "Bulat",
+  square: "Kotak",
+  oblong: "Oblong",
+  heart: "Hati",
+};
+
+export type Hairstyle = {
+  id: string;
+  name: string;
+  image_url: string;
+  description: string;
+  suitable_shapes: FaceShape[];
+  match_score_map: Partial<Record<FaceShape, number>>;
+};
+
 export type AnalyticsDistribution = {
   name: string;
   count: number;
