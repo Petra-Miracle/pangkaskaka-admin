@@ -89,7 +89,7 @@ function KpiCard({
             <div className="text-4xl leading-none font-bold tracking-tight text-primary tabular-nums">
               {format ? format(animated) : formatNumber(animated)}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <TrendChip value={trend} suffix={trendSuffix} />
               {footnote && <span className="text-xs text-muted-foreground">{footnote}</span>}
             </div>
