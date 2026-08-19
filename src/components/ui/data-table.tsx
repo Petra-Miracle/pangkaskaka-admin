@@ -88,7 +88,7 @@ export function DataTable<TData>({
                       key={header.id}
                       colSpan={header.colSpan}
                       className={cn(
-                        "bg-muted/30 h-10",
+                        "sticky top-0 z-10 h-10 bg-muted/90 backdrop-blur-md",
                         canSort && "cursor-pointer select-none"
                       )}
                       onClick={
@@ -109,7 +109,7 @@ export function DataTable<TData>({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
+          <TableBody className="table-rows">
             {loading
               ? Array.from({ length: skeletonRows }).map((_, i) => (
                   <TableRow key={`skeleton-${i}`} className="hover:bg-transparent">
@@ -159,13 +159,13 @@ export function DataTable<TData>({
       </div>
 
       {!loading && totalRows > 0 && (
-        <div className="flex flex-col gap-3 border-t border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="flex flex-col gap-3 border-t border-border bg-muted/20 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
             <span className="tabular-nums">
               {from}–{to} dari {totalRows}
             </span>
             <span className="text-muted-foreground/40">·</span>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-0.5 rounded-lg border border-border bg-background/60 p-0.5">
               {pageSizeOptions.map((size) => (
                 <button
                   key={size}
@@ -173,7 +173,7 @@ export function DataTable<TData>({
                   className={cn(
                     "rounded-md px-1.5 py-0.5 font-medium tabular-nums transition-colors",
                     currentPageSize === size
-                      ? "bg-primary/10 text-primary"
+                      ? "bg-primary/10 text-primary shadow-sm"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   )}
                 >

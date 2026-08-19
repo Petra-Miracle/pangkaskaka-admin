@@ -123,7 +123,7 @@ function ShopsByFilterChart() {
   };
 
   return (
-    <Card className="glass-card lg:col-span-2">
+    <Card className="glass-card card-glow lg:col-span-2">
       <Card.Header className="flex-row items-start justify-between gap-4">
         <div className="flex items-start gap-3">
           <div className="icon-tile size-10">
@@ -199,7 +199,7 @@ function UserRolesPieChart() {
   };
 
   return (
-    <Card className="glass-card">
+    <Card className="glass-card card-glow">
       <Card.Header>
         <div className="flex items-start gap-3">
           <div className="icon-tile size-10">
@@ -265,7 +265,7 @@ function AvgRatingRadialChart() {
   };
 
   return (
-    <Card className="glass-card">
+    <Card className="glass-card card-glow">
       <Card.Header>
         <div className="flex items-start gap-3">
           <div className="icon-tile size-10">
@@ -322,7 +322,7 @@ function GrowthBarChart() {
   };
 
   return (
-    <Card className="glass-card">
+    <Card className="glass-card card-glow">
       <Card.Header>
         <div className="flex items-start gap-3">
           <div className="icon-tile size-10">
@@ -368,7 +368,7 @@ function KecamatanDonutChart() {
   };
 
   return (
-    <Card className="glass-card">
+    <Card className="glass-card card-glow">
       <Card.Header>
         <div className="flex items-start gap-3">
           <div className="icon-tile size-10">
@@ -398,7 +398,7 @@ function AtRiskShopsList() {
   const shops = data?.health.warning_shops ?? [];
 
   return (
-    <Card className="glass-card h-full">
+    <Card className="glass-card card-glow h-full">
       <Card.Header>
         <div className="flex items-start gap-3">
           <div className="icon-tile size-10">
@@ -459,7 +459,7 @@ export function StatisticsSection() {
           Jumlah toko, pengguna, dan pertumbuhan platform.
         </p>
       </div>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
+      <div className="stagger-children grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
         <ShopsByFilterChart />
         <UserRolesPieChart />
         <AvgRatingRadialChart />
