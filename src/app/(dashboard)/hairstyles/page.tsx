@@ -29,6 +29,7 @@ import {
 import { SearchBox } from "@/components/ui/search-box";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
+import { HairstylesImportDialog } from "@/components/hairstyles/import-dialog";
 import {
   useCreateHairstyle,
   useDeleteHairstyle,
@@ -307,14 +308,17 @@ export default function HairstylesPage() {
         title="Hairstyles"
         description="Gaya rambut untuk rekomendasi AI Face Scan di aplikasi mobile."
         actions={
-          <HairstyleFormDialog
-            trigger={
-              <Button className="gap-2">
-                <Plus className="size-4" />
-                Tambah gaya rambut
-              </Button>
-            }
-          />
+          <div className="flex flex-wrap items-center gap-2">
+            <HairstylesImportDialog />
+            <HairstyleFormDialog
+              trigger={
+                <Button className="gap-2">
+                  <Plus className="size-4" />
+                  Tambah gaya rambut
+                </Button>
+              }
+            />
+          </div>
         }
       />
 
