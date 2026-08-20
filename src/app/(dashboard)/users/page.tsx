@@ -1,14 +1,32 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Scissors, ShieldCheck, Store, Users as UsersIcon } from "lucide-react";
+import { toast } from "sonner";
+import { Ban, Eye, RotateCcw, Scissors, ShieldCheck, Store, Trash2, UserCog, Users as UsersIcon } from "lucide-react";
 import { Card } from "@heroui/react";
 import { SearchBox } from "@/components/ui/search-box";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
+import { Textarea } from "@/components/ui/textarea";
 import { PageHeader } from "@/components/nav/page-header";
 import { DataTable, legacyCreateColumnHelper } from "@/components/ui/data-table";
 import type { LegacyColumnDef } from "@tanstack/react-table/legacy";
-import { useAllUsers } from "@/lib/queries/users";
+import { useActivateUser, useAllUsers, useDeleteUser, useSuspendUser, useUpdateUserRole } from "@/lib/queries/users";
+import { getSafeErrorMessage } from "@/lib/api";
+import { getUser } from "@/lib/auth";
 import { ADMIN_USER_ROLES, type AdminUser, type AdminUserRole } from "@/types/admin";
 import { cn, formatRelativeTime } from "@/lib/utils";
 
@@ -46,6 +64,304 @@ function initialsOf(name: string | undefined) {
     .slice(0, 2)
     .join("")
     .toUpperCase();
+}
+
+function StatusBadge({ suspended }: { suspended: boolean }) {
+  return suspended ? (
+    <Badge variant="outline" className="border-transparent bg-destructive/10 font-medium text-destructive">
+      Ditangguhkan
+    </Badge>
+  ) : (
+    <Badge variant="outline" className="border-transparent bg-emerald-500/10 font-medium text-emerald-700 dark:text-emerald-400">
+      Aktif
+    </Badge>
+  );
+}
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-3 border-b border-border pb-3 last:border-0 last:pb-0">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="max-w-56 truncate text-right font-medium">{value}</span>
+    </div>
+  );
+}
+
+function UserDetailDialog({ user }: { user: AdminUser }) {
+  const meta = ROLE_META[user.role as AdminUserRole];
+  return (
+    <Dialog>
+      <DialogTrigger
+        render={
+          <Button size="icon" variant="ghost" className="size-8" aria-label="Lihat detail" title="Lihat detail">
+            <Eye className="size-3.5" />
+          </Button>
+        }
+      />
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-3">
+            <Avatar className="size-10 border border-primary/10">
+              <AvatarFallback className="bg-gradient-to-br from-primary/12 to-primary/5 text-sm font-bold text-primary">
+                {initialsOf(user.name)}
+              </AvatarFallback>
+            </Avatar>
+            {user.name}
+          </DialogTitle>
+          <DialogDescription>Detail akun terdaftar di platform.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3 text-sm">
+          <div className="flex items-center justify-between gap-3 border-b border-border pb-3">
+            <span className="text-muted-foreground">Role</span>
+            <span
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium",
+                meta?.chip ?? "bg-muted text-muted-foreground"
+              )}
+            >
+              <span className={cn("size-1.5 rounded-full", meta?.dot ?? "bg-muted-foreground")} />
+              {meta?.label ?? user.role}
+            </span>
+          </div>
+          <div className="flex items-center justify-between gap-3 border-b border-border pb-3">
+            <span className="text-muted-foreground">Status</span>
+            <StatusBadge suspended={!!user.is_suspended} />
+          </div>
+          <DetailRow label="Email" value={user.email} />
+          <DetailRow label="Telepon" value={user.phone || "—"} />
+          <DetailRow label="Alamat" value={user.address || "—"} />
+          <DetailRow label="Terdaftar" value={new Date(user.created_at).toLocaleString("id-ID")} />
+          {user.is_suspended && (
+            <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3 text-xs text-destructive">
+              <p className="font-medium">Alasan penangguhan</p>
+              <p className="mt-0.5 text-destructive/80">{user.suspended_reason || "Tidak ada alasan dicatat."}</p>
+              {user.suspended_at && (
+                <p className="mt-1 text-destructive/60">{new Date(user.suspended_at).toLocaleString("id-ID")}</p>
+              )}
+            </div>
+          )}
+        </div>
+        <DialogFooter>
+          <DialogClose render={<Button variant="outline">Tutup</Button>} />
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function LockedActionButton({ icon: Icon, reason }: { icon: typeof Ban; reason?: string }) {
+  return (
+    <Button size="icon" variant="ghost" className="size-8 opacity-40" disabled title={reason}>
+      <Icon className="size-3.5" />
+    </Button>
+  );
+}
+
+function SuspendToggleDialog({ user, disabled, disabledReason }: { user: AdminUser; disabled?: boolean; disabledReason?: string }) {
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState("");
+  const suspendUser = useSuspendUser();
+  const activateUser = useActivateUser();
+  const isSuspended = !!user.is_suspended;
+
+  if (disabled) {
+    return <LockedActionButton icon={isSuspended ? RotateCcw : Ban} reason={disabledReason} />;
+  }
+
+  if (isSuspended) {
+    function handleActivate() {
+      activateUser.mutate(user.id, {
+        onSuccess: () => toast.success(`${user.name} diaktifkan kembali`),
+        onError: (err) => toast.error(getSafeErrorMessage(err, "Gagal mengaktifkan akun")),
+      });
+    }
+    return (
+      <Button
+        size="icon"
+        variant="ghost"
+        className="size-8 text-emerald-600 hover:text-emerald-600 dark:text-emerald-400"
+        aria-label="Aktifkan kembali"
+        title="Aktifkan kembali"
+        disabled={activateUser.isPending}
+        onClick={handleActivate}
+      >
+        {activateUser.isPending ? <Spinner color="success" size="xs" label="Mengaktifkan..." /> : <RotateCcw className="size-3.5" />}
+      </Button>
+    );
+  }
+
+  function handleSuspend() {
+    suspendUser.mutate(
+      { id: user.id, reason: reason.trim() || undefined },
+      {
+        onSuccess: () => {
+          toast.success(`${user.name} ditangguhkan`);
+          setOpen(false);
+          setReason("");
+        },
+        onError: (err) => toast.error(getSafeErrorMessage(err, "Gagal menangguhkan akun")),
+      }
+    );
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger
+        render={
+          <Button size="icon" variant="ghost" className="size-8 text-destructive hover:text-destructive" aria-label="Tangguhkan" title="Tangguhkan akun">
+            <Ban className="size-3.5" />
+          </Button>
+        }
+      />
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Tangguhkan {user.name}?</DialogTitle>
+          <DialogDescription>
+            Akun tidak bisa login sampai diaktifkan kembali dari sini. Data dan riwayatnya tetap tersimpan.
+          </DialogDescription>
+        </DialogHeader>
+        <Textarea placeholder="Alasan penangguhan (opsional)..." value={reason} onChange={(e) => setReason(e.target.value)} rows={3} />
+        <DialogFooter>
+          <DialogClose render={<Button variant="outline">Batal</Button>} />
+          <Button variant="destructive" disabled={suspendUser.isPending} onClick={handleSuspend} className="gap-2">
+            {suspendUser.isPending && <Spinner color="danger" size="xs" label="Menangguhkan..." />}
+            Tangguhkan
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ChangeRoleDialog({ user, disabled, disabledReason }: { user: AdminUser; disabled?: boolean; disabledReason?: string }) {
+  const [open, setOpen] = useState(false);
+  const [role, setRole] = useState<AdminUserRole>((user.role as AdminUserRole) ?? "customer");
+  const updateRole = useUpdateUserRole();
+
+  if (disabled) {
+    return <LockedActionButton icon={UserCog} reason={disabledReason} />;
+  }
+
+  function handleOpenChange(next: boolean) {
+    setOpen(next);
+    if (!next) setRole((user.role as AdminUserRole) ?? "customer");
+  }
+
+  function handleSubmit() {
+    updateRole.mutate(
+      { id: user.id, role },
+      {
+        onSuccess: () => {
+          toast.success(`Role ${user.name} diubah ke ${ROLE_META[role]?.label ?? role}`);
+          setOpen(false);
+        },
+        onError: (err) => toast.error(getSafeErrorMessage(err, "Gagal mengubah role")),
+      }
+    );
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger
+        render={
+          <Button size="icon" variant="ghost" className="size-8" aria-label="Ubah role" title="Ubah role">
+            <UserCog className="size-3.5" />
+          </Button>
+        }
+      />
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Ubah role {user.name}</DialogTitle>
+          <DialogDescription>
+            Role menentukan akses fitur di aplikasi mobile. Perubahan berlaku langsung setelah disimpan.
+          </DialogDescription>
+        </DialogHeader>
+        <Select value={role} onValueChange={(value) => setRole((value as AdminUserRole) ?? "customer")}>
+          <SelectTrigger>
+            <SelectValue>{(value: AdminUserRole) => ROLE_META[value]?.label ?? value}</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {ADMIN_USER_ROLES.map((r) => (
+              <SelectItem key={r} value={r}>
+                {ROLE_META[r].label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <DialogFooter>
+          <DialogClose render={<Button variant="outline">Batal</Button>} />
+          <Button disabled={updateRole.isPending || role === user.role} onClick={handleSubmit} className="gap-2">
+            {updateRole.isPending && <Spinner color="brand" size="xs" label="Menyimpan..." />}
+            Simpan
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function DeleteUserDialog({ user, disabled, disabledReason }: { user: AdminUser; disabled?: boolean; disabledReason?: string }) {
+  const [open, setOpen] = useState(false);
+  const deleteUser = useDeleteUser();
+
+  if (disabled) {
+    return <LockedActionButton icon={Trash2} reason={disabledReason} />;
+  }
+
+  function handleDelete() {
+    deleteUser.mutate(user.id, {
+      onSuccess: () => {
+        toast.success(`${user.name} dihapus`);
+        setOpen(false);
+      },
+      onError: (err) => toast.error(getSafeErrorMessage(err, "Gagal menghapus akun")),
+    });
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger
+        render={
+          <Button size="icon" variant="ghost" className="size-8 text-destructive hover:text-destructive" aria-label="Hapus akun" title="Hapus akun">
+            <Trash2 className="size-3.5" />
+          </Button>
+        }
+      />
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Hapus akun {user.name}?</DialogTitle>
+          <DialogDescription>
+            Aksi ini permanen dan tidak bisa dibatalkan. Untuk pemilik toko yang masih punya toko terdaftar, hapus
+            atau alihkan tokonya dulu — permintaan hapus akan ditolak selama itu belum dilakukan.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <DialogClose render={<Button variant="outline">Batal</Button>} />
+          <Button variant="destructive" disabled={deleteUser.isPending} onClick={handleDelete} className="gap-2">
+            {deleteUser.isPending && <Spinner color="danger" size="xs" label="Menghapus..." />}
+            Hapus
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function UserActionsCell({ user }: { user: AdminUser }) {
+  const currentUser = getUser();
+  const isSelf = currentUser?.id === user.id;
+  const isAdminRow = user.role === "admin";
+  const locked = isSelf || isAdminRow;
+  const lockedReason = isSelf ? "Tidak bisa mengubah akun sendiri" : isAdminRow ? "Akun admin tidak bisa diubah dari sini" : undefined;
+
+  return (
+    <div className="flex justify-end gap-1">
+      <UserDetailDialog user={user} />
+      <SuspendToggleDialog user={user} disabled={locked} disabledReason={lockedReason} />
+      <ChangeRoleDialog user={user} disabled={locked} disabledReason={lockedReason} />
+      <DeleteUserDialog user={user} disabled={locked} disabledReason={lockedReason} />
+    </div>
+  );
 }
 
 const columnHelper = legacyCreateColumnHelper<AdminUser>();
@@ -90,6 +406,10 @@ const columns: LegacyColumnDef<AdminUser, any>[] = [
       );
     },
   }),
+  columnHelper.accessor("is_suspended", {
+    header: "Status",
+    cell: (info) => <StatusBadge suspended={!!info.getValue()} />,
+  }),
   columnHelper.accessor("created_at", {
     header: "Terdaftar",
     cell: (info) => (
@@ -97,6 +417,11 @@ const columns: LegacyColumnDef<AdminUser, any>[] = [
         {formatRelativeTime(info.getValue() as string)}
       </span>
     ),
+  }),
+  columnHelper.display({
+    id: "actions",
+    header: () => <span className="sr-only">Aksi</span>,
+    cell: ({ row }) => <UserActionsCell user={row.original} />,
   }),
 ];
 

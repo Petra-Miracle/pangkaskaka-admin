@@ -7,8 +7,8 @@
 > asli, bukan tebakan dari AGENT_BRIEF.md saja — beberapa hal di brief
 > ternyata sudah tidak akurat begitu dicek ulang.
 
-Dibuat: 2026-08-15 | Diperbarui: 2026-08-19 (Hairstyles CRUD ditutup — lihat
-bagian 5) | Terkait: `AGENT_BRIEF.md` bagian 4, `SECURITY_AUDIT.md` (S2)
+Dibuat: 2026-08-15 | Diperbarui: 2026-08-20 (User management CRUD ditutup —
+lihat bagian 7) | Terkait: `AGENT_BRIEF.md` bagian 4, `SECURITY_AUDIT.md` (S2)
 
 ---
 
@@ -21,6 +21,7 @@ bagian 5) | Terkait: `AGENT_BRIEF.md` bagian 4, `SECURITY_AUDIT.md` (S2)
 | Bookings | `GET /admin/bookings?...` | Kecil-sedang — data booking sudah ada, cuma belum ada view lintas-toko | Tidak |
 | Audit Log | `GET /admin/audit-log` + tulis log di 5 endpoint lain | Besar — perlu koleksi baru + instrumentasi di banyak tempat | Tidak |
 | Hairstyles (tambah/edit/hapus) | ~~`POST` / `PUT` / `DELETE /admin/hairstyles`~~ **Selesai 2026-08-19** | — | — |
+| User management (suspend/role/hapus) | ~~`POST`/`PUT`/`DELETE /admin/users/{id}/...`~~ **Selesai 2026-08-20** | — | — |
 | Recruitment criteria | *(bukan endpoint hilang — koreksi dokumentasi, lihat di bawah)* | — | — |
 
 ---
@@ -238,10 +239,55 @@ membingungkan agent/developer berikutnya yang membaca deskripsi lama.
 
 ---
 
+## 7. User management — suspend, aktifkan, ubah role, hapus akun — SELESAI
+
+> Status 2026-08-20: ditambahkan langsung ke `backend/server.py` (bukan
+> cuma didokumentasikan) karena repo backend ada di komputer yang sama
+> (`D:\APP-PangkasKAKA`) dan pemilik project meng-otorisasi perubahan
+> langsung, lalu di-push ke `origin/main` sehingga Railway redeploy
+> otomatis. Diverifikasi live lewat probe tanpa kredensial: endpoint baru
+> balas `401` (butuh token) begitu deploy selesai, bukan `404` seperti
+> sebelum di-push — commit backend: `701b411`.
+
+Sebelum ini, `GET /admin/users` adalah satu-satunya endpoint terkait user
+— tidak ada field `is_suspended`/`is_banned` sama sekali di dokumen profil,
+apalagi endpoint tulis. Empat endpoint baru:
+
+- `POST /admin/users/{user_id}/suspend` — body `{ reason?: string }`. Set
+  `is_suspended: true` + `suspended_reason`/`suspended_at`/`suspended_by`.
+  Ditolak (400) kalau target diri sendiri atau akun `role: admin`.
+- `POST /admin/users/{user_id}/activate` — kebalikan dari suspend, bersihkan
+  field-field di atas.
+- `PUT /admin/users/{user_id}/role` — body `{ role: "customer"|"owner"|"karyawan"|"admin" }`.
+  Ditolak (400) kalau target diri sendiri. **Catatan:** promosi ke `owner`
+  cuma mengubah field role, tidak otomatis membuat entri toko — pemilik baru
+  tetap harus lewat alur pendaftaran toko normal di aplikasi.
+- `DELETE /admin/users/{user_id}` — hapus permanen dokumen profil. Ditolak
+  (400) kalau target `role: admin`, target diri sendiri, atau target
+  `owner` yang masih punya toko terdaftar (`db.barbershops` dengan
+  `owner_id` itu). Untuk `role: karyawan`, entri `db.karyawan` +
+  `db.karyawan_locations` miliknya ikut dihapus (cascade), meniru pola
+  cascade yang sudah ada di suspend-toko (membatalkan booking aktif).
+- **Login** (`POST /auth/login`) sekarang menolak (403) akun dengan
+  `is_suspended: true`, jadi suspend benar-benar memblokir akses, bukan
+  cuma penanda visual di dashboard.
+
+**Dampak nyata:** Halaman `/users` sekarang punya 4 aksi per baris (lihat
+detail, tangguhkan/aktifkan, ubah role, hapus), dengan tombol
+suspend/ubah-role/hapus otomatis nonaktif untuk baris akun sendiri dan
+akun `admin` lain (mencerminkan guard yang sama di backend, bukan cuma
+kosmetik UI).
+
+---
+
 ## Metodologi verifikasi
 
 Semua status di atas dicek pakai `curl` langsung ke API produksi dengan
 token admin asli (`POST /auth/login` → `Authorization: Bearer <token>`),
 bukan dari asumsi AGENT_BRIEF.md semata. Kalau backend berubah setelah
 tanggal dokumen ini dibuat, jalankan ulang pengecekan sebelum
-mempercayainya lagi.
+mempercayainya lagi. (Pengecualian: bagian 7 dicek lewat probe
+tanpa-kredensial 401-vs-404 karena kredensial admin tidak dibagikan ke
+agent pada sesi itu — bukan penyimpangan dari metodologi, cuma bukti yang
+dipakai berbeda: konfirmasi endpoint benar-benar live di produksi, bukan
+konfirmasi isi respons sukses/gagalnya.)

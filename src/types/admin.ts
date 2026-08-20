@@ -136,6 +136,9 @@ export type AdminUser = {
   address: string;
   photo: string;
   created_at: string;
+  is_suspended?: boolean;
+  suspended_reason?: string | null;
+  suspended_at?: string | null;
 };
 
 export type ChatMessage = {
