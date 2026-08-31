@@ -113,54 +113,6 @@ export default function DashboardHomePage() {
 
   return (
     <div className="space-y-6">
-      {/* Greeting banner */}
-      <div className="bg-aurora hero-panel relative overflow-hidden rounded-2xl p-4 text-white shadow-lg shadow-primary/20 md:p-5">
-        <div className="bg-grid pointer-events-none absolute inset-0 opacity-20" />
-        <div className="bg-noise pointer-events-none absolute inset-0" />
-        <div className="pointer-events-none absolute -top-20 -right-12 size-40 rounded-full bg-white/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 left-1/3 size-48 rounded-full bg-white/5 blur-3xl" />
-
-        <div className="relative z-10 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div className="min-w-0">
-            <p className="text-[10px] font-semibold tracking-[0.14em] text-white/70 uppercase">{today}</p>
-            <h1 className="mt-0.5 truncate text-xl font-bold tracking-tight md:text-2xl">
-              {greeting}
-              {adminName ? `, ${adminName}` : ""}
-            </h1>
-            <p className="mt-0.5 truncate text-xs text-white/75">
-              Ringkasan KPI seluruh platform PangkasKAKA.
-            </p>
-          </div>
-
-          <div className="flex shrink-0 flex-wrap items-center gap-2.5">
-            <Button
-              variant="outline"
-              nativeButton={false}
-              className="border-white/25 bg-white/10 text-white shadow-none backdrop-blur-md hover:bg-white/20 hover:text-white"
-              render={
-                <Link href="/verifications" className="gap-1.5">
-                  <ShieldAlert className="size-4" />
-                  Antrian verifikasi
-                  {!isLoading && (s?.pending_verifications ?? 0) > 0 && (
-                    <span className="rounded-full bg-white/25 px-1.5 py-0.5 text-[11px] font-bold">
-                      {s?.pending_verifications}
-                    </span>
-                  )}
-                  <ArrowRight className="size-4" />
-                </Link>
-              }
-            />
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-medium text-white/85 backdrop-blur-md">
-              <span className="relative flex size-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-                <span className="relative inline-flex size-1.5 rounded-full bg-emerald-400" />
-              </span>
-              API Production Online
-            </span>
-          </div>
-        </div>
-      </div>
-
       {isError && (
         <div className="flex items-center gap-2 rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
           <ShieldAlert className="size-4 shrink-0" />
