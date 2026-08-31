@@ -57,13 +57,18 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
   return data as T;
 }
 
-// SECURITY_AUDIT.md S5: backend `detail`/`message` strings can contain
-// internals not meant for the UI. 401/403 messages are safe/useful to show
-// as-is (they're just "you're not allowed"); everything else is logged for
-// debugging and swapped for a generic message.
+// SECURITY_AUDIT.md S5 (revised 2026-08-21): backend `detail`/`message`
+// strings can contain internals not meant for the UI, but only on the
+// server's own mistakes (5xx) — every 4xx in this backend is a deliberate
+// `raise HTTPException(4xx, "...")` with a hand-written, caller-facing
+// Indonesian message (confirmed: no `str(e)`/exception passthroughs in any
+// of the 60+ 400s in server.py), so hiding those behind a generic fallback
+// was actively throwing away the one piece of information the admin needed
+// (e.g. "Pemilik ini masih punya toko terdaftar..." on a blocked delete).
+// 5xx and network failures still log and fall back to generic wording.
 export function getSafeErrorMessage(err: unknown, fallback: string): string {
   if (err instanceof ApiError) {
-    if (err.status === 401 || err.status === 403) return err.message;
+    if (err.status >= 400 && err.status < 500) return err.message;
     console.error(`[API ${err.status}]`, err.message, err.body);
     return fallback;
   }
