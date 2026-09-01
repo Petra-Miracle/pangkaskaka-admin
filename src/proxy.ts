@@ -47,6 +47,9 @@ export function proxy(request: NextRequest) {
   return NextResponse.next();
 }
 
+// Excludes API routes, Next's own internals, and any path with a file
+// extension (images, icons, fonts, etc.) — public static assets like the
+// logo must be reachable from /login itself, which has no session yet.
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!api|_next/static|_next/image|.*\\..*).*)"],
 };

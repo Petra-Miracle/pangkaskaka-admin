@@ -19,7 +19,7 @@ export function LogoLoading({
       <div className={cn("flex items-center gap-2.5 text-sm text-muted-foreground", className)}>
         <div className="relative size-7 overflow-hidden rounded-lg border border-border bg-background shadow-soft">
           <Image
-            src="/pangkaskaka-logo.jpeg"
+            src="/pangkaskaka-logo.png"
             alt="PangkasKAKA"
             fill
             sizes="28px"
@@ -39,7 +39,7 @@ export function LogoLoading({
         <span className="absolute -inset-3 rounded-3xl bg-primary/10 blur-xl" />
         <div className="relative flex size-28 items-center justify-center overflow-hidden rounded-3xl border border-border bg-background shadow-card animate-scale-in">
           <Image
-            src="/pangkaskaka-logo.jpeg"
+            src="/pangkaskaka-logo.png"
             alt="PangkasKAKA"
             width={112}
             height={112}

@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import Image from "next/image";
 import {
   Command,
   PanelLeftClose,
   PanelLeftOpen,
-  Scissors,
   Search,
 } from "lucide-react";
 import { NAV_SECTIONS } from "@/lib/nav-items";
@@ -53,8 +53,8 @@ export function Sidebar() {
           collapsed ? "justify-center px-3" : "px-4"
         )}
       >
-        <div className="relative flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary via-primary to-primary/70 text-primary-foreground shadow-md shadow-primary/25 ring-1 ring-white/40 ring-inset">
-          <Scissors className="size-4" />
+        <div className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl shadow-md shadow-primary/25 ring-1 ring-white/40 ring-inset">
+          <Image src="/pangkaskaka-logo.png" alt="PangkasKAKA" fill sizes="36px" className="object-cover" priority />
           <span className="absolute -right-0.5 -bottom-0.5 size-2.5 rounded-full border-2 border-sidebar bg-emerald-500" />
         </div>
         {!collapsed && (

@@ -1,9 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { LayoutDashboard, LogOut, Menu, MoreHorizontal, Scissors, Search, ShieldCheck, Store, Users } from "lucide-react";
+import { LayoutDashboard, LogOut, Menu, MoreHorizontal, Search, ShieldCheck, Store, Users } from "lucide-react";
 import { Avatar as HeroAvatar } from "@heroui/react";
 import { NAV_SECTIONS } from "@/lib/nav-items";
 import { Badge } from "@/components/ui/badge";
@@ -60,8 +61,8 @@ export function MobileNav() {
           <Button variant="ghost" size="icon" onClick={() => setDrawerOpen(true)} aria-label="Buka menu" className="size-8">
             <Menu className="size-4.5" />
           </Button>
-          <div className="relative flex size-7 items-center justify-center rounded-lg bg-gradient-to-br from-primary via-primary to-primary/70 text-primary-foreground shadow-sm shadow-primary/25 ring-1 ring-white/40 ring-inset">
-            <Scissors className="size-3.5" />
+          <div className="relative flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-lg shadow-sm shadow-primary/25 ring-1 ring-white/40 ring-inset">
+            <Image src="/pangkaskaka-logo.png" alt="PangkasKAKA" fill sizes="28px" className="object-cover" priority />
           </div>
           <span className="text-sm font-bold tracking-tight">PangkasKAKA</span>
         </div>
@@ -123,8 +124,8 @@ export function MobileNav() {
           <DialogTitle className="sr-only">Navigasi</DialogTitle>
           <div className="flex h-full flex-col">
             <div className="flex h-14 items-center gap-2.5 border-b border-sidebar-border/70 px-5">
-              <div className="relative flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary via-primary to-primary/70 text-primary-foreground shadow-md shadow-primary/25 ring-1 ring-white/40 ring-inset">
-                <Scissors className="size-4" />
+              <div className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl shadow-md shadow-primary/25 ring-1 ring-white/40 ring-inset">
+                <Image src="/pangkaskaka-logo.png" alt="PangkasKAKA" fill sizes="36px" className="object-cover" priority />
                 <span className="absolute -right-0.5 -bottom-0.5 size-2.5 rounded-full border-2 border-sidebar bg-emerald-500" />
               </div>
               <div className="leading-tight">
