@@ -61,3 +61,19 @@ export function useDeleteUser() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-users"] }),
   });
 }
+
+// PUT /admin/users/{id}/set-password — unlike suspend/role/delete this has no
+// self/admin restriction server-side (setting a password isn't destructive to
+// account access the way those are, and an admin resetting their own or a
+// fellow admin's password during onboarding/testing is a normal case). Not
+// cached/invalidated beyond the users list since the password itself isn't
+// part of any AdminUser field the UI reads.
+export function useSetUserPassword() {
+  return useMutation({
+    mutationFn: ({ id, newPassword }: { id: string; newPassword: string }) =>
+      apiFetch<{ ok: boolean }>(`/admin/users/${id}/set-password`, {
+        method: "PUT",
+        body: { new_password: newPassword },
+      }),
+  });
+}

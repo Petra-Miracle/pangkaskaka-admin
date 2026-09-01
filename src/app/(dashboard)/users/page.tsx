@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Ban, Eye, RotateCcw, Scissors, ShieldCheck, Store, Trash2, UserCog, Users as UsersIcon } from "lucide-react";
+import { Ban, Eye, EyeOff, KeyRound, RotateCcw, Scissors, ShieldCheck, Store, Trash2, UserCog, Users as UsersIcon } from "lucide-react";
 import { Card } from "@heroui/react";
 import { SearchBox } from "@/components/ui/search-box";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -18,13 +18,22 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { PageHeader } from "@/components/nav/page-header";
 import { DataTable, legacyCreateColumnHelper } from "@/components/ui/data-table";
 import type { LegacyColumnDef } from "@tanstack/react-table/legacy";
-import { useActivateUser, useAllUsers, useDeleteUser, useSuspendUser, useUpdateUserRole } from "@/lib/queries/users";
+import {
+  useActivateUser,
+  useAllUsers,
+  useDeleteUser,
+  useSetUserPassword,
+  useSuspendUser,
+  useUpdateUserRole,
+} from "@/lib/queries/users";
 import { getSafeErrorMessage } from "@/lib/api";
 import { getUser } from "@/lib/auth";
 import { ADMIN_USER_ROLES, type AdminUser, type AdminUserRole } from "@/types/admin";
@@ -347,6 +356,84 @@ function DeleteUserDialog({ user, disabled, disabledReason }: { user: AdminUser;
   );
 }
 
+function SetPasswordDialog({ user }: { user: AdminUser }) {
+  const [open, setOpen] = useState(false);
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const setUserPassword = useSetUserPassword();
+
+  function handleOpenChange(next: boolean) {
+    setOpen(next);
+    if (!next) {
+      setPassword("");
+      setShowPassword(false);
+    }
+  }
+
+  function handleSubmit() {
+    setUserPassword.mutate(
+      { id: user.id, newPassword: password },
+      {
+        onSuccess: () => {
+          toast.success(`Password ${user.name} berhasil diatur`);
+          handleOpenChange(false);
+        },
+        onError: (err) => toast.error(getSafeErrorMessage(err, "Gagal mengatur password")),
+      }
+    );
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger
+        render={
+          <Button size="icon" variant="ghost" className="size-8" aria-label="Atur password" title="Atur password">
+            <KeyRound className="size-3.5" />
+          </Button>
+        }
+      />
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Atur password {user.name}</DialogTitle>
+          <DialogDescription>
+            Password lama langsung tidak berlaku. Pastikan password ini disampaikan ke pemilik akun lewat jalur
+            aman — tidak ada salinannya yang tersimpan di dashboard setelah dialog ini ditutup.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-1.5">
+          <Label htmlFor="set-password-input">Password baru</Label>
+          <div className="relative">
+            <Input
+              id="set-password-input"
+              type={showPassword ? "text" : "password"}
+              autoComplete="new-password"
+              placeholder="Minimal 8 karakter"
+              className="pr-10"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
+              className="absolute top-1/2 right-2.5 -translate-y-1/2 rounded-md p-0.5 text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            </button>
+          </div>
+        </div>
+        <DialogFooter>
+          <DialogClose render={<Button variant="outline">Batal</Button>} />
+          <Button disabled={password.length < 8 || setUserPassword.isPending} onClick={handleSubmit} className="gap-2">
+            {setUserPassword.isPending && <Spinner color="brand" size="xs" label="Menyimpan..." />}
+            Simpan
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function UserActionsCell({ user }: { user: AdminUser }) {
   const currentUser = getUser();
   const isSelf = currentUser?.id === user.id;
@@ -359,6 +446,7 @@ function UserActionsCell({ user }: { user: AdminUser }) {
       <UserDetailDialog user={user} />
       <SuspendToggleDialog user={user} disabled={locked} disabledReason={lockedReason} />
       <ChangeRoleDialog user={user} disabled={locked} disabledReason={lockedReason} />
+      <SetPasswordDialog user={user} />
       <DeleteUserDialog user={user} disabled={locked} disabledReason={lockedReason} />
     </div>
   );
