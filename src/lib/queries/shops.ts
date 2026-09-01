@@ -39,6 +39,22 @@ export function useShop(shopId: string) {
   });
 }
 
+export type AiDocReviewResult = { available: true; doc_key: string; notes: string } | { available: false; reason: string };
+
+// Advisory-only: asks the backend to have Gemini Vision describe/flag the
+// uploaded document, purely to help the admin's own manual review — it never
+// decides valid/invalid, and the result isn't written to any database (see
+// backend/server.py's admin_ai_review_doc), so nothing here is cached or
+// invalidated either. Each click is a fresh, independent analysis.
+export function useAiReviewDocument(shopId: string) {
+  return useMutation({
+    mutationFn: (docKey: DocKey) =>
+      apiFetch<AiDocReviewResult>(`/admin/shops/${shopId}/documents/${docKey}/ai-review`, {
+        method: "POST",
+      }),
+  });
+}
+
 export function useReviewDocument(shopId: string) {
   const queryClient = useQueryClient();
   return useMutation({

@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { Sparkles } from "lucide-react";
 import { Card } from "@heroui/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
-import { useReviewDocument } from "@/lib/queries/shops";
+import { useAiReviewDocument, useReviewDocument, type AiDocReviewResult } from "@/lib/queries/shops";
 import { getSafeErrorMessage } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import type { DocKey, DocStatus, ShopDocument } from "@/types/admin";
@@ -46,7 +47,17 @@ export function DocumentReviewCard({
 }) {
   const [note, setNote] = useState(doc.note ?? "");
   const [pendingStatus, setPendingStatus] = useState<DocStatus | null>(null);
+  const [aiResult, setAiResult] = useState<AiDocReviewResult | null>(null);
   const reviewDocument = useReviewDocument(shopId);
+  const aiReview = useAiReviewDocument(shopId);
+
+  function handleAiReview() {
+    setAiResult(null);
+    aiReview.mutate(docKey, {
+      onSuccess: (data) => setAiResult(data),
+      onError: (err) => toast.error(getSafeErrorMessage(err, "Analisis AI gagal, lanjutkan review manual")),
+    });
+  }
 
   function handleReview(status: DocStatus) {
     setPendingStatus(status);
@@ -87,6 +98,48 @@ export function DocumentReviewCard({
             Belum diunggah
           </div>
         )}
+
+        <div className="space-y-2">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={!doc.url || aiReview.isPending}
+            onClick={handleAiReview}
+            className="gap-1.5"
+          >
+            {aiReview.isPending ? (
+              <Spinner color="brand" size="xs" label="Menganalisis..." />
+            ) : (
+              <Sparkles className="size-3.5" />
+            )}
+            Analisis dengan AI
+          </Button>
+
+          {aiResult && (
+            <div
+              className={cn(
+                "rounded-lg border px-3 py-2.5 text-xs",
+                aiResult.available
+                  ? "border-primary/20 bg-primary/5 text-foreground"
+                  : "border-border bg-muted/40 text-muted-foreground"
+              )}
+            >
+              {aiResult.available ? (
+                <>
+                  <p className="mb-1 flex items-center gap-1.5 font-semibold text-primary">
+                    <Sparkles className="size-3 shrink-0" />
+                    Catatan AI (bantuan, bukan keputusan final)
+                  </p>
+                  <p className="leading-relaxed">{aiResult.notes}</p>
+                </>
+              ) : (
+                <p>{aiResult.reason}</p>
+              )}
+            </div>
+          )}
+        </div>
+
         <Textarea
           placeholder="Catatan untuk pemilik toko (opsional untuk valid, disarankan untuk invalid/revisi)"
           value={note}
