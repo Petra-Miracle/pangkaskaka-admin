@@ -7,8 +7,8 @@
 > asli, bukan tebakan dari AGENT_BRIEF.md saja — beberapa hal di brief
 > ternyata sudah tidak akurat begitu dicek ulang.
 
-Dibuat: 2026-08-15 | Diperbarui: 2026-08-20 (User management CRUD ditutup —
-lihat bagian 7) | Terkait: `AGENT_BRIEF.md` bagian 4, `SECURITY_AUDIT.md` (S2)
+Dibuat: 2026-08-15 | Diperbarui: 2026-09-09 (Kelola Admin toko — lihat
+bagian 8) | Terkait: `AGENT_BRIEF.md` bagian 4, `SECURITY_AUDIT.md` (S2)
 
 ---
 
@@ -23,6 +23,7 @@ lihat bagian 7) | Terkait: `AGENT_BRIEF.md` bagian 4, `SECURITY_AUDIT.md` (S2)
 | Hairstyles (tambah/edit/hapus) | ~~`POST` / `PUT` / `DELETE /admin/hairstyles`~~ **Selesai 2026-08-19** | — | — |
 | User management (suspend/role/hapus) | ~~`POST`/`PUT`/`DELETE /admin/users/{id}/...`~~ **Selesai 2026-08-20** | — | — |
 | Recruitment criteria | *(bukan endpoint hilang — koreksi dokumentasi, lihat di bawah)* | — | — |
+| Kelola Admin toko (buat/list/pindah/reset pw) | ~~`/superadmin/admins*`~~ **Sudah ada di backend** — butuh 1 penyesuaian aturan 1:1, lihat bagian 8 | Kecil | — |
 
 ---
 
@@ -277,6 +278,62 @@ detail, tangguhkan/aktifkan, ubah role, hapus), dengan tombol
 suspend/ubah-role/hapus otomatis nonaktif untuk baris akun sendiri dan
 akun `admin` lain (mencerminkan guard yang sama di backend, bukan cuma
 kosmetik UI).
+
+---
+
+## 8. Kelola Admin toko — sudah ada, butuh penegakan aturan "1 toko = 1 admin"
+
+> Status 2026-09-09: keempat endpoint di bawah **sudah live** di
+> `backend/server.py` (dibaca langsung dari repo `D:\APP-PangkasKAKA`, commit
+> `42aeae4`, baris 2456–2514). Dashboard `/admins` ("Kelola Admin") dan aksi
+> "Buat admin" per baris di `/shops` dibangun mengikuti kontrak ini.
+
+Endpoint yang dipakai dashboard (semua `require_role("superadmin")`):
+
+- `POST /superadmin/admins` — body `CreateAdminIn`
+  `{ name: str, email: EmailStr, phone: str, managed_shop_ids: string[] }`.
+  Backend generate password (`_gen_password` = `secrets.token_urlsafe(9)`),
+  balas `{ admin: {...}, password: "<plaintext, sekali>" }`. 400 kalau email
+  sudah terdaftar / ada shop_id tidak valid.
+- `GET /superadmin/admins` — `{ admins: [ {..., managed_shop_ids, managed_shops:[{id,name}], created_at, created_by} ] }` (tanpa field password).
+- `PUT /superadmin/admins/{id}` — body `{ managed_shop_ids: string[] }`, balas `{ ok: true }`.
+- `POST /superadmin/admins/{id}/reset-password` — balas `{ ok: true, password: "<plaintext, sekali>" }`.
+
+### Yang perlu diubah di backend (kecil)
+
+Pemilik project menetapkan **satu toko hanya boleh punya satu admin, dan satu
+admin hanya memegang satu toko**. Dashboard sudah menegakkan ini di sisi
+klien (dropdown hanya menampilkan toko tanpa admin; tombol "Buat admin"
+nonaktif untuk toko yang sudah punya admin), tapi backend belum, jadi
+pemanggilan API langsung masih bisa melanggarnya. Ubah di
+`create_admin` (server.py:2456) dan `update_admin_scope` (server.py:2493):
+
+1. Tolak (400) kalau `len(body.managed_shop_ids) > 1`.
+2. Tolak (409/400) kalau salah satu `shop_id` sudah ada di `managed_shop_ids`
+   milik akun `role: "admin"` lain:
+   ```python
+   clash = await db.profiles.find_one({
+       "role": "admin",
+       "managed_shop_ids": {"$in": body.managed_shop_ids},
+       "id": {"$ne": admin_id},   # hanya di update_admin_scope
+   })
+   if clash:
+       raise HTTPException(400, "Toko ini sudah punya admin")
+   ```
+
+Tidak perlu mengubah bentuk request/response — dashboard tetap mengirim
+`managed_shop_ids` sebagai array berisi tepat satu id.
+
+### Catatan lanjutan (belum dikerjakan di dashboard)
+
+Persona `admin` sendiri (login lewat dashboard Vercel, halaman ringkasan +
+daftar pelamar + verifikasi berkas + skoring tes + chat rekrutmen) adalah
+pekerjaan terpisah yang lebih besar — lihat catatan diskusi. Backend untuk
+persona itu sudah sebagian ada (`/shop-admin/karyawan`,
+`/shop-admin/karyawan/{kid}/berkas-decision`,
+`/shop-admin/karyawan/{kid}/evaluate`, `/recruitment/{kid}/messages`), tapi
+**katalog produk untuk admin** dan **laporan keuangan read-only untuk admin**
+belum ada endpoint-nya sama sekali.
 
 ---
 

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Ban, ExternalLink, Info, Store as StoreIcon } from "lucide-react";
+import { Ban, ExternalLink, Info, Store as StoreIcon, UserCog, UserPlus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@heroui/react";
@@ -24,6 +24,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
 import { useAllShops, useSuspendShop } from "@/lib/queries/shops";
+import { useShopAdmins } from "@/lib/queries/admins";
+import { CreateShopAdminDialog } from "@/components/admins/create-admin-dialog";
 import { getSafeErrorMessage } from "@/lib/api";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import type { Shop } from "@/types/admin";
@@ -104,6 +106,41 @@ function SuspendDialog({ shop }: { shop: Shop }) {
   );
 }
 
+// Aksi "Buat admin" per baris — memanggil useShopAdmins() sendiri (React Query
+// men-dedup ke satu request, cache-nya sama dengan halaman Kelola Admin). Kalau
+// toko sudah punya admin, tombolnya dinonaktifkan (aturan 1 toko = 1 admin).
+function ShopAdminAction({ shop }: { shop: Shop }) {
+  const { data: admins } = useShopAdmins();
+  const existing = admins?.find((a) => a.managed_shop_ids.includes(shop.id));
+
+  if (existing) {
+    return (
+      <Button
+        size="sm"
+        variant="outline"
+        className="gap-1.5 opacity-60"
+        disabled
+        title={`Sudah dikelola admin: ${existing.name}`}
+      >
+        <UserCog className="size-3.5" />
+        Ada admin
+      </Button>
+    );
+  }
+
+  return (
+    <CreateShopAdminDialog
+      lockedShop={{ id: shop.id, name: shop.name }}
+      trigger={
+        <Button size="sm" variant="outline" className="gap-1.5">
+          <UserPlus className="size-3.5" />
+          Buat admin
+        </Button>
+      }
+    />
+  );
+}
+
 const columnHelper = legacyCreateColumnHelper<Shop>();
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TanStack v9 column defs are invariant over TValue
@@ -154,7 +191,7 @@ const columns: LegacyColumnDef<Shop, any>[] = [
     id: "actions",
     header: () => <span className="sr-only">Aksi</span>,
     cell: ({ row }) => (
-      <div className="flex justify-end gap-2">
+      <div className="flex flex-wrap justify-end gap-2">
         <Button
           size="sm"
           variant="outline"
@@ -167,6 +204,7 @@ const columns: LegacyColumnDef<Shop, any>[] = [
             </Link>
           }
         />
+        <ShopAdminAction shop={row.original} />
         <SuspendDialog shop={row.original} />
       </div>
     ),

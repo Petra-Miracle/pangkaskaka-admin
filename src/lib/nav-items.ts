@@ -4,6 +4,7 @@ import {
   ShieldCheck,
   Store,
   Users,
+  UserCog,
   ClipboardList,
   CreditCard,
   CalendarClock,
@@ -35,6 +36,7 @@ export const NAV_SECTIONS: NavSection[] = [
     label: "Manajemen",
     items: [
       { label: "Shops", href: "/shops", icon: Store },
+      { label: "Kelola Admin", href: "/admins", icon: UserCog },
       { label: "Users", href: "/users", icon: Users },
       { label: "Recruitment", href: "/recruitment", icon: ClipboardList },
       { label: "Hairstyles", href: "/hairstyles", icon: Sparkles },

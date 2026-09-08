@@ -127,6 +127,36 @@ export type Shop = {
 export const ADMIN_USER_ROLES = ["customer", "owner", "streetbarber", "admin", "superadmin"] as const;
 export type AdminUserRole = (typeof ADMIN_USER_ROLES)[number];
 
+// "Admin toko" — akun peran sempit yang dibuat SuperAdmin lewat
+// /superadmin/admins (backend server.py:2456+). Satu admin dikaitkan ke satu
+// toko (aturan 1:1 ditegakkan di dashboard; backend menyimpannya sebagai
+// array `managed_shop_ids` dan `managed_shops` sudah di-join nama tokonya).
+export type ManagedShopRef = {
+  id: string;
+  name: string;
+};
+
+export type ShopAdmin = {
+  id: string;
+  email: string;
+  name: string;
+  phone: string;
+  role: "admin";
+  managed_shop_ids: string[];
+  managed_shops: ManagedShopRef[];
+  address?: string;
+  photo?: string;
+  created_at: string;
+  created_by?: string;
+};
+
+export type CreateShopAdminInput = {
+  name: string;
+  email: string;
+  phone: string;
+  managed_shop_ids: string[];
+};
+
 export type AdminUser = {
   id: string;
   email: string;
