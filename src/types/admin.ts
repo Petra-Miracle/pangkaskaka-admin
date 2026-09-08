@@ -124,7 +124,7 @@ export type Shop = {
   };
 };
 
-export const ADMIN_USER_ROLES = ["customer", "owner", "karyawan", "admin"] as const;
+export const ADMIN_USER_ROLES = ["customer", "owner", "streetbarber", "admin", "superadmin"] as const;
 export type AdminUserRole = (typeof ADMIN_USER_ROLES)[number];
 
 export type AdminUser = {

@@ -50,8 +50,9 @@ const STATUS_LABELS: Record<string, string> = {
 const ROLE_LABELS: Record<string, string> = {
   customer: "Customer",
   owner: "Pemilik toko",
-  karyawan: "Karyawan",
+  streetbarber: "StreetBarber",
   admin: "Admin",
+  superadmin: "Superadmin",
 };
 
 // Addresses look like "Jl. ..., <kelurahan>, Kupang" — the API doesn't expose

@@ -95,7 +95,7 @@ export function ChatPanel({ shopId }: { shopId: string }) {
               <p className="py-6 text-center text-sm text-muted-foreground">Belum ada pesan.</p>
             )}
             {data.messages.map((msg, i) => {
-              const isAdmin = msg.sender_role === "admin";
+              const isAdmin = msg.sender_role === "superadmin";
               const text = msg.message ?? msg.text ?? JSON.stringify(msg);
               const time = timeOf(msg.created_at);
               return (

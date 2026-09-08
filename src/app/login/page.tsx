@@ -113,8 +113,8 @@ function LoginForm() {
 
       const { token, user } = data as LoginResponse;
 
-      if (user?.role !== "admin") {
-        throw new Error("Akun ini bukan akun admin. Akses ditolak.");
+      if (user?.role !== "superadmin") {
+        throw new Error("Akun ini bukan akun superadmin. Akses ditolak.");
       }
 
       writeAttempts({ count: 0, lockedUntil: null });

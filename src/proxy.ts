@@ -19,7 +19,7 @@ function readValidSession(rawToken: string): { role: string; exp: number } | nul
     const json = atob(base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "="));
     const claims = JSON.parse(json) as { role?: string; exp?: number };
     if (!claims.exp || claims.exp * 1000 <= Date.now()) return null;
-    if (claims.role !== "admin") return null;
+    if (claims.role !== "superadmin") return null;
     return { role: claims.role, exp: claims.exp };
   } catch {
     return null;

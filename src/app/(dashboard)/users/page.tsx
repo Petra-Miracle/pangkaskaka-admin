@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Ban, Eye, EyeOff, KeyRound, RotateCcw, Scissors, ShieldCheck, Store, Trash2, UserCog, Users as UsersIcon } from "lucide-react";
+import { Ban, ClipboardCheck, Eye, EyeOff, KeyRound, RotateCcw, Scissors, ShieldCheck, Store, Trash2, UserCog, Users as UsersIcon } from "lucide-react";
 import { Card } from "@heroui/react";
 import { SearchBox } from "@/components/ui/search-box";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -40,11 +40,11 @@ import { ADMIN_USER_ROLES, type AdminUser, type AdminUserRole } from "@/types/ad
 import { cn, formatRelativeTime } from "@/lib/utils";
 
 const ROLE_META: Record<AdminUserRole, { label: string; chip: string; dot: string; icon: typeof UsersIcon }> = {
-  admin: {
-    label: "Admin",
-    chip: "bg-primary/10 text-primary",
-    dot: "bg-primary",
-    icon: ShieldCheck,
+  customer: {
+    label: "Customer",
+    chip: "bg-muted text-muted-foreground",
+    dot: "bg-muted-foreground",
+    icon: UsersIcon,
   },
   owner: {
     label: "Pemilik toko",
@@ -52,17 +52,23 @@ const ROLE_META: Record<AdminUserRole, { label: string; chip: string; dot: strin
     dot: "bg-sky-500",
     icon: Store,
   },
-  karyawan: {
-    label: "Karyawan",
+  streetbarber: {
+    label: "StreetBarber",
     chip: "bg-violet-500/10 text-violet-600 dark:text-violet-400",
     dot: "bg-violet-500",
     icon: Scissors,
   },
-  customer: {
-    label: "Customer",
-    chip: "bg-muted text-muted-foreground",
-    dot: "bg-muted-foreground",
-    icon: UsersIcon,
+  admin: {
+    label: "Admin",
+    chip: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+    dot: "bg-amber-500",
+    icon: ClipboardCheck,
+  },
+  superadmin: {
+    label: "Superadmin",
+    chip: "bg-primary/10 text-primary",
+    dot: "bg-primary",
+    icon: ShieldCheck,
   },
 };
 
@@ -437,9 +443,9 @@ function SetPasswordDialog({ user }: { user: AdminUser }) {
 function UserActionsCell({ user }: { user: AdminUser }) {
   const currentUser = getUser();
   const isSelf = currentUser?.id === user.id;
-  const isAdminRow = user.role === "admin";
-  const locked = isSelf || isAdminRow;
-  const lockedReason = isSelf ? "Tidak bisa mengubah akun sendiri" : isAdminRow ? "Akun admin tidak bisa diubah dari sini" : undefined;
+  const isSuperadminRow = user.role === "superadmin";
+  const locked = isSelf || isSuperadminRow;
+  const lockedReason = isSelf ? "Tidak bisa mengubah akun sendiri" : isSuperadminRow ? "Akun superadmin tidak bisa diubah dari sini" : undefined;
 
   return (
     <div className="flex justify-end gap-1">
@@ -555,7 +561,7 @@ export default function UsersPage() {
       <PageHeader
         eyebrow="Akun"
         title="Users"
-        description={`Semua akun terdaftar di platform (${isLoading ? "…" : users?.length ?? 0}) — customer, owner, karyawan, dan admin.`}
+        description={`Semua akun terdaftar di platform (${isLoading ? "…" : users?.length ?? 0}) — customer, owner, streetbarber, admin, dan superadmin.`}
       />
 
       {isError && (
@@ -564,7 +570,7 @@ export default function UsersPage() {
         </div>
       )}
 
-      <div className="stagger-children grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="stagger-children grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {ADMIN_USER_ROLES.map((r) => {
           const meta = ROLE_META[r];
           const Icon = meta.icon;
