@@ -147,7 +147,12 @@ export function CreateShopAdminDialog({
                     onValueChange={(value) => setShopId((value as string | null) ?? null)}
                   >
                     <SelectTrigger id="ca-shop" className="w-full">
-                      <SelectValue placeholder="Pilih toko yang belum punya admin..." />
+                      <SelectValue placeholder="Pilih toko yang belum punya admin...">
+                        {(value: string | null) =>
+                          shops?.find((s) => s.id === value)?.name ??
+                          "Pilih toko yang belum punya admin..."
+                        }
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {availableShops.length === 0 ? (
