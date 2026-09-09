@@ -145,7 +145,7 @@ function LoginForm() {
       <div className="mb-7 flex flex-col items-center text-center animate-fade-up">
         <div className="relative mb-4 flex size-14 items-center justify-center overflow-hidden rounded-2xl shadow-lg shadow-primary/30 ring-1 ring-white/40 ring-inset animate-float">
           <Image src="/pangkaskaka-logo.png" alt="PangkasKAKA" fill sizes="56px" className="object-cover" priority />
-          <span className="absolute -right-0.5 -bottom-0.5 size-3 rounded-full border-2 border-white bg-emerald-500" />
+          <span className="absolute -right-0.5 -bottom-0.5 size-3 rounded-full border-2 border-white bg-success" />
         </div>
         <h1 className="text-xl font-bold tracking-tight text-foreground">PangkasKAKA</h1>
         <p className="mt-1 text-sm text-muted-foreground">Masuk untuk mengelola platform</p>
@@ -243,8 +243,8 @@ export default function LoginPage() {
     <div className="bg-animated-mesh relative flex min-h-screen overflow-hidden">
       <div className="bg-noise pointer-events-none absolute inset-0" />
       <div className="pointer-events-none absolute -top-40 -left-32 size-[28rem] animate-float-soft rounded-full bg-primary/15 blur-3xl" />
-      <div className="pointer-events-none absolute -right-40 -bottom-40 size-[30rem] animate-float-soft rounded-full bg-violet-500/15 blur-3xl [animation-delay:-6s]" />
-      <div className="pointer-events-none absolute top-1/3 right-1/4 size-40 rounded-full bg-sky-500/10 blur-3xl" />
+      <div className="pointer-events-none absolute -right-40 -bottom-40 size-[30rem] animate-float-soft rounded-full bg-accent-400/15 blur-3xl [animation-delay:-6s]" />
+      <div className="pointer-events-none absolute top-1/3 right-1/4 size-40 rounded-full bg-accent-200/20 blur-3xl" />
 
       <div className="relative z-10 flex flex-1 items-center justify-center px-4 py-10">
         <Suspense fallback={null}>

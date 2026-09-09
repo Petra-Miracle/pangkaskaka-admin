@@ -32,7 +32,7 @@ export default function BookingsPage() {
         title="Bookings"
         description="Pencarian booking lintas toko untuk dukungan sengketa (dispute)."
         actions={
-          <Badge variant="outline" className="gap-1.5">
+          <Badge variant="neutral" className="gap-1.5">
             <Clock className="size-3" />
             Menunggu endpoint backend
           </Badge>
@@ -61,7 +61,7 @@ export default function BookingsPage() {
           </div>
         </Card.Header>
         <Card.Content className="stagger-children gap-5 text-sm">
-          <div className="flex items-start gap-2 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-amber-700 dark:text-amber-400">
+          <div className="flex items-start gap-2 rounded-xl border border-warning/20 bg-warning-bg px-4 py-3 text-warning">
             <Clock className="mt-0.5 size-4 shrink-0" />
             Kirim spesifikasi di bawah ke pemilik/pengelola repo backend (di luar proyek ini) — lihat juga
             AGENT_BRIEF.md bagian 4.

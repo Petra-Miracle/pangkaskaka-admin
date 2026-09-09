@@ -69,9 +69,9 @@ function HairstyleImage({ src, alt }: { src: string; alt: string }) {
 function ScoreBadge({ score }: { score: number }) {
   const tone =
     score >= 70
-      ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+      ? "bg-success-bg text-success"
       : score >= 40
-        ? "bg-amber-500/10 text-amber-700 dark:text-amber-400"
+        ? "bg-warning-bg text-warning"
         : "bg-muted text-muted-foreground";
   return (
     <span className={cn("inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums", tone)}>

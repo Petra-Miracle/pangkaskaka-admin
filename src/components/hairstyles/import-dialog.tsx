@@ -233,7 +233,7 @@ export function HairstylesImportDialog() {
                           <td className="px-2 py-1.5">
                             {outcome ? (
                               outcome.ok ? (
-                                <span className="text-emerald-600 dark:text-emerald-400">Berhasil</span>
+                                <span className="text-success">Berhasil</span>
                               ) : (
                                 <span className="text-destructive" title={outcome.error}>
                                   Gagal: {outcome.error}
