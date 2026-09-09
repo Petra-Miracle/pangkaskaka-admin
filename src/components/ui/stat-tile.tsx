@@ -81,7 +81,7 @@ export function StatTile({
         </div>
       )}
       <div className="min-h-4 text-xs">
-        {trend ? (
+        {loading ? null : trend ? (
           <TrendChip trend={trend} />
         ) : note ? (
           <span className="text-muted-foreground">{note}</span>

@@ -4,9 +4,10 @@ import { useMemo, useState } from "react";
 import { useTheme } from "next-themes";
 import type { ApexOptions } from "apexcharts";
 import type { LucideIcon } from "lucide-react";
+import type { ReactNode } from "react";
 import {
   AlertTriangle,
-  ChartNoAxesColumnIncreasing,
+  HelpCircle,
   LineChart,
   MapPin,
   PieChart,
@@ -14,7 +15,6 @@ import {
   Star,
   TrendingUp,
 } from "lucide-react";
-import type { ReactNode } from "react";
 import { ApexChart } from "@/components/ui/apex-chart";
 import { Card } from "@heroui/react";
 import {
@@ -25,14 +25,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
+import { SectionHeader } from "@/components/ui/section-header";
 import { getChartPalette } from "@/lib/chart-colors";
 import { useAdminAnalytics } from "@/lib/queries/analytics";
 import { useAllShops } from "@/lib/queries/shops";
 import { useAllUsers } from "@/lib/queries/users";
 import { ADMIN_USER_ROLES } from "@/types/admin";
+import { formatCount } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
-const CHART_HEIGHT = 300;
+const CHART_HEIGHT = 210;
 
 const SHOP_FILTER_MODES = [
   { value: "category", label: "Kategori" },
@@ -66,15 +68,36 @@ function extractArea(address: string) {
 
 // Sumbu Y chart "Jumlah toko": tetap 0–40 dengan langkah 5 (0,5,10,…,40) supaya
 // tampilannya konsisten & detail. Kalau data melampaui 40, batas atas naik ke
-// kelipatan 10 berikutnya, langkah tetap = max/8 (selalu bilangan bulat).
+// kelipatan 10 berikutnya, langkah tetap = max/5 (selalu bilangan bulat).
 function integerAxis(maxValue: number): { max: number; tickAmount: number } {
   const max = maxValue > 40 ? Math.ceil(maxValue / 10) * 10 : 40;
-  return { max, tickAmount: max / 5 }; // langkah selalu 5 → tick 0,5,10,…
+  return { max, tickAmount: max / 5 };
+}
+
+// Kosmetik chart yang seragam: tanpa toolbar, grid garis horizontal tipis saja,
+// tooltip pil gelap.
+function baseChartOptions(borderColor: string): ApexOptions {
+  return {
+    chart: {
+      toolbar: { show: false },
+      fontFamily: "inherit",
+      parentHeightOffset: 0,
+      animations: { enabled: true, speed: 650 },
+    },
+    grid: {
+      borderColor,
+      strokeDashArray: 4,
+      xaxis: { lines: { show: false } },
+      yaxis: { lines: { show: true } },
+      padding: { left: 8, right: 8, top: 8 },
+    },
+    tooltip: { theme: "dark", style: { fontSize: "12px" } },
+  };
 }
 
 function ChartEmptyState({ label }: { label: string }) {
   return (
-    <div className="flex h-64 items-center justify-center text-center text-sm text-muted-foreground">
+    <div className="flex h-52 items-center justify-center px-4 text-center text-sm text-muted-foreground">
       {label}
     </div>
   );
@@ -82,16 +105,29 @@ function ChartEmptyState({ label }: { label: string }) {
 
 function ChartLoading({ label }: { label: string }) {
   return (
-    <div className="flex h-64 items-center justify-center">
+    <div className="flex h-52 items-center justify-center">
       <Spinner color="brand" size="sm" label={label} />
     </div>
+  );
+}
+
+function InfoHint({ text }: { text: string }) {
+  return (
+    <button
+      type="button"
+      title={text}
+      aria-label={text}
+      className="shrink-0 rounded-full text-muted-foreground/60 transition-colors hover:text-muted-foreground focus-visible:outline-2 focus-visible:outline-ring"
+    >
+      <HelpCircle className="size-3.5" />
+    </button>
   );
 }
 
 function ChartCard({
   icon: Icon,
   title,
-  description,
+  hint,
   action,
   footer,
   children,
@@ -99,7 +135,7 @@ function ChartCard({
 }: {
   icon: LucideIcon;
   title: string;
-  description?: string;
+  hint?: string;
   action?: ReactNode;
   footer?: ReactNode;
   children: ReactNode;
@@ -107,28 +143,22 @@ function ChartCard({
 }) {
   return (
     <Card className={cn("glass-card card-glow", className)}>
-      <Card.Header className="flex-col items-stretch gap-3 lg:flex-row lg:items-start lg:justify-between">
-        <div className="flex min-w-0 items-start gap-3">
-          <div className="icon-tile size-10 shrink-0">
-            <Icon className="size-4.5" />
+      <Card.Header className="flex-row items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <div className="icon-tile size-9 shrink-0">
+            <Icon className="size-4" />
           </div>
-          <div className="min-w-0">
-            <Card.Title className="text-base text-foreground">{title}</Card.Title>
-            {description && (
-              <Card.Description className="mt-0.5 line-clamp-2 max-w-md leading-relaxed text-muted-foreground">
-                {description}
-              </Card.Description>
-            )}
-          </div>
+          <Card.Title className="truncate text-sm font-semibold text-foreground">{title}</Card.Title>
+          {hint && <InfoHint text={hint} />}
         </div>
-        {action && <div className="shrink-0 lg:pt-0.5">{action}</div>}
+        {action && <div className="shrink-0">{action}</div>}
       </Card.Header>
-      <Card.Content className="min-w-0 pt-2">
+      <Card.Content className="min-w-0 pt-1">
         <div className="w-full">{children}</div>
       </Card.Content>
       {footer && (
-        <Card.Footer className="-mx-4 -mb-4 flex-wrap gap-2 border-t border-border/60 bg-muted/30 px-4 py-2.5">
-          <span className="text-xs text-muted-foreground">{footer}</span>
+        <Card.Footer className="-mx-4 -mb-4 mt-1 flex-wrap gap-2 border-t border-border/60 bg-muted/30 px-4 py-2">
+          <span className="text-[11px] text-muted-foreground">{footer}</span>
         </Card.Footer>
       )}
     </Card>
@@ -161,13 +191,11 @@ function ShopsByFilterChart() {
   const { max: yMax, tickAmount } = integerAxis(maxCount);
 
   const options: ApexOptions = {
+    ...baseChartOptions(palette.border),
     chart: {
+      ...baseChartOptions(palette.border).chart,
       type: "area",
       height: CHART_HEIGHT,
-      toolbar: { show: false },
-      fontFamily: "inherit",
-      parentHeightOffset: 0,
-      animations: { enabled: true, speed: 700, animateGradually: { enabled: true, delay: 60 } },
     },
     stroke: { curve: "smooth", width: 3, lineCap: "round" },
     dataLabels: {
@@ -194,7 +222,6 @@ function ShopsByFilterChart() {
         stops: [0, 95, 100],
       },
     },
-    grid: { borderColor: palette.border, padding: { left: 8, right: 8, top: 12 } },
     xaxis: {
       categories: grouped.map(([key]) => key),
       labels: {
@@ -217,7 +244,6 @@ function ShopsByFilterChart() {
         formatter: (val) => Math.round(val).toString(),
       },
     },
-    tooltip: { theme: dark ? "dark" : "light" },
     series: [{ name: "Jumlah toko", data: grouped.map(([, count]) => count) }],
   };
 
@@ -225,12 +251,12 @@ function ShopsByFilterChart() {
     <ChartCard
       icon={LineChart}
       title="Jumlah toko terdaftar"
-      description={`Menghitung setiap toko yang terdaftar di platform, difilter per ${
+      hint={`Setiap toko yang terdaftar di platform, dikelompokkan per ${
         SHOP_FILTER_MODES.find((m) => m.value === mode)?.label.toLowerCase()
       }.`}
       action={
         <Select value={mode} onValueChange={(value) => setMode((value as ShopFilterMode) ?? "category")}>
-          <SelectTrigger className="w-full lg:w-44">
+          <SelectTrigger className="w-40">
             <SelectValue>
               {(value: ShopFilterMode) => SHOP_FILTER_MODES.find((m) => m.value === value)?.label}
             </SelectValue>
@@ -244,13 +270,21 @@ function ShopsByFilterChart() {
           </SelectContent>
         </Select>
       }
-      footer={`Total ${shops?.length ?? 0} toko terdaftar (disetujui + menunggu verifikasi).`}
+      footer={`Total ${formatCount(shops?.length ?? 0)} toko terdaftar (disetujui + menunggu verifikasi).`}
       className="lg:col-span-2"
     >
       {isLoading ? (
         <ChartLoading label="Memuat data toko..." />
       ) : grouped.length === 0 ? (
-        <ChartEmptyState label="Belum ada toko terdaftar." />
+        <ChartEmptyState label="Belum ada toko terdaftar di platform." />
+      ) : grouped.length === 1 ? (
+        // Garis/area dengan satu titik tidak masuk akal — tampilkan angkanya.
+        <div className="flex h-52 flex-col items-center justify-center gap-1">
+          <span className="text-5xl font-bold tabular-nums text-ink-900">
+            {formatCount(grouped[0][1])}
+          </span>
+          <span className="text-sm text-muted-foreground">toko · {grouped[0][0]}</span>
+        </div>
       ) : (
         <ApexChart options={options} />
       )}
@@ -261,33 +295,31 @@ function ShopsByFilterChart() {
 function UserRolesPieChart() {
   const { data: users, isLoading } = useAllUsers();
   const palette = getChartPalette();
-  const { resolvedTheme } = useTheme();
-  const dark = resolvedTheme === "dark";
 
-  const counts = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const role of ADMIN_USER_ROLES) map.set(role, 0);
-    for (const user of users ?? []) map.set(user.role, (map.get(user.role) ?? 0) + 1);
-    return ADMIN_USER_ROLES.map((role) => [ROLE_LABELS[role] ?? role, map.get(role) ?? 0] as const);
-  }, [users]);
+  const roleCount = new Map<string, number>();
+  for (const role of ADMIN_USER_ROLES) roleCount.set(role, 0);
+  for (const user of users ?? []) roleCount.set(user.role, (roleCount.get(user.role) ?? 0) + 1);
+  const counts = ADMIN_USER_ROLES.map(
+    (role) => [ROLE_LABELS[role] ?? role, roleCount.get(role) ?? 0] as const
+  );
 
   const total = counts.reduce((sum, [, count]) => sum + count, 0);
 
   const options: ApexOptions = {
+    ...baseChartOptions(palette.border),
     chart: {
+      ...baseChartOptions(palette.border).chart,
       type: "pie",
       height: CHART_HEIGHT,
-      fontFamily: "inherit",
-      animations: { enabled: true, speed: 700 },
     },
     labels: counts.map(([label]) => label),
-    colors: [palette.chart5, palette.chart3, palette.chart1, palette.chart4],
+    colors: [palette.chart1, palette.chart2, palette.chart3, palette.chart4, palette.chart5],
     legend: {
       position: "bottom",
       horizontalAlign: "center",
       fontSize: "12px",
       offsetY: 2,
-      itemMargin: { horizontal: 10, vertical: 3 },
+      itemMargin: { horizontal: 8, vertical: 2 },
       labels: { colors: palette.muted },
       markers: { width: 6, height: 6, offsetX: -2 },
     },
@@ -297,10 +329,7 @@ function UserRolesPieChart() {
       style: { fontSize: "12px" },
       dropShadow: { enabled: false },
     },
-    tooltip: {
-      theme: dark ? "dark" : "light",
-      y: { formatter: (val) => `${val} user` },
-    },
+    tooltip: { theme: "dark", y: { formatter: (val) => `${formatCount(val)} user` } },
     series: counts.map(([, count]) => count),
   };
 
@@ -308,7 +337,7 @@ function UserRolesPieChart() {
     <ChartCard
       icon={PieChart}
       title="Total pengguna per role"
-      description="Total di seluruh platform — karyawan & customer belum bisa dipecah per toko karena API belum menyimpan relasi karyawan ke toko."
+      hint="Total di seluruh platform. Karyawan & customer belum bisa dipecah per toko."
     >
       {isLoading ? (
         <ChartLoading label="Memuat data pengguna..." />
@@ -334,7 +363,7 @@ function AvgRatingRadialChart() {
       type: "radialBar",
       height: CHART_HEIGHT,
       fontFamily: "inherit",
-      animations: { enabled: true, speed: 700 },
+      animations: { enabled: true, speed: 650 },
     },
     series: [pct],
     labels: ["Rating"],
@@ -342,9 +371,7 @@ function AvgRatingRadialChart() {
     plotOptions: {
       radialBar: {
         hollow: { size: "62%" },
-        track: {
-          background: dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)",
-        },
+        track: { background: dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)" },
         dataLabels: {
           value: {
             formatter: () => rating.toFixed(1),
@@ -357,14 +384,14 @@ function AvgRatingRadialChart() {
         },
       },
     },
-    tooltip: { theme: dark ? "dark" : "light" },
+    tooltip: { theme: "dark" },
   };
 
   return (
     <ChartCard
       icon={Star}
       title="Rata-rata rating toko"
-      description="Skala 0–5, dihitung dari seluruh toko di platform."
+      hint="Skala 0–5, dihitung dari seluruh toko di platform."
     >
       {isLoading ? <ChartLoading label="Memuat rating..." /> : <ApexChart options={options} />}
     </ChartCard>
@@ -374,19 +401,15 @@ function AvgRatingRadialChart() {
 function GrowthBarChart() {
   const { data, isLoading } = useAdminAnalytics();
   const palette = getChartPalette();
-  const { resolvedTheme } = useTheme();
-  const dark = resolvedTheme === "dark";
   const customerGrowth = data?.kpi.customer_growth_pct ?? 0;
   const revenueGrowth = data?.kpi.revenue_growth_pct ?? 0;
 
   const options: ApexOptions = {
+    ...baseChartOptions(palette.border),
     chart: {
+      ...baseChartOptions(palette.border).chart,
       type: "bar",
       height: CHART_HEIGHT,
-      toolbar: { show: false },
-      fontFamily: "inherit",
-      parentHeightOffset: 0,
-      animations: { enabled: true, speed: 700 },
     },
     plotOptions: { bar: { horizontal: true, borderRadius: 6, barHeight: "38%" } },
     dataLabels: {
@@ -401,7 +424,6 @@ function GrowthBarChart() {
       revenueGrowth >= 0 ? palette.success : palette.danger,
     ],
     fill: { type: "solid" },
-    grid: { borderColor: palette.border, padding: { left: 8, right: 16 } },
     xaxis: {
       categories: ["Pertumbuhan pelanggan", "Pertumbuhan pendapatan"],
       labels: {
@@ -411,10 +433,7 @@ function GrowthBarChart() {
       axisBorder: { show: false },
       axisTicks: { show: false },
     },
-    tooltip: {
-      theme: dark ? "dark" : "light",
-      y: { formatter: (val) => `${Number(val).toFixed(1)}%` },
-    },
+    tooltip: { theme: "dark", y: { formatter: (val) => `${Number(val).toFixed(1)}%` } },
     series: [{ name: "Growth %", data: [customerGrowth, revenueGrowth] }],
   };
 
@@ -422,7 +441,7 @@ function GrowthBarChart() {
     <ChartCard
       icon={TrendingUp}
       title="Pertumbuhan bulan ini"
-      description="Persentase pertumbuhan pelanggan & pendapatan dari `/analytics/admin`."
+      hint="Persentase pertumbuhan pelanggan & pendapatan dibanding bulan lalu."
     >
       {isLoading ? <ChartLoading label="Memuat data pertumbuhan..." /> : <ApexChart options={options} />}
     </ChartCard>
@@ -432,25 +451,23 @@ function GrowthBarChart() {
 function KecamatanDonutChart() {
   const { data, isLoading } = useAdminAnalytics();
   const palette = getChartPalette();
-  const { resolvedTheme } = useTheme();
-  const dark = resolvedTheme === "dark";
   const distribution = data?.distribution ?? [];
 
   const options: ApexOptions = {
+    ...baseChartOptions(palette.border),
     chart: {
+      ...baseChartOptions(palette.border).chart,
       type: "donut",
       height: CHART_HEIGHT,
-      fontFamily: "inherit",
-      animations: { enabled: true, speed: 700 },
     },
     labels: distribution.map((d) => d.name),
-    colors: [palette.chart5, palette.chart3, palette.chart2, palette.chart1, palette.chart4],
+    colors: [palette.chart1, palette.chart2, palette.chart3, palette.chart4, palette.chart5],
     legend: {
       position: "bottom",
       horizontalAlign: "center",
       fontSize: "12px",
       offsetY: 2,
-      itemMargin: { horizontal: 10, vertical: 3 },
+      itemMargin: { horizontal: 8, vertical: 2 },
       labels: { colors: palette.muted },
       markers: { width: 6, height: 6, offsetX: -2 },
     },
@@ -460,10 +477,7 @@ function KecamatanDonutChart() {
       style: { fontSize: "12px" },
       dropShadow: { enabled: false },
     },
-    tooltip: {
-      theme: dark ? "dark" : "light",
-      y: { formatter: (val) => `${val} toko` },
-    },
+    tooltip: { theme: "dark", y: { formatter: (val) => `${formatCount(val)} toko` } },
     series: distribution.map((d) => d.count),
   };
 
@@ -471,12 +485,12 @@ function KecamatanDonutChart() {
     <ChartCard
       icon={MapPin}
       title="Distribusi toko per kecamatan"
-      description="Dihitung langsung oleh backend (`distribution`), bukan hasil filter di halaman ini."
+      hint="Dihitung langsung oleh backend, bukan hasil filter di halaman ini."
     >
       {isLoading ? (
         <ChartLoading label="Memuat distribusi..." />
       ) : distribution.length === 0 ? (
-        <ChartEmptyState label="Belum ada data distribusi." />
+        <ChartEmptyState label="Belum ada data distribusi wilayah." />
       ) : (
         <ApexChart options={options} />
       )}
@@ -492,7 +506,7 @@ function AtRiskShopsList() {
     <ChartCard
       icon={AlertTriangle}
       title="Toko berisiko"
-      description="Rating toko turun lebih dari 0.5 dalam seminggu terakhir."
+      hint="Rating toko turun lebih dari 0.5 dalam seminggu terakhir."
       className="h-full"
     >
       {isLoading ? (
@@ -502,7 +516,7 @@ function AtRiskShopsList() {
           ))}
         </div>
       ) : shops.length === 0 ? (
-        <div className="flex h-full min-h-32 items-center justify-center gap-2 rounded-xl border border-success/20 bg-success/5 px-4 py-3 text-sm text-success">
+        <div className="flex h-full min-h-32 items-center justify-center gap-2 rounded-xl border border-success/20 bg-success-bg px-4 py-3 text-sm text-success">
           <ShieldCheck className="size-4 shrink-0" />
           Tidak ada toko berisiko saat ini.
         </div>
@@ -511,13 +525,15 @@ function AtRiskShopsList() {
           {shops.map((shop, index) => (
             <li
               key={shop.id ?? shop.shop_id ?? index}
-              className="group flex items-center gap-3 rounded-xl border border-warning/20 bg-warning/5 px-3.5 py-2.5 text-sm transition-colors hover:bg-warning/10"
+              className="group flex items-center gap-3 rounded-xl border border-warning/20 bg-warning-bg px-3.5 py-2.5 text-sm transition-colors hover:border-warning/40"
             >
               <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-warning/15 text-xs font-bold text-warning tabular-nums">
                 {index + 1}
               </span>
               <AlertTriangle className="size-4 shrink-0 text-warning" />
-              <span className="min-w-0 flex-1 truncate font-medium text-heading">{shop.name ?? "Toko tidak diketahui"}</span>
+              <span className="min-w-0 flex-1 truncate font-medium text-foreground">
+                {shop.name ?? "Toko tidak diketahui"}
+              </span>
             </li>
           ))}
         </ul>
@@ -529,15 +545,7 @@ function AtRiskShopsList() {
 export function StatisticsSection() {
   return (
     <div className="space-y-4">
-      <div className="animate-fade-up">
-        <h2 className="flex items-center gap-2.5 text-xl font-bold tracking-tight text-foreground">
-          <span className="icon-tile size-9">
-            <ChartNoAxesColumnIncreasing className="size-4.5" />
-          </span>
-          Statistik
-        </h2>
-        <p className="mt-1.5 text-sm text-muted-foreground">Jumlah toko, pengguna, dan pertumbuhan platform.</p>
-      </div>
+      <SectionHeader>Statistik</SectionHeader>
       <div className="stagger-children grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
         <ShopsByFilterChart />
         <UserRolesPieChart />
