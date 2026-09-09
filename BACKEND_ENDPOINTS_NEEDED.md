@@ -7,8 +7,9 @@
 > asli, bukan tebakan dari AGENT_BRIEF.md saja — beberapa hal di brief
 > ternyata sudah tidak akurat begitu dicek ulang.
 
-Dibuat: 2026-08-15 | Diperbarui: 2026-09-09 (Kelola Admin toko — lihat
-bagian 8) | Terkait: `AGENT_BRIEF.md` bagian 4, `SECURITY_AUDIT.md` (S2)
+Dibuat: 2026-08-15 | Diperbarui: 2026-09-09 (Kelola Admin toko — bagian 8;
+Modul Street Barber — bagian 9) | Terkait: `AGENT_BRIEF.md` bagian 4,
+`SECURITY_AUDIT.md` (S2)
 
 ---
 
@@ -24,6 +25,7 @@ bagian 8) | Terkait: `AGENT_BRIEF.md` bagian 4, `SECURITY_AUDIT.md` (S2)
 | User management (suspend/role/hapus) | ~~`POST`/`PUT`/`DELETE /admin/users/{id}/...`~~ **Selesai 2026-08-20** | — | — |
 | Recruitment criteria | *(bukan endpoint hilang — koreksi dokumentasi, lihat di bawah)* | — | — |
 | Kelola Admin toko (buat/list/pindah/reset pw) | ~~`/superadmin/admins*`~~ **Sudah ada di backend** — butuh 1 penyesuaian aturan 1:1, lihat bagian 8 | Kecil | — |
+| Modul Street Barber (ringkasan, daftar agregat, detail 6 tab) | `GET /admin/street-barbers*` + `POST /admin/street-barbers/{id}/actions` — 9 endpoint, lihat bagian 9 | Sedang-besar | Ya, parsial (daftar akun via `/admin/users?role=streetbarber`) |
 
 ---
 
@@ -334,6 +336,132 @@ persona itu sudah sebagian ada (`/shop-admin/karyawan`,
 `/shop-admin/karyawan/{kid}/evaluate`, `/recruitment/{kid}/messages`), tapi
 **katalog produk untuk admin** dan **laporan keuangan read-only untuk admin**
 belum ada endpoint-nya sama sekali.
+
+---
+
+## 9. Modul Street Barber (dashboard SuperAdmin) — endpoint yang dibutuhkan
+
+> Status 2026-09-09: menu **Street Barber** + Lapis 1/2/3 sudah dibangun di
+> dashboard (`src/app/(dashboard)/street-barbers/`). Yang berfungsi sekarang
+> hanya bagian yang bisa dilayani `GET /admin/users?role=streetbarber`:
+> daftar akun, status aktif/ditangguhkan, suspend/aktifkan. Semua metrik
+> operasional dan halaman detail menampilkan panel "Menunggu endpoint
+> backend" yang menyebutkan endpoint di bawah ini persis.
+
+Semua `require_role("superadmin")`. StreetBarber = `profiles` dengan
+`role: "streetbarber"`; ada juga baris di koleksi `barbers`
+(`karyawan_id`, `shop_id` verifikator, `rating`, `skill_level`, `status`) dan
+`karyawan` (berkas + skor verifikasi), serta wallet `owner_type: "karyawan"`.
+
+### 9.1 Ringkasan armada — `GET /admin/street-barbers/summary`
+```json
+{
+  "total": 0, "active": 0, "suspended": 0,
+  "active_7d": 0,            // punya >=1 booking selesai dalam 7 hari
+  "online_now": 0,           // karyawan_locations diperbarui < 10 menit lalu
+  "undisbursed_total": 0,    // SUM(balance_pending + balance_available) wallet karyawan
+  "gmv_trend": [ { "date": "YYYY-MM-DD", "gmv": 0 } ],
+  "by_district": [ { "district": "Oebobo", "barbers": 0, "demand": 0 } ],
+  "rating_histogram": [ { "bucket": "1", "count": 0 }, { "bucket": "2", "count": 0 } ]
+}
+```
+`demand` = jumlah booking layanan panggilan di kecamatan itu (range 30 hari),
+supaya sisi supply vs demand kelihatan.
+
+### 9.2 Daftar dengan kolom agregat — `GET /admin/street-barbers?range=30d&status=&district=&risk=&search=&page=&size=`
+```json
+{
+  "total": 0,
+  "street_barbers": [
+    {
+      "id": "string", "name": "string", "phone": "string", "photo": "string",
+      "status": "active | inactive | suspended | needs_reverification",
+      "base_district": "string",
+      "orders_30d": 0,
+      "cancellation_rate": 0.0,        // 0..1, dibatalkan barberman / total
+      "rating": 0.0, "reviews_count": 0,
+      "gmv_month": 0,                  // integer rupiah
+      "undisbursed_balance": 0,        // integer rupiah
+      "last_active_at": "ISO datetime | null",
+      "risk_flags": ["high_cancellation" | "rating_drop" | "document_expiring"]
+    }
+  ]
+}
+```
+`risk` query menerima salah satu nilai `risk_flags`.
+
+### 9.3 Detail — profil gabungan — `GET /admin/street-barbers/{id}/profile`
+```json
+{
+  "id": "string", "name": "string", "email": "string", "phone": "string",
+  "photo": "string", "address": "string",
+  "operating_districts": ["string"],
+  "availability": [ { "day": "mon", "from": "08:00", "to": "17:00" } ],
+  "payout_account": { "bank_name": "string", "account_number": "string", "account_holder": "string" },
+  "documents": [
+    { "key": "ktp", "url": "string", "uploaded_at": "ISO", "expires_at": "ISO | null", "expiring_soon": false }
+  ],
+  "joined_at": "ISO", "status": "active | suspended | ..."
+}
+```
+
+### 9.4 Transaksi — `GET /admin/street-barbers/{id}/bookings?status=&range=&page=&size=`
+Bentuk baris = objek transaksi Bagian D (`booking_id`, `started_at`/`completed_at`
+UTC, `customer_name`/`customer_phone`, `service_address`/`district`,
+`service_type` snapshot, `gross_amount`, `fee_percent_snapshot`, `fee_amount`,
+`net_amount`, `payment_method`/`payment_reference`, `status`, `payout_status`).
+
+### 9.5 Keuangan — `GET /admin/street-barbers/{id}/wallet` + `GET /admin/street-barbers/{id}/payouts?status=&page=`
+```json
+// wallet
+{ "balance_pending": 0, "balance_available": 0,
+  "recap": { "daily": [...], "weekly": [...], "monthly": [...] } }
+// payouts
+{ "total": 0, "payouts": [
+  { "id": "string", "amount": 0, "status": "held|processing|paid|failed",
+    "batch_id": "string|null", "failure_reason": "string|null",
+    "requested_at": "ISO", "paid_at": "ISO|null" } ] }
+```
+
+### 9.6 Performa & SOP — `GET /admin/street-barbers/{id}/performance?range=`
+```json
+{
+  "avg_rating": 0.0, "rating_trend": [ { "date": "YYYY-MM-DD", "rating": 0.0 } ],
+  "completion_rate": 0.0,
+  "cancellation": { "by_barber": 0.0, "by_customer": 0.0 },
+  "avg_accept_seconds": 0, "avg_late_minutes": 0,
+  "complaints": 0,
+  "sop_notes": [ { "at": "ISO", "note": "string", "by": "string" } ]
+}
+```
+
+### 9.7 Riwayat verifikasi — `GET /admin/street-barbers/{id}/verification-history`
+```json
+{ "attempts": [
+  { "attempt_number": 1,
+    "stage1": { "reviewed_by": "string", "reviewed_at": "ISO", "shop_id": "string", "shop_name": "string", "notes": "string" },
+    "stage2": { "tested_by": "string", "tested_at": "ISO", "score": 0, "criteria": {...}, "evidence_urls": ["string"], "result": "passed|failed" } } ] }
+```
+Sumber datanya sudah ada di koleksi `karyawan` — endpoint ini cuma
+membukanya untuk sudut pandang SuperAdmin lintas toko (yang sekarang
+`/shop-admin/karyawan` batasi ke admin toko bersangkutan).
+
+### 9.8 Log aktivitas — `GET /admin/audit-log?target_type=street_barber&target_id={id}`
+Bagian dari Audit Log (§4 / Bagian F). Tidak ada tambahan khusus di sini.
+
+### 9.9 Tindakan SuperAdmin — `POST /admin/street-barbers/{id}/actions`
+```json
+// request
+{ "action": "revoke | reverify | flag | hold_payout | release_payout | manual_payout | adjust",
+  "reason": "string (wajib)",
+  "amount": 0        // hanya untuk manual_payout / adjust
+}
+// response
+{ "ok": true }
+```
+Semua wajib menulis ke `audit_logs` dengan `reason`. Suspend/aktifkan tetap
+lewat `/admin/users/{id}/suspend|activate` yang sudah ada (dashboard sudah
+memakainya).
 
 ---
 
