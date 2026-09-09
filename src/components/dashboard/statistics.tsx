@@ -6,8 +6,8 @@ import type { ApexOptions } from "apexcharts";
 import type { LucideIcon } from "lucide-react";
 import {
   AlertTriangle,
-  BarChart3,
   ChartNoAxesColumnIncreasing,
+  LineChart,
   MapPin,
   PieChart,
   ShieldCheck,
@@ -159,28 +159,41 @@ function ShopsByFilterChart() {
 
   const maxCount = grouped.reduce((m, [, count]) => Math.max(m, count), 0);
   const { max: yMax, tickAmount } = integerAxis(maxCount);
-  // Batasi lebar bar supaya sedikit kategori tidak jadi balok selebar kartu.
-  const columnWidth = grouped.length <= 2 ? "18%" : grouped.length <= 4 ? "38%" : "60%";
 
   const options: ApexOptions = {
     chart: {
-      type: "bar",
+      type: "area",
       height: CHART_HEIGHT,
       toolbar: { show: false },
       fontFamily: "inherit",
       parentHeightOffset: 0,
       animations: { enabled: true, speed: 700, animateGradually: { enabled: true, delay: 60 } },
     },
-    plotOptions: { bar: { borderRadius: 6, columnWidth } },
+    stroke: { curve: "smooth", width: 3, lineCap: "round" },
     dataLabels: {
       enabled: true,
-      offsetY: -18,
+      offsetY: -10,
       formatter: (val) => Math.round(Number(val)).toString(),
-      style: { fontSize: "11px", fontWeight: 600, colors: [palette.muted] },
+      style: { fontSize: "11px", fontWeight: 700, colors: [palette.chart3] },
     },
     legend: { show: false },
     colors: [palette.chart1],
-    fill: { type: "solid" },
+    markers: {
+      size: 4,
+      colors: [palette.background],
+      strokeColors: palette.chart1,
+      strokeWidth: 2,
+      hover: { size: 6 },
+    },
+    fill: {
+      type: "gradient",
+      gradient: {
+        shadeIntensity: 1,
+        opacityFrom: dark ? 0.5 : 0.4,
+        opacityTo: 0.03,
+        stops: [0, 95, 100],
+      },
+    },
     grid: { borderColor: palette.border, padding: { left: 8, right: 8, top: 12 } },
     xaxis: {
       categories: grouped.map(([key]) => key),
@@ -210,7 +223,7 @@ function ShopsByFilterChart() {
 
   return (
     <ChartCard
-      icon={BarChart3}
+      icon={LineChart}
       title="Jumlah toko terdaftar"
       description={`Menghitung setiap toko yang terdaftar di platform, difilter per ${
         SHOP_FILTER_MODES.find((m) => m.value === mode)?.label.toLowerCase()
