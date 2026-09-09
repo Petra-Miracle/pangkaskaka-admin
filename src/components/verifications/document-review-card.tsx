@@ -34,17 +34,27 @@ const STATUS_ACCENT: Record<DocStatus, string> = {
   needs_revision: "border-amber-500/30",
 };
 
+const EMPTY_DOC: ShopDocument = {
+  url: "",
+  status: "pending",
+  note: "",
+  reviewed_at: null,
+  reviewed_by: null,
+};
+
 export function DocumentReviewCard({
   shopId,
   docKey,
   label,
-  doc,
+  doc: rawDoc,
 }: {
   shopId: string;
   docKey: DocKey;
   label: string;
-  doc: ShopDocument;
+  // Bisa undefined kalau objek `docs` toko tidak lengkap.
+  doc?: ShopDocument;
 }) {
+  const doc = rawDoc ?? EMPTY_DOC;
   const [note, setNote] = useState(doc.note ?? "");
   const [pendingStatus, setPendingStatus] = useState<DocStatus | null>(null);
   const [aiResult, setAiResult] = useState<AiDocReviewResult | null>(null);

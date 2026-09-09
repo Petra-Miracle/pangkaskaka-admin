@@ -36,8 +36,12 @@ export default function VerificationDetailPage() {
   const verifyShop = useVerifyShop(shopId);
   const [rejectNote, setRejectNote] = useState("");
   const [rejectOpen, setRejectOpen] = useState(false);
-  const reviewedDocCount = shop
-    ? Object.values(shop.docs).filter((d) => d.status !== "pending").length
+  // Toko lama / hasil seed bisa tidak punya objek `docs` sama sekali —
+  // jangan Object.values() sesuatu yang undefined.
+  const docs = shop?.docs;
+  const hasDocs = !!docs && Object.keys(docs).length > 0;
+  const reviewedDocCount = docs
+    ? Object.values(docs).filter((d) => d?.status && d.status !== "pending").length
     : 0;
 
   const STATUS_META: Record<string, { label: string; className: string }> = {
@@ -177,7 +181,9 @@ export default function VerificationDetailPage() {
           <div>
             <p className="text-muted-foreground">Diajukan</p>
             <p className="font-medium">
-              {new Date(shop.docs_submitted_at).toLocaleString("id-ID")}
+              {shop.docs_submitted_at
+                ? new Date(shop.docs_submitted_at).toLocaleString("id-ID")
+                : "—"}
             </p>
           </div>
           <div>
@@ -197,17 +203,23 @@ export default function VerificationDetailPage() {
             ({reviewedDocCount}/{Object.keys(DOC_LABELS).length} direview)
           </span>
         </h2>
-        <div className="stagger-children grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {(Object.keys(DOC_LABELS) as DocKey[]).map((docKey) => (
-            <DocumentReviewCard
-              key={docKey}
-              shopId={shop.id}
-              docKey={docKey}
-              label={DOC_LABELS[docKey]}
-              doc={shop.docs[docKey]}
-            />
-          ))}
-        </div>
+        {hasDocs ? (
+          <div className="stagger-children grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {(Object.keys(DOC_LABELS) as DocKey[]).map((docKey) => (
+              <DocumentReviewCard
+                key={docKey}
+                shopId={shop.id}
+                docKey={docKey}
+                label={DOC_LABELS[docKey]}
+                doc={docs?.[docKey]}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-xl border border-dashed border-border bg-muted/20 px-4 py-8 text-center text-sm text-muted-foreground">
+            Toko ini belum mengunggah dokumen apa pun.
+          </div>
+        )}
       </div>
 
       <ChatPanel shopId={shop.id} />
