@@ -77,10 +77,22 @@ function MoveShopDialog({ admin }: { admin: ShopAdmin }) {
   const options = useMemo(
     () =>
       (shops ?? [])
-        .filter((s) => !takenByOthers.has(s.id))
+        .filter((s) => !takenByOthers.has(s.id) && s.id !== currentShopId)
         .sort((a, b) => a.name.localeCompare(b.name, "id")),
-    [shops, takenByOthers]
+    [shops, takenByOthers, currentShopId]
   );
+
+  // Nama toko dari id — `managed_shops` (sudah di-join backend) jadi sumber utama
+  // supaya trigger tidak pernah menampilkan UUID mentah walau daftar shop
+  // (`useAllShops`) belum termuat atau toko-nya di luar daftar itu.
+  const shopNameById = (id: string | null) => {
+    if (!id) return null;
+    return (
+      admin.managed_shops?.find((s) => s.id === id)?.name ??
+      shops?.find((s) => s.id === id)?.name ??
+      null
+    );
+  };
 
   function handleOpenChange(next: boolean) {
     setOpen(next);
@@ -129,16 +141,29 @@ function MoveShopDialog({ admin }: { admin: ShopAdmin }) {
           <Label htmlFor="move-shop">Toko baru</Label>
           <Select value={shopId} onValueChange={(value) => setShopId((value as string | null) ?? null)}>
             <SelectTrigger id="move-shop" className="w-full">
-              <SelectValue placeholder="Pilih toko..." />
+              <SelectValue placeholder="Pilih toko...">
+                {(value: string | null) => shopNameById(value) ?? "Pilih toko..."}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              {options.map((s) => (
-                <SelectItem key={s.id} value={s.id}>
-                  {s.name}
-                </SelectItem>
-              ))}
+              {options.length === 0 ? (
+                <div className="px-2 py-3 text-center text-xs text-muted-foreground">
+                  Tidak ada toko lain yang bisa dipilih.
+                </div>
+              ) : (
+                options.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    {s.name}
+                  </SelectItem>
+                ))
+              )}
             </SelectContent>
           </Select>
+          {shopNameById(currentShopId) && (
+            <p className="text-xs text-muted-foreground">
+              Sekarang mengelola: <span className="font-medium">{shopNameById(currentShopId)}</span>
+            </p>
+          )}
         </div>
         <DialogFooter>
           <DialogClose render={<Button variant="outline">Batal</Button>} />
