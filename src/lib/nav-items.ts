@@ -5,6 +5,7 @@ import {
   Store,
   Users,
   UserCog,
+  Scissors,
   ClipboardList,
   CreditCard,
   CalendarClock,
@@ -36,6 +37,7 @@ export const NAV_SECTIONS: NavSection[] = [
     label: "Manajemen",
     items: [
       { label: "Shops", href: "/shops", icon: Store },
+      { label: "Street Barber", href: "/street-barbers", icon: Scissors },
       { label: "Kelola Admin", href: "/admins", icon: UserCog },
       { label: "Users", href: "/users", icon: Users },
       { label: "Recruitment", href: "/recruitment", icon: ClipboardList },
