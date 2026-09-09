@@ -1,29 +1,30 @@
 "use client";
 
 import type { CSSProperties, MouseEvent } from "react";
-import Link from "next/link";
-import {
-  ArrowRight,
-  ShieldAlert,
-  Store,
-  TrendingDown,
-  TrendingUp,
-  Users,
-  Wallet,
-} from "lucide-react";
+import { ShieldAlert, Store, TrendingDown, TrendingUp, Users, Wallet } from "lucide-react";
 import { Card } from "@heroui/react";
-import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { StatisticsSection } from "@/components/dashboard/statistics";
 import { useDashboardStats } from "@/lib/queries/dashboard";
 import { useAdminAnalytics } from "@/lib/queries/analytics";
-import { useAnimatedNumber, useGreeting, useStoredAdminUser, useTodayLabel } from "@/lib/client-values";
-import { formatNumber, formatRupiah } from "@/lib/utils";
-import { cn } from "@/lib/utils";
+import { useAnimatedNumber } from "@/lib/client-values";
+import { cn, formatNumber, formatRupiah, hasEnoughSample } from "@/lib/utils";
 import type { DashboardStats } from "@/types/admin";
 
-function TrendChip({ value, suffix = "%" }: { value?: number; suffix?: string }) {
+function TrendChip({
+  value,
+  suffix = "%",
+  sampleSize,
+}: {
+  value?: number;
+  suffix?: string;
+  /** Kalau diberikan dan di bawah ambang, persentase disembunyikan (basis terlalu kecil). */
+  sampleSize?: number;
+}) {
   if (value === undefined) return null;
+  if (sampleSize !== undefined && !hasEnoughSample(sampleSize)) {
+    return <span className="text-xs text-muted-foreground">Data belum cukup untuk dibandingkan</span>;
+  }
   const positive = value >= 0;
   return (
     <span
@@ -50,6 +51,7 @@ function KpiCard({
   accent,
   trend,
   trendSuffix,
+  trendSampleSize,
   footnote,
 }: {
   label: string;
@@ -59,6 +61,7 @@ function KpiCard({
   accent: string;
   trend?: number;
   trendSuffix?: string;
+  trendSampleSize?: number;
   footnote?: string;
 }) {
   const animated = useAnimatedNumber(value ?? 0, 900);
@@ -90,7 +93,7 @@ function KpiCard({
               {format ? format(animated) : formatNumber(animated)}
             </div>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-              <TrendChip value={trend} suffix={trendSuffix} />
+              <TrendChip value={trend} suffix={trendSuffix} sampleSize={trendSampleSize} />
               {footnote && <span className="text-xs text-muted-foreground">{footnote}</span>}
             </div>
           </>
@@ -101,12 +104,8 @@ function KpiCard({
 }
 
 export default function DashboardHomePage() {
-  const { data: stats, isLoading, isError } = useDashboardStats();
+  const { data: stats, isError } = useDashboardStats();
   const { data: analytics } = useAdminAnalytics();
-  const greeting = useGreeting();
-  const today = useTodayLabel();
-  const user = useStoredAdminUser();
-  const adminName = user?.name?.split(" ")[0] ?? null;
 
   const kpi = analytics?.kpi;
   const s: DashboardStats | undefined = stats;
@@ -143,6 +142,7 @@ export default function DashboardHomePage() {
           value={s?.total_customers}
           accent="from-emerald-500/15 to-emerald-500/5 text-emerald-600 dark:text-emerald-400"
           trend={kpi?.customer_growth_pct}
+          trendSampleSize={s?.total_customers}
           footnote="vs bulan lalu"
         />
         <KpiCard
@@ -152,6 +152,9 @@ export default function DashboardHomePage() {
           format={formatRupiah}
           accent="from-violet-500/15 to-violet-500/5 text-violet-600 dark:text-violet-400"
           trend={kpi?.revenue_growth_pct}
+          // Endpoint ini tak memberi jumlah transaksi — pakai total customer sebagai
+          // proksi kematangan platform: di bawah 10, % pendapatan belum bermakna.
+          trendSampleSize={s?.total_customers}
           footnote="vs bulan lalu"
         />
       </div>
