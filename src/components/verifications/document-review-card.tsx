@@ -10,14 +10,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
 import { useAiReviewDocument, useReviewDocument, type AiDocReviewResult } from "@/lib/queries/shops";
 import { getSafeErrorMessage } from "@/lib/api";
-import { cn } from "@/lib/utils";
+import { cn, formatDateTimeWITA } from "@/lib/utils";
 import type { DocKey, DocStatus, ShopDocument } from "@/types/admin";
 
-const STATUS_VARIANT: Record<DocStatus, "outline" | "default" | "destructive" | "secondary"> = {
+const STATUS_VARIANT: Record<DocStatus, "outline" | "success" | "destructive" | "warning"> = {
   pending: "outline",
-  valid: "default",
+  valid: "success",
   invalid: "destructive",
-  needs_revision: "secondary",
+  needs_revision: "warning",
 };
 
 const STATUS_LABEL: Record<DocStatus, string> = {
@@ -29,9 +29,9 @@ const STATUS_LABEL: Record<DocStatus, string> = {
 
 const STATUS_ACCENT: Record<DocStatus, string> = {
   pending: "border-border",
-  valid: "border-emerald-500/30",
+  valid: "border-success/30",
   invalid: "border-destructive/30",
-  needs_revision: "border-amber-500/30",
+  needs_revision: "border-warning/30",
 };
 
 const EMPTY_DOC: ShopDocument = {
@@ -81,7 +81,7 @@ export function DocumentReviewCard({
     );
   }
 
-  const reviewedAt = doc.reviewed_at ? new Date(doc.reviewed_at).toLocaleString("id-ID") : null;
+  const reviewedAt = doc.reviewed_at ? formatDateTimeWITA(doc.reviewed_at) : null;
 
   return (
     <Card className={cn("glass-card glass-card-hover border-t-2 transition-colors", STATUS_ACCENT[doc.status])}>

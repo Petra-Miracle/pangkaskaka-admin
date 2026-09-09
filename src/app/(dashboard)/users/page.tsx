@@ -6,8 +6,9 @@ import { Ban, ClipboardCheck, Eye, EyeOff, KeyRound, RotateCcw, Scissors, Shield
 import { Card } from "@heroui/react";
 import { SearchBox } from "@/components/ui/search-box";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Dialog,
   DialogClose,
@@ -37,8 +38,10 @@ import {
 import { getSafeErrorMessage } from "@/lib/api";
 import { getUser } from "@/lib/auth";
 import { ADMIN_USER_ROLES, type AdminUser, type AdminUserRole } from "@/types/admin";
-import { cn, formatRelativeTime } from "@/lib/utils";
+import { cn, formatDateTimeWITA, formatRelativeTime } from "@/lib/utils";
 
+// Chip role sengaja netral (brief §3: satu aksen saja) — ikonnya yang
+// membedakan peran. Superadmin diberi aksen karena peran paling berwenang.
 const ROLE_META: Record<AdminUserRole, { label: string; chip: string; dot: string; icon: typeof UsersIcon }> = {
   customer: {
     label: "Customer",
@@ -48,26 +51,26 @@ const ROLE_META: Record<AdminUserRole, { label: string; chip: string; dot: strin
   },
   owner: {
     label: "Pemilik toko",
-    chip: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
-    dot: "bg-sky-500",
+    chip: "bg-muted text-muted-foreground",
+    dot: "bg-muted-foreground",
     icon: Store,
   },
   streetbarber: {
     label: "StreetBarber",
-    chip: "bg-violet-500/10 text-violet-600 dark:text-violet-400",
-    dot: "bg-violet-500",
+    chip: "bg-muted text-muted-foreground",
+    dot: "bg-muted-foreground",
     icon: Scissors,
   },
   admin: {
     label: "Admin",
-    chip: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-    dot: "bg-amber-500",
+    chip: "bg-muted text-muted-foreground",
+    dot: "bg-muted-foreground",
     icon: ClipboardCheck,
   },
   superadmin: {
     label: "Superadmin",
-    chip: "bg-primary/10 text-primary",
-    dot: "bg-primary",
+    chip: "bg-accent-50 text-accent-700",
+    dot: "bg-accent-500",
     icon: ShieldCheck,
   },
 };
@@ -79,18 +82,6 @@ function initialsOf(name: string | undefined) {
     .slice(0, 2)
     .join("")
     .toUpperCase();
-}
-
-function StatusBadge({ suspended }: { suspended: boolean }) {
-  return suspended ? (
-    <Badge variant="outline" className="border-transparent bg-destructive/10 font-medium text-destructive">
-      Ditangguhkan
-    </Badge>
-  ) : (
-    <Badge variant="outline" className="border-transparent bg-emerald-500/10 font-medium text-emerald-700 dark:text-emerald-400">
-      Aktif
-    </Badge>
-  );
 }
 
 function DetailRow({ label, value }: { label: string; value: string }) {
@@ -140,18 +131,18 @@ function UserDetailDialog({ user }: { user: AdminUser }) {
           </div>
           <div className="flex items-center justify-between gap-3 border-b border-border pb-3">
             <span className="text-muted-foreground">Status</span>
-            <StatusBadge suspended={!!user.is_suspended} />
+            <StatusBadge status={user.is_suspended ? "suspended" : "active"} />
           </div>
           <DetailRow label="Email" value={user.email} />
           <DetailRow label="Telepon" value={user.phone || "—"} />
           <DetailRow label="Alamat" value={user.address || "—"} />
-          <DetailRow label="Terdaftar" value={new Date(user.created_at).toLocaleString("id-ID")} />
+          <DetailRow label="Terdaftar" value={formatDateTimeWITA(user.created_at)} />
           {user.is_suspended && (
             <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3 text-xs text-destructive">
               <p className="font-medium">Alasan penangguhan</p>
               <p className="mt-0.5 text-destructive/80">{user.suspended_reason || "Tidak ada alasan dicatat."}</p>
               {user.suspended_at && (
-                <p className="mt-1 text-destructive/60">{new Date(user.suspended_at).toLocaleString("id-ID")}</p>
+                <p className="mt-1 text-destructive/60">{formatDateTimeWITA(user.suspended_at)}</p>
               )}
             </div>
           )}
@@ -194,7 +185,7 @@ function SuspendToggleDialog({ user, disabled, disabledReason }: { user: AdminUs
       <Button
         size="icon"
         variant="ghost"
-        className="size-8 text-emerald-600 hover:text-emerald-600 dark:text-emerald-400"
+        className="size-8 text-success hover:text-success"
         aria-label="Aktifkan kembali"
         title="Aktifkan kembali"
         disabled={activateUser.isPending}
@@ -502,12 +493,12 @@ const columns: LegacyColumnDef<AdminUser, any>[] = [
   }),
   columnHelper.accessor("is_suspended", {
     header: "Status",
-    cell: (info) => <StatusBadge suspended={!!info.getValue()} />,
+    cell: (info) => <StatusBadge status={info.getValue() ? "suspended" : "active"} />,
   }),
   columnHelper.accessor("created_at", {
     header: "Terdaftar",
     cell: (info) => (
-      <span className="text-muted-foreground" title={new Date(info.getValue() as string).toLocaleString("id-ID")}>
+      <span className="text-muted-foreground" title={formatDateTimeWITA(info.getValue() as string)}>
         {formatRelativeTime(info.getValue() as string)}
       </span>
     ),
@@ -623,12 +614,11 @@ export default function UsersPage() {
             initialSorting={[{ id: "created_at", desc: true }]}
             pageSize={10}
             emptyState={
-              <div className="mx-auto flex max-w-xs flex-col items-center gap-2 text-muted-foreground">
-                <div className="flex size-12 items-center justify-center rounded-2xl border border-border bg-muted/50">
-                  <UsersIcon className="size-5" />
-                </div>
-                <p className="text-sm font-medium">Tidak ada user yang cocok dengan filter saat ini.</p>
-              </div>
+              <EmptyState
+                icon={UsersIcon}
+                title="Tidak ada user yang cocok"
+                description="Coba ganti filter role atau kosongkan pencarian."
+              />
             }
           />
         </Card.Content>

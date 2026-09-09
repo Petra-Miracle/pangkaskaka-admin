@@ -30,7 +30,7 @@ const STATUS_MAP: Record<string, { tone: StatusTone; label: string }> = {
   approved: { tone: "success", label: "Disetujui" },
   pending: { tone: "warning", label: "Menunggu" },
   rejected: { tone: "danger", label: "Ditolak" },
-  suspended: { tone: "neutral", label: "Disuspend" },
+  suspended: { tone: "danger", label: "Ditangguhkan" },
   // dokumen
   valid: { tone: "success", label: "Valid" },
   invalid: { tone: "danger", label: "Tidak valid" },

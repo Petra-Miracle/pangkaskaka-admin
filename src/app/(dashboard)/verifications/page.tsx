@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@heroui/react";
 import { PageHeader } from "@/components/nav/page-header";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { EmptyState } from "@/components/ui/empty-state";
 import { DataTable, legacyCreateColumnHelper } from "@/components/ui/data-table";
 import type { LegacyColumnDef } from "@tanstack/react-table/legacy";
 import { cn, formatRelativeTime } from "@/lib/utils";
@@ -15,21 +17,6 @@ import { DOC_LABELS, type DocKey, type Shop } from "@/types/admin";
 function reviewedCount(docs: Record<DocKey, { status: string }> | undefined) {
   if (!docs) return 0;
   return Object.values(docs).filter((d) => d.status !== "pending").length;
-}
-
-function StatusBadge({ status }: { status: string }) {
-  if (status === "pending") {
-    return (
-      <Badge variant="outline" className="gap-1.5 border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400">
-        <span className="relative flex size-1.5">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-500 opacity-60" />
-          <span className="relative inline-flex size-1.5 rounded-full bg-amber-500" />
-        </span>
-        Menunggu
-      </Badge>
-    );
-  }
-  return <Badge variant="secondary">{status}</Badge>;
 }
 
 const columnHelper = legacyCreateColumnHelper<Shop>();
@@ -42,9 +29,9 @@ const columns: LegacyColumnDef<Shop, any>[] = [
     header: "Toko",
     cell: ({ row }) => (
       <Link href={`/verifications/${row.original.id}`} className="flex items-center gap-3">
-        <span className="relative flex size-9 shrink-0 items-center justify-center rounded-xl border border-primary/10 bg-gradient-to-br from-primary/12 to-primary/5 text-sm font-bold text-primary">
+        <span className="relative flex size-9 shrink-0 items-center justify-center rounded-xl border border-accent-200/70 bg-accent-50 text-sm font-bold text-accent-600">
           {row.original.name?.charAt(0).toUpperCase()}
-          <span className="absolute -right-0.5 -bottom-0.5 size-2 rounded-full border-2 border-card bg-amber-500" />
+          <span className="absolute -right-0.5 -bottom-0.5 size-2 rounded-full border-2 border-card bg-warning" />
         </span>
         <span className="max-w-44 truncate font-semibold group-hover:text-primary">{row.original.name}</span>
       </Link>
@@ -90,7 +77,7 @@ const columns: LegacyColumnDef<Shop, any>[] = [
           <div className="h-1.5 w-16 overflow-hidden rounded-full bg-muted">
             <div
               className={`h-full rounded-full transition-all ${
-                progress === 100 ? "bg-emerald-500" : "bg-primary"
+                progress === 100 ? "bg-success" : "bg-primary"
               }`}
               style={{ width: `${progress}%` }}
             />
@@ -141,22 +128,22 @@ export default function VerificationsPage() {
       label: "Antrian menunggu",
       value: isLoading ? "…" : count,
       icon: Inbox,
-      accent: "text-amber-600 dark:text-amber-400",
-      tile: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+      accent: "text-warning",
+      tile: "bg-warning-bg text-warning",
     },
     {
       label: "Dokumen direview",
       value: isLoading ? "…" : `${reviewedDocs}/${totalDocs}`,
       icon: FileCheck2,
-      accent: "text-primary",
-      tile: "bg-primary/10 text-primary",
+      accent: "text-ink-900",
+      tile: "bg-accent-50 text-accent-600",
     },
     {
       label: "Siap diputuskan",
       value: isLoading ? "…" : readyToDecide,
       icon: Gavel,
-      accent: "text-emerald-600 dark:text-emerald-400",
-      tile: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+      accent: "text-success",
+      tile: "bg-success-bg text-success",
     },
   ];
 
@@ -199,13 +186,11 @@ export default function VerificationsPage() {
             loading={isLoading}
             pageSize={10}
             emptyState={
-              <div className="mx-auto flex max-w-xs flex-col items-center gap-2 text-muted-foreground">
-                <div className="flex size-12 items-center justify-center rounded-2xl border border-border bg-muted/50">
-                  <Inbox className="size-5" />
-                </div>
-                <p className="text-sm font-medium">Tidak ada toko yang menunggu verifikasi.</p>
-                <p className="text-xs">Antrian baru akan muncul di sini saat pemilik toko mengajukan dokumennya.</p>
-              </div>
+              <EmptyState
+                icon={Inbox}
+                title="Tidak ada toko yang menunggu verifikasi"
+                description="Antrian baru muncul di sini saat pemilik toko mengajukan dokumennya."
+              />
             }
           />
         </Card.Content>

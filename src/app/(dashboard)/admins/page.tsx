@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/select";
 import { SearchBox } from "@/components/ui/search-box";
 import { Spinner } from "@/components/ui/spinner";
+import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/nav/page-header";
 import { DataTable, legacyCreateColumnHelper } from "@/components/ui/data-table";
 import type { LegacyColumnDef } from "@tanstack/react-table/legacy";
@@ -39,7 +40,7 @@ import {
 } from "@/lib/queries/admins";
 import { useAllShops } from "@/lib/queries/shops";
 import { getSafeErrorMessage } from "@/lib/api";
-import { formatRelativeTime } from "@/lib/utils";
+import { formatDateTimeWITA, formatRelativeTime } from "@/lib/utils";
 import type { ShopAdmin } from "@/types/admin";
 
 function initialsOf(name?: string) {
@@ -283,7 +284,7 @@ const columns: LegacyColumnDef<ShopAdmin, any>[] = [
     cell: (info) => (
       <span
         className="text-muted-foreground"
-        title={new Date(info.getValue() as string).toLocaleString("id-ID")}
+        title={formatDateTimeWITA(info.getValue() as string)}
       >
         {formatRelativeTime(info.getValue() as string)}
       </span>
@@ -380,16 +381,19 @@ export default function AdminsPage() {
             initialSorting={[{ id: "created_at", desc: true }]}
             pageSize={10}
             emptyState={
-              <div className="mx-auto flex max-w-xs flex-col items-center gap-2 text-muted-foreground">
-                <div className="flex size-12 items-center justify-center rounded-2xl border border-border bg-muted/50">
-                  <UserCog className="size-5" />
-                </div>
-                <p className="text-sm font-medium">
-                  {admins?.length === 0
-                    ? "Belum ada akun admin toko. Buat yang pertama lewat tombol di atas."
-                    : "Tidak ada admin yang cocok dengan pencarian."}
-                </p>
-              </div>
+              <EmptyState
+                icon={UserCog}
+                title={
+                  admins?.length === 0
+                    ? "Belum ada akun admin toko"
+                    : "Tidak ada admin yang cocok"
+                }
+                description={
+                  admins?.length === 0
+                    ? "Buat yang pertama lewat tombol di kanan atas."
+                    : "Coba kata kunci pencarian yang lain."
+                }
+              />
             }
           />
         </Card.Content>

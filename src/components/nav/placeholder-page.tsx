@@ -1,6 +1,7 @@
 import { Clock, Construction } from "lucide-react";
 import { Card } from "@heroui/react";
 import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/nav/page-header";
 
 export function PlaceholderPage({
   title,
@@ -13,10 +14,11 @@ export function PlaceholderPage({
 }) {
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <h1 className="text-3xl font-bold tracking-tight text-primary md:text-4xl">{title}</h1>
-        {blocked && <Badge variant="outline">Menunggu endpoint backend</Badge>}
-      </div>
+      <PageHeader
+        eyebrow="Monitoring"
+        title={title}
+        actions={blocked ? <Badge variant="neutral">Menunggu endpoint backend</Badge> : undefined}
+      />
       <Card className="glass-card">
         <Card.Header>
           <div className="flex items-start gap-3">
@@ -32,9 +34,9 @@ export function PlaceholderPage({
         <Card.Content className="gap-3 text-sm text-muted-foreground">
           <p>Halaman ini belum dibangun.</p>
           {blocked && (
-            <div className="flex items-center gap-2 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-amber-700 dark:text-amber-400">
+            <div className="flex items-center gap-2 rounded-xl border border-warning/20 bg-warning-bg px-4 py-3 text-warning">
               <Clock className="size-4 shrink-0" />
-              Fitur ini menunggu endpoint yang belum tersedia di backend — lihat AGENT_BRIEF.md bagian 4.
+              Fitur ini menunggu endpoint yang belum tersedia di backend.
             </div>
           )}
         </Card.Content>

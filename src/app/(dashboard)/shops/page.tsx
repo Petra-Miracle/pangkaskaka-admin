@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Ban, ExternalLink, Info, Store as StoreIcon, UserCog, UserPlus } from "lucide-react";
+import { Ban, ExternalLink, Store as StoreIcon, UserCog, UserPlus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@heroui/react";
@@ -26,25 +26,11 @@ import { Spinner } from "@/components/ui/spinner";
 import { useAllShops, useSuspendShop } from "@/lib/queries/shops";
 import { useShopAdmins } from "@/lib/queries/admins";
 import { CreateShopAdminDialog } from "@/components/admins/create-admin-dialog";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { EmptyState } from "@/components/ui/empty-state";
 import { getSafeErrorMessage } from "@/lib/api";
-import { cn, formatRelativeTime } from "@/lib/utils";
+import { formatRelativeTime } from "@/lib/utils";
 import type { Shop } from "@/types/admin";
-
-const STATUS_META: Record<string, { label: string; className: string }> = {
-  approved: { label: "Disetujui", className: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400" },
-  pending: { label: "Menunggu", className: "bg-amber-500/10 text-amber-700 dark:text-amber-400" },
-  rejected: { label: "Ditolak", className: "bg-destructive/10 text-destructive" },
-  suspended: { label: "Disuspend", className: "bg-muted text-muted-foreground" },
-};
-
-function StatusBadge({ status }: { status: string }) {
-  const meta = STATUS_META[status];
-  return (
-    <Badge variant="outline" className={cn("border-transparent font-medium", meta?.className ?? "bg-muted text-muted-foreground")}>
-      {meta?.label ?? status}
-    </Badge>
-  );
-}
 
 function SuspendDialog({ shop }: { shop: Shop }) {
   const [open, setOpen] = useState(false);
@@ -253,17 +239,12 @@ export default function ShopsPage() {
         </div>
       )}
 
-      <div className="flex items-start gap-2.5 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-xs text-amber-700 dark:text-amber-400 animate-fade-up [animation-delay:60ms]">
-        <span className="flex size-6 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-600 dark:text-amber-400">
-          <Info className="size-3.5" />
-        </span>
-        <p className="leading-relaxed">
-          Backend belum punya endpoint <code className="font-mono">GET /admin/shops</code>, jadi daftar ini
-          digabung dari <code className="font-mono">/shops</code> (disetujui) +{" "}
-          <code className="font-mono">/admin/pending-shops</code> (menunggu). Toko yang pernah{" "}
-          <strong>ditolak</strong> tidak muncul di endpoint mana pun sehingga tidak terlihat di sini.
-        </p>
-      </div>
+      {/*
+        Daftar ini digabung dari GET /shops (disetujui) + GET /admin/pending-shops
+        (menunggu) karena backend belum punya GET /admin/shops. Konsekuensi: toko
+        yang pernah ditolak tidak muncul di endpoint mana pun, jadi tidak terlihat
+        di sini. Lihat AUDIT bagian 8.
+      */}
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <SearchBox
@@ -284,12 +265,11 @@ export default function ShopsPage() {
             initialSorting={[{ id: "created_at", desc: true }]}
             pageSize={10}
             emptyState={
-              <div className="mx-auto flex max-w-xs flex-col items-center gap-2 text-muted-foreground">
-                <div className="flex size-12 items-center justify-center rounded-2xl border border-border bg-muted/50">
-                  <StoreIcon className="size-5" />
-                </div>
-                <p className="text-sm font-medium">Tidak ada toko yang cocok dengan filter saat ini.</p>
-              </div>
+              <EmptyState
+                icon={StoreIcon}
+                title="Tidak ada toko yang cocok"
+                description="Coba ubah atau kosongkan kata kunci pencarian."
+              />
             }
           />
         </Card.Content>

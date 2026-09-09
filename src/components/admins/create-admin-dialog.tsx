@@ -128,7 +128,7 @@ export function CreateShopAdminDialog({
           </DialogHeader>
 
           {lockedShopTaken ? (
-            <p className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2.5 text-sm text-amber-700 dark:text-amber-400">
+            <p className="rounded-lg border border-warning/20 bg-warning-bg px-3 py-2.5 text-sm text-warning">
               {lockedShop?.name} sudah punya admin. Satu toko hanya bisa punya satu admin — pindahkan atau
               hapus admin lama dulu lewat halaman Kelola Admin.
             </p>

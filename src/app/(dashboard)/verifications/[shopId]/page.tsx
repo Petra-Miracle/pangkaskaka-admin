@@ -22,7 +22,7 @@ import { DocumentReviewCard } from "@/components/verifications/document-review-c
 import { ChatPanel } from "@/components/verifications/chat-panel";
 import { usePendingShops, useShop, useVerifyShop } from "@/lib/queries/shops";
 import { getSafeErrorMessage } from "@/lib/api";
-import { cn } from "@/lib/utils";
+import { cn, formatDateTimeWITA } from "@/lib/utils";
 import { DOC_LABELS, type DocKey } from "@/types/admin";
 
 export default function VerificationDetailPage() {
@@ -47,11 +47,11 @@ export default function VerificationDetailPage() {
   const STATUS_META: Record<string, { label: string; className: string }> = {
     pending: {
       label: "Menunggu verifikasi",
-      className: "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400",
+      className: "border-warning/30 bg-warning-bg text-warning",
     },
     approved: {
       label: "Disetujui",
-      className: "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
+      className: "border-success/30 bg-success-bg text-success",
     },
     rejected: {
       label: "Ditolak",
@@ -138,9 +138,9 @@ export default function VerificationDetailPage() {
             className={cn(
               "size-1.5 rounded-full",
               shop.verification_status === "pending"
-                ? "animate-pulse-soft bg-amber-500"
+                ? "animate-pulse-soft bg-warning"
                 : shop.verification_status === "approved"
-                  ? "bg-emerald-500"
+                  ? "bg-success"
                   : "bg-destructive"
             )}
           />
@@ -181,9 +181,7 @@ export default function VerificationDetailPage() {
           <div>
             <p className="text-muted-foreground">Diajukan</p>
             <p className="font-medium">
-              {shop.docs_submitted_at
-                ? new Date(shop.docs_submitted_at).toLocaleString("id-ID")
-                : "—"}
+              {shop.docs_submitted_at ? formatDateTimeWITA(shop.docs_submitted_at) : "—"}
             </p>
           </div>
           <div>

@@ -48,7 +48,7 @@ function CopyRow({ label, value }: { label: string; value: string }) {
           aria-label={`Salin ${label}`}
           title={`Salin ${label}`}
         >
-          {copied ? <Check className="size-3.5 text-emerald-600" /> : <Copy className="size-3.5" />}
+          {copied ? <Check className="size-3.5 text-success" /> : <Copy className="size-3.5" />}
         </Button>
       </div>
     </div>
