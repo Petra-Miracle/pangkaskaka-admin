@@ -149,6 +149,13 @@ function ShopsByFilterChart() {
     return Array.from(counts.entries()).sort((a, b) => b[1] - a[1]);
   }, [shops, mode]);
 
+  // Sumbu Y bilangan bulat & tidak gepeng saat data kecil: bulatkan batas atas ke
+  // kelipatan 5 (minimum 5), lalu 5 tick supaya langkahnya selalu bulat.
+  const maxCount = grouped.reduce((m, [, count]) => Math.max(m, count), 0);
+  const yMax = Math.max(5, Math.ceil(maxCount / 5) * 5);
+  // Batasi lebar bar supaya 1–2 kategori tidak jadi balok raksasa selebar kartu.
+  const columnWidth = `${Math.min(55, 14 + grouped.length * 12)}%`;
+
   const options: ApexOptions = {
     chart: {
       type: "bar",
@@ -158,14 +165,11 @@ function ShopsByFilterChart() {
       parentHeightOffset: 0,
       animations: { enabled: true, speed: 700, animateGradually: { enabled: true, delay: 60 } },
     },
-    plotOptions: { bar: { borderRadius: 8, columnWidth: "52%" } },
+    plotOptions: { bar: { borderRadius: 6, columnWidth } },
     dataLabels: { enabled: false },
     legend: { show: false },
     colors: [palette.chart1],
-    fill: {
-      type: "gradient",
-      gradient: { shade: "light", type: "vertical", shadeIntensity: 0.3, opacityFrom: 1, opacityTo: 0.45 },
-    },
+    fill: { type: "solid" },
     grid: { borderColor: palette.border, padding: { left: 8, right: 8 } },
     xaxis: {
       categories: grouped.map(([key]) => key),
@@ -180,6 +184,10 @@ function ShopsByFilterChart() {
       axisTicks: { show: false },
     },
     yaxis: {
+      min: 0,
+      max: yMax,
+      tickAmount: 5,
+      forceNiceScale: false,
       labels: {
         style: { colors: palette.muted, fontSize: "11px" },
         formatter: (val) => Math.round(val).toString(),
@@ -276,7 +284,7 @@ function UserRolesPieChart() {
     <ChartCard
       icon={PieChart}
       title="Total pengguna per role"
-      description="Total di seluruh platform — karyawan & customer belum bisa dipecah per toko karena API belum menyimpan relasi karyawan ke toko."
+      description="Jumlah akun per peran di seluruh platform."
     >
       {isLoading ? (
         <ChartLoading label="Memuat data pengguna..." />
@@ -291,11 +299,13 @@ function UserRolesPieChart() {
 
 function AvgRatingRadialChart() {
   const { data, isLoading } = useAdminAnalytics();
+  const { data: shops } = useAllShops();
   const palette = getChartPalette();
   const { resolvedTheme } = useTheme();
   const dark = resolvedTheme === "dark";
   const rating = data?.health.avg_rating ?? 0;
   const pct = Math.max(0, Math.min(100, Math.round((rating / 5) * 100)));
+  const totalReviews = (shops ?? []).reduce((sum, s) => sum + (s.reviews_count ?? 0), 0);
 
   const options: ApexOptions = {
     chart: {
@@ -333,6 +343,11 @@ function AvgRatingRadialChart() {
       icon={Star}
       title="Rata-rata rating toko"
       description="Skala 0–5, dihitung dari seluruh toko di platform."
+      footer={
+        totalReviews < 5
+          ? `Baru ${totalReviews} ulasan di seluruh platform — sampel terlalu kecil untuk dinilai.`
+          : `Dari ${totalReviews.toLocaleString("id-ID")} ulasan pelanggan.`
+      }
     >
       {isLoading ? <ChartLoading label="Memuat rating..." /> : <ApexChart options={options} />}
     </ChartCard>
@@ -390,7 +405,7 @@ function GrowthBarChart() {
     <ChartCard
       icon={TrendingUp}
       title="Pertumbuhan bulan ini"
-      description="Persentase pertumbuhan pelanggan & pendapatan dari `/analytics/admin`."
+      description="Persentase pertumbuhan pelanggan & pendapatan dibanding bulan lalu."
     >
       {isLoading ? <ChartLoading label="Memuat data pertumbuhan..." /> : <ApexChart options={options} />}
     </ChartCard>
@@ -439,7 +454,7 @@ function KecamatanDonutChart() {
     <ChartCard
       icon={MapPin}
       title="Distribusi toko per kecamatan"
-      description="Dihitung langsung oleh backend (`distribution`), bukan hasil filter di halaman ini."
+      description="Sebaran toko terdaftar per kecamatan di Kupang."
     >
       {isLoading ? (
         <ChartLoading label="Memuat distribusi..." />
