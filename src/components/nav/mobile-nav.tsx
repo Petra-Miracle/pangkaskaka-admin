@@ -7,7 +7,6 @@ import { useState } from "react";
 import { LayoutDashboard, LogOut, Menu, MoreHorizontal, Search, ShieldCheck, Store, Users } from "lucide-react";
 import { Avatar as HeroAvatar } from "@heroui/react";
 import { NAV_SECTIONS } from "@/lib/nav-items";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/nav/theme-toggle";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -56,15 +55,15 @@ export function MobileNav() {
   return (
     <>
       {/* Top app bar */}
-      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-sidebar-border bg-sidebar/80 px-4 backdrop-blur-xl md:hidden">
+      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-surface/85 px-4 backdrop-blur-xl md:hidden">
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" onClick={() => setDrawerOpen(true)} aria-label="Buka menu" className="size-8">
             <Menu className="size-4.5" />
           </Button>
-          <div className="relative flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-lg shadow-sm shadow-primary/25 ring-1 ring-white/40 ring-inset">
+          <div className="relative flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-black/5 ring-inset">
             <Image src="/pangkaskaka-logo.png" alt="PangkasKAKA" fill sizes="28px" className="object-cover" priority />
           </div>
-          <span className="text-sm font-bold tracking-tight">PangkasKAKA</span>
+          <span className="text-sm font-bold tracking-tight text-foreground">PangkasKAKA</span>
         </div>
         <div className="flex items-center gap-0.5">
           <Button
@@ -81,7 +80,7 @@ export function MobileNav() {
       </header>
 
       {/* Bottom nav bar */}
-      <nav className="fixed bottom-0 left-0 z-40 flex h-[64px] w-full items-stretch justify-around border-t border-sidebar-border bg-sidebar/90 px-2 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_24px_rgba(0,0,0,0.04)] backdrop-blur-xl md:hidden">
+      <nav className="fixed bottom-0 left-0 z-40 flex h-[64px] w-full items-stretch justify-around border-t border-border bg-surface/90 px-2 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_24px_rgba(0,0,0,0.04)] backdrop-blur-xl md:hidden">
         {BOTTOM_NAV_ITEMS.map((item) => {
           const active = isActive(item.href);
           const Icon = item.icon;
@@ -124,19 +123,19 @@ export function MobileNav() {
           <DialogTitle className="sr-only">Navigasi</DialogTitle>
           <div className="flex h-full flex-col">
             <div className="flex h-14 items-center gap-2.5 border-b border-sidebar-border/70 px-5">
-              <div className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl shadow-md shadow-primary/25 ring-1 ring-white/40 ring-inset">
+              <div className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white shadow-md ring-1 ring-white/40 ring-inset">
                 <Image src="/pangkaskaka-logo.png" alt="PangkasKAKA" fill sizes="36px" className="object-cover" priority />
-                <span className="absolute -right-0.5 -bottom-0.5 size-2.5 rounded-full border-2 border-sidebar bg-emerald-500" />
+                <span className="absolute -right-0.5 -bottom-0.5 size-2.5 rounded-full border-2 border-sidebar bg-success" />
               </div>
               <div className="leading-tight">
-                <p className="text-sm font-bold tracking-tight">PangkasKAKA</p>
-                <p className="text-[11px] font-medium text-muted-foreground">SuperAdmin Console</p>
+                <p className="text-sm font-bold tracking-tight text-sidebar-foreground">PangkasKAKA</p>
+                <p className="text-[11px] font-medium text-nav-text">SuperAdmin Console</p>
               </div>
             </div>
             <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-5">
               {NAV_SECTIONS.map((section) => (
                 <div key={section.label}>
-                  <p className="mb-2 px-3 text-[10px] font-semibold tracking-[0.16em] text-muted-foreground/60 uppercase">
+                  <p className="mb-2 px-3 text-[10px] font-semibold tracking-[0.16em] text-nav-text/70 uppercase">
                     {section.label}
                   </p>
                   <div className="space-y-1">
@@ -149,21 +148,21 @@ export function MobileNav() {
                           href={item.href}
                           onClick={() => setDrawerOpen(false)}
                           className={cn(
-                            "relative flex items-center gap-3 overflow-hidden rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
+                            "relative flex items-center gap-3 overflow-hidden rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
                             active
-                              ? "bg-gradient-to-r from-primary/15 via-primary/8 to-transparent text-sidebar-accent-foreground shadow-sm"
-                              : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
+                              ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                              : "text-sidebar-foreground/70 hover:bg-white/5 hover:text-sidebar-accent-foreground"
                           )}
                         >
                           {active && (
-                            <span className="absolute top-1/2 left-0 h-1/2 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-primary to-primary/60" />
+                            <span className="absolute top-1/2 left-0 h-6 w-[3px] -translate-y-1/2 rounded-r-full bg-nav-active" />
                           )}
-                          <Icon className={cn("size-4 shrink-0", active && "text-primary")} />
+                          <Icon className={cn("size-4 shrink-0", active && "text-nav-active")} />
                           <span className="flex-1">{item.label}</span>
                           {item.blocked && (
-                            <Badge variant="outline" className="text-[10px] font-normal text-muted-foreground">
+                            <span className="rounded-full bg-white/5 px-1.5 py-0.5 text-[10px] font-medium text-nav-text/70">
                               Segera
-                            </Badge>
+                            </span>
                           )}
                         </Link>
                       );
@@ -184,8 +183,8 @@ export function MobileNav() {
                           </HeroAvatar.Fallback>
                         </HeroAvatar.Root>
                         <div className="min-w-0 flex-1 text-sm">
-                          <p className="truncate font-semibold">{user.name}</p>
-                          <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+                          <p className="truncate font-semibold text-sidebar-foreground">{user.name}</p>
+                          <p className="truncate text-xs text-nav-text">{user.email}</p>
                         </div>
                       </button>
                     }

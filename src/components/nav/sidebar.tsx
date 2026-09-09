@@ -11,7 +11,6 @@ import {
   Search,
 } from "lucide-react";
 import { NAV_SECTIONS } from "@/lib/nav-items";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 const COLLAPSED_KEY = "pk_sidebar_collapsed";
@@ -43,7 +42,7 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "sticky top-0 hidden h-screen shrink-0 flex-col border-r border-sidebar-border bg-sidebar/80 text-sidebar-foreground backdrop-blur-xl transition-all duration-300 ease-out md:flex",
+        "sticky top-0 hidden h-screen shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-all duration-300 ease-out md:flex",
         collapsed ? "w-[76px]" : "w-60"
       )}
     >
@@ -53,14 +52,14 @@ export function Sidebar() {
           collapsed ? "justify-center px-3" : "px-4"
         )}
       >
-        <div className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl shadow-md shadow-primary/25 ring-1 ring-white/40 ring-inset">
+        <div className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white shadow-md ring-1 ring-white/40 ring-inset">
           <Image src="/pangkaskaka-logo.png" alt="PangkasKAKA" fill sizes="36px" className="object-cover" priority />
-          <span className="absolute -right-0.5 -bottom-0.5 size-2.5 rounded-full border-2 border-sidebar bg-emerald-500" />
+          <span className="absolute -right-0.5 -bottom-0.5 size-2.5 rounded-full border-2 border-sidebar bg-success" />
         </div>
         {!collapsed && (
           <div className="min-w-0 flex-1 leading-tight">
-            <p className="truncate text-sm font-bold tracking-tight">PangkasKAKA</p>
-            <p className="text-[11px] font-medium text-muted-foreground">SuperAdmin Console</p>
+            <p className="truncate text-sm font-bold tracking-tight text-sidebar-foreground">PangkasKAKA</p>
+            <p className="text-[11px] font-medium text-nav-text">SuperAdmin Console</p>
           </div>
         )}
       </div>
@@ -70,7 +69,7 @@ export function Sidebar() {
           onClick={openCommandPalette}
           title="Pencarian cepat (Ctrl+K)"
           className={cn(
-            "flex w-full items-center gap-2 rounded-xl border border-sidebar-border/80 bg-sidebar-accent/40 px-3 py-2 text-sm text-muted-foreground transition-all hover:border-primary/30 hover:bg-sidebar-accent/70 hover:text-foreground",
+            "flex w-full items-center gap-2 rounded-xl border border-sidebar-border bg-white/5 px-3 py-2 text-sm text-nav-text transition-colors hover:bg-white/10 hover:text-sidebar-foreground",
             collapsed && "justify-center px-0"
           )}
         >
@@ -90,7 +89,7 @@ export function Sidebar() {
         {NAV_SECTIONS.map((section) => (
           <div key={section.label}>
             {!collapsed && (
-              <p className="mb-2 px-3 text-[10px] font-semibold tracking-[0.16em] text-muted-foreground/60 uppercase">
+              <p className="mb-2 px-3 text-[10px] font-semibold tracking-[0.16em] text-nav-text/70 uppercase">
                 {section.label}
               </p>
             )}
@@ -105,24 +104,24 @@ export function Sidebar() {
                     title={collapsed ? item.label : undefined}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "relative flex items-center gap-3 overflow-hidden rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                      "relative flex items-center gap-3 overflow-hidden rounded-xl px-3 py-2.5 text-sm font-medium transition-colors duration-200",
                       collapsed && "justify-center px-0",
                       active
-                        ? "bg-gradient-to-r from-primary/15 via-primary/8 to-transparent text-sidebar-accent-foreground shadow-sm"
-                        : "text-sidebar-foreground/70 hover:translate-x-0.5 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                        : "text-sidebar-foreground/70 hover:bg-white/5 hover:text-sidebar-accent-foreground"
                     )}
                   >
                     {active && (
-                      <span className="absolute top-1/2 left-0 h-1/2 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-primary to-primary/60 shadow-sm shadow-primary/40" />
+                      <span className="absolute top-1/2 left-0 h-6 w-[3px] -translate-y-1/2 rounded-r-full bg-nav-active" />
                     )}
-                    <Icon className={cn("size-4 shrink-0", active && "text-primary")} />
+                    <Icon className={cn("size-4 shrink-0", active && "text-nav-active")} />
                     {!collapsed && (
                       <>
                         <span className="flex-1">{item.label}</span>
                         {item.blocked && (
-                          <Badge variant="outline" className="text-[10px] font-normal text-muted-foreground">
+                          <span className="rounded-full bg-white/5 px-1.5 py-0.5 text-[10px] font-medium text-nav-text/70">
                             Segera
-                          </Badge>
+                          </span>
                         )}
                       </>
                     )}
@@ -135,17 +134,16 @@ export function Sidebar() {
       </nav>
 
       <div className={cn("shrink-0 border-t border-sidebar-border/70 p-3", collapsed && "p-2.5")}>
-        <div className="flex items-center justify-between gap-2 rounded-xl border border-sidebar-border/60 bg-sidebar-accent/30 p-2.5">
+        <div className="flex items-center justify-between gap-2 rounded-xl border border-sidebar-border bg-white/5 p-2.5">
           {!collapsed && (
             <div className="flex min-w-0 items-center gap-2">
-              <span className="relative flex size-2 shrink-0">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-                <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+              <span className="relative flex size-1.5 shrink-0">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60" />
+                <span className="relative inline-flex size-1.5 rounded-full bg-success" />
               </span>
-              <div className="min-w-0 leading-tight">
-                <p className="truncate text-[11px] font-semibold">API Production</p>
-                <p className="truncate text-[10px] text-muted-foreground">Online</p>
-              </div>
+              <p className="truncate text-[11px] font-medium text-nav-text">
+                API Production · <span className="text-sidebar-foreground">Online</span>
+              </p>
             </div>
           )}
           <button
@@ -153,7 +151,7 @@ export function Sidebar() {
             aria-label={collapsed ? "Perluas sidebar" : "Ciutkan sidebar"}
             title={collapsed ? "Perluas sidebar" : "Ciutkan sidebar"}
             className={cn(
-              "shrink-0 rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground",
+              "shrink-0 rounded-lg p-1.5 text-nav-text transition-colors hover:bg-white/10 hover:text-sidebar-foreground",
               collapsed && "mx-auto"
             )}
           >

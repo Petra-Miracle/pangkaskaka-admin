@@ -1,10 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { ChevronRight, Command, LayoutDashboard, LogOut, Search } from "lucide-react";
 import { Avatar as HeroAvatar } from "@heroui/react";
 import { ThemeToggle } from "@/components/nav/theme-toggle";
+import { TimeRangePicker } from "@/components/nav/time-range-picker";
+import { formatTimeWITA } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,10 +34,25 @@ function useCurrentPage() {
   return null;
 }
 
+// "Diperbarui HH:mm WITA" — dihitung saat halaman dimuat di klien (hindari
+// ketidakcocokan hidrasi: kosong dulu, isi setelah mount).
+function useUpdatedLabel() {
+  const [label, setLabel] = useState("");
+  const pathname = usePathname();
+  useEffect(() => {
+    // Stempel waktu muat halaman — sekali per navigasi, bukan state yang
+    // perlu disinkronkan tiap render.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLabel(formatTimeWITA(Date.now()));
+  }, [pathname]);
+  return label;
+}
+
 export function Topbar() {
   const router = useRouter();
   const user = useStoredAdminUser();
   const current = useCurrentPage();
+  const updated = useUpdatedLabel();
 
   const initials = user?.name
     ?.split(" ")
@@ -49,7 +67,7 @@ export function Topbar() {
   }
 
   return (
-    <header className="sticky top-0 z-30 hidden h-16 shrink-0 items-center border-b border-sidebar-border bg-sidebar/80 backdrop-blur-xl md:flex">
+    <header className="sticky top-0 z-30 hidden h-16 shrink-0 items-center border-b border-border bg-surface/80 backdrop-blur-xl md:flex">
       <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between gap-4 px-6">
         <div className="flex min-w-0 items-center gap-1.5 text-sm">
           {current ? (
@@ -67,9 +85,15 @@ export function Topbar() {
           ) : (
             <span className="font-semibold">PangkasKAKA Console</span>
           )}
+          {updated && (
+            <span className="ml-2 hidden shrink-0 text-xs font-normal text-muted-foreground lg:inline">
+              Diperbarui {updated}
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-1.5">
+          <TimeRangePicker className="hidden sm:flex" />
           <button
             onClick={() => window.dispatchEvent(new Event("pk:open-command"))}
             className="flex h-8 items-center gap-2 rounded-lg border border-border/70 bg-background/60 px-2.5 text-sm text-muted-foreground transition-colors hover:border-primary/25 hover:text-foreground"
@@ -87,7 +111,7 @@ export function Topbar() {
               <DropdownMenuTrigger
                 render={
                   <button
-                    className="ml-1 flex items-center gap-2 rounded-full border border-sidebar-border/70 bg-background/60 py-0.5 pr-2 pl-0.5 transition-colors hover:border-primary/25"
+                    className="ml-1 flex items-center gap-2 rounded-full border border-border bg-background/60 py-0.5 pr-2 pl-0.5 transition-colors hover:border-primary/25"
                     aria-label="Menu akun"
                   >
                     <HeroAvatar.Root
