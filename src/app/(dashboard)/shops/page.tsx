@@ -29,7 +29,7 @@ import { CreateShopAdminDialog } from "@/components/admins/create-admin-dialog";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getSafeErrorMessage } from "@/lib/api";
-import { formatRelativeTime } from "@/lib/utils";
+import { formatDateTimeWITA, formatRelativeTime } from "@/lib/utils";
 import type { Shop } from "@/types/admin";
 
 function SuspendDialog({ shop }: { shop: Shop }) {
@@ -168,7 +168,7 @@ const columns: LegacyColumnDef<Shop, any>[] = [
   columnHelper.accessor("created_at", {
     header: "Terdaftar",
     cell: (info) => (
-      <span className="text-muted-foreground" title={new Date(info.getValue() as string).toLocaleString("id-ID")}>
+      <span className="text-muted-foreground" title={formatDateTimeWITA(info.getValue() as string)}>
         {formatRelativeTime(info.getValue() as string)}
       </span>
     ),

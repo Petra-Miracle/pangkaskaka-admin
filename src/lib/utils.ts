@@ -75,5 +75,10 @@ export function formatRelativeTime(dateInput: string | number | Date) {
   if (minutes < 60) return `${minutes} menit lalu`
   if (hours < 24) return `${hours} jam lalu`
   if (days < 7) return `${days} hari lalu`
-  return date.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })
+  return date.toLocaleDateString("id-ID", {
+    timeZone: WITA_TZ,
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  })
 }

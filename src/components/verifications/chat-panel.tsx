@@ -9,13 +9,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
 import { useChatThread, useCloseChatThread, useSendChatMessage } from "@/lib/queries/chat";
 import { getSafeErrorMessage } from "@/lib/api";
-import { cn } from "@/lib/utils";
+import { cn, formatTimeWITA } from "@/lib/utils";
 
 function timeOf(value: string | undefined) {
   if (!value) return null;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return null;
-  return date.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+  return formatTimeWITA(date);
 }
 
 export function ChatPanel({ shopId }: { shopId: string }) {

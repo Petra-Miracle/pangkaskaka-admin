@@ -11,7 +11,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { DataTable, legacyCreateColumnHelper } from "@/components/ui/data-table";
 import type { LegacyColumnDef } from "@tanstack/react-table/legacy";
-import { cn, formatRelativeTime } from "@/lib/utils";
+import { cn, formatDateTimeWITA, formatRelativeTime } from "@/lib/utils";
 import { DOC_LABELS, type DocKey, type Shop } from "@/types/admin";
 
 function reviewedCount(docs: Record<DocKey, { status: string }> | undefined) {
@@ -58,7 +58,7 @@ const columns: LegacyColumnDef<Shop, any>[] = [
   columnHelper.accessor("docs_submitted_at", {
     header: "Diajukan",
     cell: (info) => (
-      <span className="text-muted-foreground" title={new Date(info.getValue() as string).toLocaleString("id-ID")}>
+      <span className="text-muted-foreground" title={formatDateTimeWITA(info.getValue() as string)}>
         {formatRelativeTime(info.getValue() as string)}
       </span>
     ),
