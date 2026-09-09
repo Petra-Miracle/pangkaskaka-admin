@@ -64,17 +64,12 @@ function extractArea(address: string) {
   return parts[0] || "Tidak diketahui";
 }
 
-// Sumbu Y untuk chart hitungan (jumlah toko): selalu bilangan bulat, tanpa
-// tick dobel, dan pas dengan data (tidak gepeng). Cari langkah terkecil yang
-// bikin jumlah tick <= 8 supaya label tidak berdesakan.
+// Sumbu Y chart "Jumlah toko": tetap 0–40 dengan langkah 5 (0,5,10,…,40) supaya
+// tampilannya konsisten & detail. Kalau data melampaui 40, batas atas naik ke
+// kelipatan 10 berikutnya, langkah tetap = max/8 (selalu bilangan bulat).
 function integerAxis(maxValue: number): { max: number; tickAmount: number } {
-  const target = Math.max(4, maxValue + 1); // sedikit ruang di atas bar tertinggi
-  for (const step of [1, 2, 5, 10, 20, 50, 100]) {
-    const ticks = Math.ceil(target / step);
-    if (ticks <= 8) return { max: ticks * step, tickAmount: ticks };
-  }
-  const ticks = Math.ceil(target / 200);
-  return { max: ticks * 200, tickAmount: ticks };
+  const max = maxValue > 40 ? Math.ceil(maxValue / 10) * 10 : 40;
+  return { max, tickAmount: max / 5 }; // langkah selalu 5 → tick 0,5,10,…
 }
 
 function ChartEmptyState({ label }: { label: string }) {
@@ -164,8 +159,8 @@ function ShopsByFilterChart() {
 
   const maxCount = grouped.reduce((m, [, count]) => Math.max(m, count), 0);
   const { max: yMax, tickAmount } = integerAxis(maxCount);
-  // Batasi lebar bar supaya 1–2 kategori tidak jadi balok selebar kartu.
-  const columnWidth = `${Math.min(55, 16 + grouped.length * 12)}%`;
+  // Batasi lebar bar supaya sedikit kategori tidak jadi balok selebar kartu.
+  const columnWidth = grouped.length <= 2 ? "18%" : grouped.length <= 4 ? "38%" : "60%";
 
   const options: ApexOptions = {
     chart: {
