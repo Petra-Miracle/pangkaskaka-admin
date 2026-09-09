@@ -64,6 +64,19 @@ function extractArea(address: string) {
   return parts[0] || "Tidak diketahui";
 }
 
+// Sumbu Y untuk chart hitungan (jumlah toko): selalu bilangan bulat, tanpa
+// tick dobel, dan pas dengan data (tidak gepeng). Cari langkah terkecil yang
+// bikin jumlah tick <= 8 supaya label tidak berdesakan.
+function integerAxis(maxValue: number): { max: number; tickAmount: number } {
+  const target = Math.max(4, maxValue + 1); // sedikit ruang di atas bar tertinggi
+  for (const step of [1, 2, 5, 10, 20, 50, 100]) {
+    const ticks = Math.ceil(target / step);
+    if (ticks <= 8) return { max: ticks * step, tickAmount: ticks };
+  }
+  const ticks = Math.ceil(target / 200);
+  return { max: ticks * 200, tickAmount: ticks };
+}
+
 function ChartEmptyState({ label }: { label: string }) {
   return (
     <div className="flex h-64 items-center justify-center text-center text-sm text-muted-foreground">
@@ -149,6 +162,11 @@ function ShopsByFilterChart() {
     return Array.from(counts.entries()).sort((a, b) => b[1] - a[1]);
   }, [shops, mode]);
 
+  const maxCount = grouped.reduce((m, [, count]) => Math.max(m, count), 0);
+  const { max: yMax, tickAmount } = integerAxis(maxCount);
+  // Batasi lebar bar supaya 1–2 kategori tidak jadi balok selebar kartu.
+  const columnWidth = `${Math.min(55, 16 + grouped.length * 12)}%`;
+
   const options: ApexOptions = {
     chart: {
       type: "bar",
@@ -158,15 +176,17 @@ function ShopsByFilterChart() {
       parentHeightOffset: 0,
       animations: { enabled: true, speed: 700, animateGradually: { enabled: true, delay: 60 } },
     },
-    plotOptions: { bar: { borderRadius: 8, columnWidth: "52%" } },
-    dataLabels: { enabled: false },
+    plotOptions: { bar: { borderRadius: 6, columnWidth } },
+    dataLabels: {
+      enabled: true,
+      offsetY: -18,
+      formatter: (val) => Math.round(Number(val)).toString(),
+      style: { fontSize: "11px", fontWeight: 600, colors: [palette.muted] },
+    },
     legend: { show: false },
     colors: [palette.chart1],
-    fill: {
-      type: "gradient",
-      gradient: { shade: "light", type: "vertical", shadeIntensity: 0.3, opacityFrom: 1, opacityTo: 0.45 },
-    },
-    grid: { borderColor: palette.border, padding: { left: 8, right: 8 } },
+    fill: { type: "solid" },
+    grid: { borderColor: palette.border, padding: { left: 8, right: 8, top: 12 } },
     xaxis: {
       categories: grouped.map(([key]) => key),
       labels: {
@@ -180,6 +200,10 @@ function ShopsByFilterChart() {
       axisTicks: { show: false },
     },
     yaxis: {
+      min: 0,
+      max: yMax,
+      tickAmount,
+      forceNiceScale: false,
       labels: {
         style: { colors: palette.muted, fontSize: "11px" },
         formatter: (val) => Math.round(val).toString(),
