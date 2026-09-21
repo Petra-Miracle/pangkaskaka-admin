@@ -34,12 +34,44 @@ export function useAllShops() {
 export function useShop(shopId: string) {
   return useQuery({
     queryKey: ["shop", shopId],
-    queryFn: () => apiFetch<Shop>(`/shops/${shopId}`),
+    // The public endpoint deliberately omits all private registration data.
+    // Verification must use the SuperAdmin-specific, document-redacted DTO.
+    queryFn: () => apiFetch<Shop>(`/admin/shops/${shopId}`),
     enabled: !!shopId,
   });
 }
 
 export type AiDocReviewResult = { available: true; doc_key: string; notes: string } | { available: false; reason: string };
+
+export type DocumentUnlockSession = {
+  unlock_token: string;
+  expires_in: number;
+};
+
+export type DocumentPreview = {
+  token: string;
+  expires_in: number;
+};
+
+export function useUnlockDocuments() {
+  return useMutation({
+    mutationFn: (secret: string) =>
+      apiFetch<DocumentUnlockSession>("/admin/documents/unlock", {
+        method: "POST",
+        body: { secret },
+      }),
+  });
+}
+
+export function useDocumentPreview(shopId: string) {
+  return useMutation({
+    mutationFn: ({ docKey, unlockToken }: { docKey: DocKey; unlockToken: string }) =>
+      apiFetch<DocumentPreview>(`/admin/shops/${shopId}/documents/${docKey}/preview-token`, {
+        method: "POST",
+        body: { unlock_token: unlockToken },
+      }),
+  });
+}
 
 // Advisory-only: asks the backend to have Gemini Vision describe/flag the
 // uploaded document, purely to help the admin's own manual review — it never
@@ -48,9 +80,10 @@ export type AiDocReviewResult = { available: true; doc_key: string; notes: strin
 // invalidated either. Each click is a fresh, independent analysis.
 export function useAiReviewDocument(shopId: string) {
   return useMutation({
-    mutationFn: (docKey: DocKey) =>
+    mutationFn: ({ docKey, unlockToken }: { docKey: DocKey; unlockToken: string }) =>
       apiFetch<AiDocReviewResult>(`/admin/shops/${shopId}/documents/${docKey}/ai-review`, {
         method: "POST",
+        body: { unlock_token: unlockToken },
       }),
   });
 }

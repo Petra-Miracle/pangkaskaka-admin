@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ArrowLeft, CheckCircle2, FileCheck2, Gavel, Store, XCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle2, FileCheck2, Gavel, LockKeyhole, Store, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@heroui/react";
 import {
@@ -17,10 +17,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { DocumentReviewCard } from "@/components/verifications/document-review-card";
 import { ChatPanel } from "@/components/verifications/chat-panel";
-import { usePendingShops, useShop, useVerifyShop } from "@/lib/queries/shops";
+import { usePendingShops, useShop, useUnlockDocuments, useVerifyShop } from "@/lib/queries/shops";
 import { getSafeErrorMessage } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { DOC_LABELS, type DocKey } from "@/types/admin";
@@ -36,6 +37,10 @@ export default function VerificationDetailPage() {
   const verifyShop = useVerifyShop(shopId);
   const [rejectNote, setRejectNote] = useState("");
   const [rejectOpen, setRejectOpen] = useState(false);
+  const [unlockOpen, setUnlockOpen] = useState(false);
+  const [documentSecret, setDocumentSecret] = useState("");
+  const [unlockToken, setUnlockToken] = useState<string | null>(null);
+  const unlockDocuments = useUnlockDocuments();
   // Toko lama / hasil seed bisa tidak punya objek `docs` sama sekali —
   // jangan Object.values() sesuatu yang undefined.
   const docs = shop?.docs;
@@ -43,6 +48,30 @@ export default function VerificationDetailPage() {
   const reviewedDocCount = docs
     ? Object.values(docs).filter((d) => d?.status && d.status !== "pending").length
     : 0;
+
+  // The backend expires this same token independently. This timer merely
+  // removes already-rendered previews from the current tab at the same time.
+  useEffect(() => {
+    if (!unlockToken) return;
+    const timeout = window.setTimeout(() => {
+      setUnlockToken(null);
+      toast.info("Akses dokumen telah dikunci kembali.");
+    }, 5 * 60 * 1000);
+    return () => window.clearTimeout(timeout);
+  }, [unlockToken]);
+
+  function handleUnlock() {
+    if (!documentSecret.trim()) return;
+    unlockDocuments.mutate(documentSecret, {
+      onSuccess: ({ unlock_token, expires_in }) => {
+        setUnlockToken(unlock_token);
+        setDocumentSecret("");
+        setUnlockOpen(false);
+        toast.success(`Akses dokumen dibuka selama ${Math.ceil(expires_in / 60)} menit.`);
+      },
+      onError: (err) => toast.error(getSafeErrorMessage(err, "Secret key tidak dapat diverifikasi")),
+    });
+  }
 
   const STATUS_META: Record<string, { label: string; className: string }> = {
     pending: {
@@ -194,15 +223,38 @@ export default function VerificationDetailPage() {
       </Card>
 
       <div className="animate-fade-up [animation-delay:120ms]">
-        <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold">
-          <span className="icon-tile size-8">
-            <FileCheck2 className="size-4" />
-          </span>
-          Dokumen
-          <span className="text-sm font-normal text-muted-foreground">
-            ({reviewedDocCount}/{Object.keys(DOC_LABELS).length} direview)
-          </span>
-        </h2>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="flex items-center gap-2 text-lg font-semibold">
+            <span className="icon-tile size-8">
+              <FileCheck2 className="size-4" />
+            </span>
+            Dokumen
+            <span className="text-sm font-normal text-muted-foreground">
+              ({reviewedDocCount}/{Object.keys(DOC_LABELS).length} direview)
+            </span>
+          </h2>
+          {hasDocs && (
+            <Button
+              size="sm"
+              variant={unlockToken ? "outline" : "default"}
+              onClick={() => (unlockToken ? setUnlockToken(null) : setUnlockOpen(true))}
+              className="gap-1.5"
+            >
+              <LockKeyhole className="size-3.5" />
+              {unlockToken ? "Kunci dokumen" : "Buka dokumen"}
+            </Button>
+          )}
+        </div>
+        {hasDocs && (
+          <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-primary/15 bg-primary/[0.03] px-3.5 py-3 text-xs text-muted-foreground">
+            <LockKeyhole className="mt-0.5 size-4 shrink-0 text-primary" />
+            <p className="leading-relaxed">
+              {unlockToken
+                ? "Akses dokumen pribadi sedang aktif dan akan terkunci otomatis dalam 5 menit. Kunci kembali saat selesai."
+                : "KTP, NIB, NPWP, dan dokumen pribadi disembunyikan. Masukkan secret key untuk membuka akses sementara."}
+            </p>
+          </div>
+        )}
         {hasDocs ? (
           <div className="stagger-children grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {(Object.keys(DOC_LABELS) as DocKey[]).map((docKey) => (
@@ -212,6 +264,8 @@ export default function VerificationDetailPage() {
                 docKey={docKey}
                 label={DOC_LABELS[docKey]}
                 doc={docs?.[docKey]}
+                unlockToken={unlockToken}
+                onRequestUnlock={() => setUnlockOpen(true)}
               />
             ))}
           </div>
@@ -221,6 +275,38 @@ export default function VerificationDetailPage() {
           </div>
         )}
       </div>
+
+      <Dialog open={unlockOpen} onOpenChange={setUnlockOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Buka dokumen pribadi</DialogTitle>
+            <DialogDescription>
+              Masukkan secret key SuperAdmin untuk membuka dokumen selama 5 menit. Akses ini dicatat oleh sistem.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-1.5">
+            <label htmlFor="document-secret" className="text-sm font-medium">Secret key</label>
+            <Input
+              id="document-secret"
+              type="password"
+              autoComplete="off"
+              value={documentSecret}
+              onChange={(event) => setDocumentSecret(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") handleUnlock();
+              }}
+              placeholder="Masukkan secret key"
+            />
+          </div>
+          <DialogFooter>
+            <DialogClose render={<Button variant="outline">Batal</Button>} />
+            <Button disabled={!documentSecret.trim() || unlockDocuments.isPending} onClick={handleUnlock} className="gap-2">
+              {unlockDocuments.isPending && <Spinner color="brand" size="xs" label="Memverifikasi..." />}
+              Buka akses
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <ChatPanel shopId={shop.id} />
 

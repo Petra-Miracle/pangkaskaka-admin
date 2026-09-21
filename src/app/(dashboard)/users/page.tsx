@@ -362,11 +362,15 @@ function DeleteUserDialog({ user, disabled, disabledReason }: { user: AdminUser;
   );
 }
 
-function SetPasswordDialog({ user }: { user: AdminUser }) {
+function SetPasswordDialog({ user, disabled, disabledReason }: { user: AdminUser; disabled?: boolean; disabledReason?: string }) {
   const [open, setOpen] = useState(false);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const setUserPassword = useSetUserPassword();
+
+  if (disabled) {
+    return <LockedActionButton icon={KeyRound} reason={disabledReason} />;
+  }
 
   function handleOpenChange(next: boolean) {
     setOpen(next);
@@ -442,18 +446,28 @@ function SetPasswordDialog({ user }: { user: AdminUser }) {
 
 function UserActionsCell({ user }: { user: AdminUser }) {
   const currentUser = getUser();
+  const { data: users } = useAllUsers();
   const isSelf = currentUser?.id === user.id;
   const isSuperadminRow = user.role === "superadmin";
-  const locked = isSelf || isSuperadminRow;
-  const lockedReason = isSelf ? "Tidak bisa mengubah akun sendiri" : isSuperadminRow ? "Akun superadmin tidak bisa diubah dari sini" : undefined;
+  // Sesama superadmin boleh dikelola penuh (suspend/ubah role/atur password/hapus).
+  // Hanya akun sendiri yang dikunci agar tidak lockout. Proteksi tambahan:
+  // superadmin terakhir tidak bisa di-suspend/ubah-role/hapus.
+  const superadminCount = users?.filter((u) => u.role === "superadmin").length ?? 0;
+  const isLastSuperadmin = isSuperadminRow && superadminCount <= 1;
+  const selfReason = "Tidak bisa mengubah akun sendiri";
+  const lastReason = "Tidak bisa menonaktifkan superadmin terakhir";
+
+  const selfLocked = isSelf;
+  const destructiveLocked = isSelf || isLastSuperadmin;
+  const destructiveReason = isSelf ? selfReason : isLastSuperadmin ? lastReason : undefined;
 
   return (
     <div className="flex justify-end gap-1">
       <UserDetailDialog user={user} />
-      <SuspendToggleDialog user={user} disabled={locked} disabledReason={lockedReason} />
-      <ChangeRoleDialog user={user} disabled={locked} disabledReason={lockedReason} />
-      <SetPasswordDialog user={user} />
-      <DeleteUserDialog user={user} disabled={locked} disabledReason={lockedReason} />
+      <SuspendToggleDialog user={user} disabled={destructiveLocked} disabledReason={destructiveReason} />
+      <ChangeRoleDialog user={user} disabled={destructiveLocked} disabledReason={destructiveReason} />
+      <SetPasswordDialog user={user} disabled={selfLocked} disabledReason={selfLocked ? selfReason : undefined} />
+      <DeleteUserDialog user={user} disabled={destructiveLocked} disabledReason={destructiveReason} />
     </div>
   );
 }

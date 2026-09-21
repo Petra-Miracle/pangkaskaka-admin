@@ -80,7 +80,10 @@ export const DOC_LABELS: Record<DocKey, string> = {
 };
 
 export type ShopDocument = {
-  url: string;
+  // Sensitive document data is intentionally absent until the SuperAdmin
+  // completes the server-verified document unlock step.
+  url?: string;
+  has_file?: boolean;
   status: DocStatus;
   note: string;
   reviewed_at: string | null;

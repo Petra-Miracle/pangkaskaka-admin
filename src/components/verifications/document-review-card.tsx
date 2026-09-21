@@ -1,14 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Sparkles } from "lucide-react";
+import { LockKeyhole, Sparkles } from "lucide-react";
 import { Card } from "@heroui/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
-import { useAiReviewDocument, useReviewDocument, type AiDocReviewResult } from "@/lib/queries/shops";
+import {
+  useAiReviewDocument,
+  useDocumentPreview,
+  useReviewDocument,
+  type AiDocReviewResult,
+} from "@/lib/queries/shops";
 import { getSafeErrorMessage } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import type { DocKey, DocStatus, ShopDocument } from "@/types/admin";
@@ -42,28 +47,65 @@ const EMPTY_DOC: ShopDocument = {
   reviewed_by: null,
 };
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 export function DocumentReviewCard({
   shopId,
   docKey,
   label,
   doc: rawDoc,
+  unlockToken,
+  onRequestUnlock,
 }: {
   shopId: string;
   docKey: DocKey;
   label: string;
   // Bisa undefined kalau objek `docs` toko tidak lengkap.
   doc?: ShopDocument;
+  unlockToken: string | null;
+  onRequestUnlock: () => void;
 }) {
   const doc = rawDoc ?? EMPTY_DOC;
   const [note, setNote] = useState(doc.note ?? "");
   const [pendingStatus, setPendingStatus] = useState<DocStatus | null>(null);
   const [aiResult, setAiResult] = useState<AiDocReviewResult | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const reviewDocument = useReviewDocument(shopId);
   const aiReview = useAiReviewDocument(shopId);
+  const previewDocument = useDocumentPreview(shopId);
+  const hasFile = doc.has_file ?? Boolean(doc.url);
+
+  // A locked/expired dashboard session must also hide any image already
+  // rendered in the current tab; the server remains the actual enforcement.
+  useEffect(() => {
+    if (!unlockToken) {
+      setPreviewUrl(null);
+      setAiResult(null);
+    }
+  }, [unlockToken]);
+
+  function handlePreview() {
+    if (!hasFile) return;
+    if (!unlockToken) {
+      onRequestUnlock();
+      return;
+    }
+    previewDocument.mutate(
+      { docKey, unlockToken },
+      {
+        onSuccess: (data) => setPreviewUrl(`${API_BASE_URL}/documents/preview/${data.token}`),
+        onError: (err) => toast.error(getSafeErrorMessage(err, "Gagal membuka dokumen")),
+      }
+    );
+  }
 
   function handleAiReview() {
     setAiResult(null);
-    aiReview.mutate(docKey, {
+    if (!unlockToken) {
+      onRequestUnlock();
+      return;
+    }
+    aiReview.mutate({ docKey, unlockToken }, {
       onSuccess: (data) => setAiResult(data),
       onError: (err) => toast.error(getSafeErrorMessage(err, "Analisis AI gagal, lanjutkan review manual")),
     });
@@ -94,15 +136,30 @@ export function DocumentReviewCard({
         </div>
       </Card.Header>
       <Card.Content className="gap-3">
-        {doc.url ? (
+        {previewUrl ? (
           <div className="img-zoom group rounded-lg border border-border">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={doc.url}
+              src={previewUrl}
               alt={label}
               className="h-48 w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
             />
           </div>
+        ) : hasFile ? (
+          <button
+            type="button"
+            onClick={handlePreview}
+            disabled={previewDocument.isPending}
+            className="flex h-48 w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-primary/30 bg-primary/[0.03] text-sm text-muted-foreground transition-colors hover:bg-primary/[0.07] disabled:cursor-wait"
+          >
+            <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              {previewDocument.isPending ? <Spinner color="brand" size="xs" label="Membuka..." /> : <LockKeyhole className="size-4" />}
+            </span>
+            <span className="font-medium text-foreground">
+              {unlockToken ? "Klik untuk tampilkan dokumen" : "Dokumen terkunci"}
+            </span>
+            <span className="text-xs">{unlockToken ? "Akses sementara aktif" : "Masukkan secret key untuk melihat"}</span>
+          </button>
         ) : (
           <div className="flex h-48 w-full items-center justify-center rounded-lg border border-dashed border-border text-sm text-muted-foreground">
             Belum diunggah
@@ -114,7 +171,7 @@ export function DocumentReviewCard({
             type="button"
             size="sm"
             variant="outline"
-            disabled={!doc.url || aiReview.isPending}
+            disabled={!hasFile || aiReview.isPending}
             onClick={handleAiReview}
             className="gap-1.5"
           >
@@ -123,7 +180,7 @@ export function DocumentReviewCard({
             ) : (
               <Sparkles className="size-3.5" />
             )}
-            Analisis dengan AI
+            {unlockToken ? "Analisis dengan AI" : "Buka kunci untuk analisis"}
           </Button>
 
           {aiResult && (

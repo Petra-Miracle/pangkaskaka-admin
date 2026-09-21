@@ -24,10 +24,10 @@ export function useAllUsers() {
 
 // POST/PUT/DELETE /admin/users/{id}(/suspend|/activate|/role) — added
 // 2026-08-20 alongside the backend endpoints themselves (they didn't exist
-// before: only GET /admin/users was live). Backend rejects targeting an
-// admin account or the caller's own account with a 400 — surfaced via
-// getSafeErrorMessage, no client-side duplication of that rule beyond
-// disabling the buttons for those rows.
+// before: only GET /admin/users was live). Backend may still reject targeting
+// a superadmin account or the caller's own account with a 400 — surfaced via
+// getSafeErrorMessage. Client-side: sesama superadmin boleh dikelola penuh,
+// hanya akun sendiri (+ superadmin terakhir) yang tombolnya dikunci.
 export function useSuspendUser() {
   const queryClient = useQueryClient();
   return useMutation({
