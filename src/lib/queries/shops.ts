@@ -34,9 +34,9 @@ export function useAllShops() {
 export function useShop(shopId: string) {
   return useQuery({
     queryKey: ["shop", shopId],
-    // The public endpoint deliberately omits all private registration data.
-    // Verification must use the SuperAdmin-specific, document-redacted DTO.
-    queryFn: () => apiFetch<Shop>(`/admin/shops/${shopId}`),
+    // Tetap pakai endpoint publik sampai GET /admin/shops/{id} ada di backend —
+    // versi sebelumnya memakai endpoint admin yang belum ada sehingga detail 404.
+    queryFn: () => apiFetch<Shop>(`/shops/${shopId}`),
     enabled: !!shopId,
   });
 }
