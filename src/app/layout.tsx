@@ -1,4 +1,4 @@
-cd "D:\SuperAdmin APP-PangkasKAKA"import type { Metadata, Viewport } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/components/providers/query-provider";
