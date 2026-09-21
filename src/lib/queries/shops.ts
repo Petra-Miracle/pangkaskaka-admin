@@ -34,9 +34,10 @@ export function useAllShops() {
 export function useShop(shopId: string) {
   return useQuery({
     queryKey: ["shop", shopId],
-    // Tetap pakai endpoint publik sampai GET /admin/shops/{id} ada di backend —
-    // versi sebelumnya memakai endpoint admin yang belum ada sehingga detail 404.
-    queryFn: () => apiFetch<Shop>(`/shops/${shopId}`),
+    // DTO khusus SuperAdmin yang disensor (tanpa URL dokumen asli) — butuh
+    // backend setelah commit unlock-dokumen. Jangan kembalikan ke /shops/{id}
+    // publik karena URL dokumen akan bocor sebelum sesi unlock.
+    queryFn: () => apiFetch<Shop>(`/admin/shops/${shopId}`),
     enabled: !!shopId,
   });
 }
