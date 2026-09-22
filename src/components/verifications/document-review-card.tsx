@@ -107,7 +107,7 @@ export function DocumentReviewCard({
     }
     aiReview.mutate({ docKey, unlockToken }, {
       onSuccess: (data) => setAiResult(data),
-      onError: (err) => toast.error(getSafeErrorMessage(err, "Analisis AI gagal, lanjutkan review manual")),
+      onError: (err) => toast.error(getSafeErrorMessage(err, "Verifikasi AI gagal, lanjutkan pemeriksaan manual")),
     });
   }
 
@@ -180,7 +180,7 @@ export function DocumentReviewCard({
             ) : (
               <Sparkles className="size-3.5" />
             )}
-            {unlockToken ? "Analisis dengan AI" : "Buka kunci untuk analisis"}
+            {unlockToken ? "Verifikasi dengan AI" : "Buka kunci untuk verifikasi"}
           </Button>
 
           {aiResult && (
@@ -196,7 +196,7 @@ export function DocumentReviewCard({
                 <>
                   <p className="mb-1 flex items-center gap-1.5 font-semibold text-primary">
                     <Sparkles className="size-3 shrink-0" />
-                    Catatan AI (bantuan, bukan keputusan final)
+                    Hasil verifikasi AI (temuan awal, keputusan tetap oleh Anda)
                   </p>
                   <p className="leading-relaxed">{aiResult.notes}</p>
                 </>
